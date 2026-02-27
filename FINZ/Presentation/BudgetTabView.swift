@@ -357,6 +357,7 @@ private struct LearnRowView: View {
 struct AccountView: View {
     @Environment(\.managedObjectContext) private var context
     @EnvironmentObject var vm: QuestionnaireViewModel
+    @EnvironmentObject var authService: AuthenticationService
     @State private var showingResetAlert = false
     @State private var showingSuccessAlert = false
     @State private var isResetting = false
@@ -369,6 +370,10 @@ struct AccountView: View {
     @State private var exportError: String? = nil
     @State private var showingImportPicker = false
     @State private var importError: String? = nil
+    @State private var showingImportConfirm = false
+    @State private var showingImportSuccess = false
+    @State private var pendingImportURL: URL? = nil
+    @State private var showingSignOutAlert = false
 
     var body: some View {
         NavigationStack {
@@ -425,6 +430,28 @@ struct AccountView: View {
                     .disabled(isResetting)
                 }
 
+                Section(header: Text("Authentification")) {
+                    if let user = authService.user {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Connecté en tant que:")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(user.fullName)
+                                .font(.headline)
+                            Text(user.email)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.vertical, 8)
+                    }
+                    
+                    Button(role: .destructive) {
+                        showingSignOutAlert = true
+                    } label: {
+                        Label("Se déconnecter", systemImage: "arrow.right.circle")
+                    }
+                }
+
                 Section(header: Text("À propos")) {
                     Text("Compte")
                         .foregroundStyle(.secondary)
@@ -435,6 +462,15 @@ struct AccountView: View {
             .finzHeader()
             .onAppear {
                 firstName = AppSettings.firstName
+            }
+            .alert("Confirmer la déconnexion", isPresented: $showingSignOutAlert) {
+                Button("Annuler", role: .cancel) {}
+                Button("Se déconnecter", role: .destructive) {
+                    authService.signOut()
+                    NotificationCenter.default.post(name: NSNotification.Name("UserDidSignOut"), object: nil)
+                }
+            } message: {
+                Text("Vous serez redirigé vers l'écran de connexion.")
             }
             .alert("Confirmer la réinitialisation", isPresented: $showingResetAlert) {
                 Button("Annuler", role: .cancel) {}
@@ -465,6 +501,24 @@ struct AccountView: View {
             } message: {
                 if let error = exportError { Text(error) }
             }
+            .alert("Importer ces données ?", isPresented: $showingImportConfirm) {
+                Button("Annuler", role: .cancel) {
+                    pendingImportURL = nil
+                }
+                Button("Importer") {
+                    guard let url = pendingImportURL else { return }
+                    Task { await importBackup(from: url) }
+                }
+            } message: {
+                if let url = pendingImportURL {
+                    Text(url.lastPathComponent)
+                }
+            }
+            .alert("Import terminé", isPresented: $showingImportSuccess) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Les données ont été importées avec succès.")
+            }
             .alert("Erreur import", isPresented: Binding<Bool>(
                 get: { importError != nil },
                 set: { if !$0 { importError = nil } }
@@ -489,7 +543,8 @@ struct AccountView: View {
         .fileImporter(isPresented: $showingImportPicker, allowedContentTypes: [UTType.json], onCompletion: { result in
             switch result {
             case .success(let url):
-                Task { await importBackup(from: url) }
+                pendingImportURL = url
+                showingImportConfirm = true
             case .failure(let error):
                 importError = "Impossible d'ouvrir le fichier : \(error.localizedDescription)"
             }
@@ -597,8 +652,9 @@ struct AccountView: View {
             for name in entityNames {
                 let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: name)
                 let delete = NSBatchDeleteRequest(fetchRequest: fetch)
-                _ = try? context.execute(delete)
+                _ = try context.execute(delete)
             }
+            context.reset()
 
             // Import
             for name in entityNames {
@@ -633,6 +689,11 @@ struct AccountView: View {
 
             if context.hasChanges {
                 try context.save()
+            }
+            await MainActor.run {
+                pendingImportURL = nil
+                showingImportConfirm = false
+                showingImportSuccess = true
             }
         } catch {
             importError = "Erreur lors de l'import : \(error.localizedDescription)"
@@ -719,4 +780,3 @@ struct ActivityView: UIViewControllerRepresentable {
     }
     func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
 }
-

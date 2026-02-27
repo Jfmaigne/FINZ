@@ -5,6 +5,7 @@ struct RootView: View {
     @EnvironmentObject private var session: SessionManager
     @Environment(\.managedObjectContext) private var viewContext
     @State private var showSplash: Bool = true
+    @StateObject private var authService = AuthenticationService()
     @StateObject private var questionnaireVM = QuestionnaireViewModel()
     @State private var hasIncomeData: Bool? = nil
     @State private var forceProfileCreation: Bool = false
@@ -25,7 +26,10 @@ struct RootView: View {
                     }
             } else {
                 Group {
-                    if forceProfileCreation {
+                    // Si l'utilisateur n'est pas authentifié, afficher l'écran d'authentification
+                    if !authService.isAuthenticated {
+                        AuthenticationView(authService: authService)
+                    } else if forceProfileCreation {
                         NavigationStack {
                             LifeView()
                                 .environmentObject(questionnaireVM)
@@ -33,15 +37,14 @@ struct RootView: View {
                     } else if let hasIncomeData {
                         if hasIncomeData {
                             // If income rows exist, go straight to the budget dashboard
-                            BudgetTabView().environmentObject(questionnaireVM)
+                            BudgetTabView()
+                                .environmentObject(questionnaireVM)
+                                .environmentObject(authService)
                         } else {
                             // Otherwise continue with the existing flow
-                            if session.isLoggedIn() {
-                                FinanceProfilView()
-                                    .environmentObject(questionnaireVM)
-                            } else {
-                                AuthView()
-                            }
+                            FinanceProfilView()
+                                .environmentObject(questionnaireVM)
+                                .environmentObject(authService)
                         }
                     } else {
                         // While determining, show a lightweight placeholder
@@ -54,6 +57,15 @@ struct RootView: View {
                 .onReceive(NotificationCenter.default.publisher(for: Notification.Name("ProfileEditCompleted"))) { _ in
                     forceProfileCreation = false
                     Task { await determineInitialRoute() }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: Notification.Name("UserDidAuthenticate"))) { _ in
+                    // Quand l'utilisateur s'authentifie, relancer la détermination de route
+                    Task { await determineInitialRoute() }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: Notification.Name("UserDidSignOut"))) { _ in
+                    // Quand l'utilisateur se déconnecte, réinitialiser l'authentification
+                    authService.signOut()
+                    showSplash = false
                 }
             }
         }
