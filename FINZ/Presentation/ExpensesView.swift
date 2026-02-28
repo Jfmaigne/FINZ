@@ -1,10 +1,10 @@
 import SwiftUI
-import CoreData
+import SwiftData
 import Combine
 
 struct ExpensesView: View {
     @EnvironmentObject var vm: QuestionnaireViewModel
-    @Environment(\.managedObjectContext) var context
+    @Environment(\.modelContext) var modelContext
     @Environment(\.continueAction) private var continueAction
     @Environment(\.dismiss) private var dismissView
 
@@ -97,6 +97,8 @@ struct ExpensesView: View {
         var complement: String = ""
         var provider: String? = nil
         var endDate: Date? = nil
+        var mainCategoryID: UUID? = nil
+        var subCategoryID: UUID? = nil
     }
 
     @State private var entries: [ExpenseEntry] = []
@@ -108,16 +110,32 @@ struct ExpensesView: View {
     let periodicities = ["Annuel", "Trimestriel", "Mensuel", "Hebdomadaire", "Quotidien"]
     
     private var groupedEntries: [(category: ExpenseCategory, items: [ExpenseEntry])] {
-        let groups = Dictionary(grouping: entries, by: { $0.kind.category })
+        let groups: [ExpenseCategory: [ExpenseEntry]] = Dictionary(grouping: entries) { $0.kind.category }
         let categoryOrder: [ExpenseCategory] = [.logement, .transport, .vieCourante, .abonnements, .investissements, .plaisir]
-        return categoryOrder.compactMap { cat in
-            guard let items = groups[cat], !items.isEmpty else { return nil }
+
+        var result: [(category: ExpenseCategory, items: [ExpenseEntry])] = []
+        
+        for cat in categoryOrder {
+            guard var items = groups[cat], !items.isEmpty else { continue }
+            
+            // Create a simple order map
             let order = ExpenseKind.availableKinds.filter { $0.category == cat }
-            let sorted = items.sorted { a, b in
-                (order.firstIndex(of: a.kind) ?? Int.max) < (order.firstIndex(of: b.kind) ?? Int.max)
+            var orderMap: [ExpenseKind: Int] = [:]
+            for (index, kind) in order.enumerated() {
+                orderMap[kind] = index
             }
-            return (cat, sorted)
+            
+            // Sort items by the order map
+            items.sort { a, b in
+                let aIndex = orderMap[a.kind] ?? Int.max
+                let bIndex = orderMap[b.kind] ?? Int.max
+                return aIndex < bIndex
+            }
+            
+            result.append((cat, items))
         }
+        
+        return result
     }
 
     var body: some View {
@@ -247,7 +265,6 @@ struct ExpensesView: View {
             }
             .fullScreenCover(isPresented: $showTabs) {
                 BudgetTabView()
-                    .environment(\.managedObjectContext, context)
                     .environmentObject(vm)
             }
         }
@@ -289,17 +306,18 @@ struct ExpensesView: View {
 
     private func setupEntries() {
         // Fetch existing expenses
-        let request: NSFetchRequest<Expense> = Expense.fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \Expense.kind, ascending: true)]
+        let fetchDescriptor = FetchDescriptor<Expense>(
+            sortBy: [SortDescriptor(\.kind, order: .forward)]
+        )
         do {
-            let fetched = try context.fetch(request)
+            let fetched = try modelContext.fetch(fetchDescriptor)
             if !fetched.isEmpty {
                 entries = fetched.map {
                     ExpenseEntry(
-                        id: $0.id ?? UUID(),
-                        kind: ExpenseKind(rawValue: $0.kind ?? "") ?? .assuranceHabitation,
+                        id: $0.id,
+                        kind: ExpenseKind(rawValue: $0.kind) ?? .assuranceHabitation,
                         amount: String(format: "%.0f", $0.amount),
-                        periodicity: $0.periodicity ?? "Mensuel",
+                        periodicity: $0.periodicity,
                         complement: $0.complement ?? "",
                         provider: $0.provider,
                         endDate: $0.endDate
@@ -308,8 +326,9 @@ struct ExpensesView: View {
                 return
             }
         } catch {
-            // do nothing, fallback to defaults below
+            print("Failed to fetch expenses: \(error)")
         }
+        // do nothing, fallback to defaults below
 
         // Defaults based on housing status
         var defaults: [ExpenseEntry] = []
@@ -355,7 +374,7 @@ struct ExpensesView: View {
         }
 
         do {
-            try BudgetProjectionManager.projectExpenses(for: Date(), context: context)
+            try BudgetProjectionManager.projectExpenses(for: Date(), modelContext: modelContext)
         } catch {
             // non fatal error, just log or ignore
         }
@@ -368,22 +387,40 @@ struct ExpensesView: View {
     }
 
     private func persistEntries() throws {
-        let fetchRequest: NSFetchRequest<Expense> = Expense.fetchRequest()
+        let fetchDescriptor = FetchDescriptor<Expense>()
         let allIds = entries.map { $0.id }
         // Delete expenses not in entries
-        let existing = try context.fetch(fetchRequest)
+        let existing = try modelContext.fetch(fetchDescriptor)
         for expense in existing {
-            if let expenseId = expense.id, !allIds.contains(expenseId) {
-                context.delete(expense)
+            if !allIds.contains(expense.id) {
+                modelContext.delete(expense)
             }
         }
 
         for entry in entries {
-            let requestSingle: NSFetchRequest<Expense> = Expense.fetchRequest()
-            requestSingle.predicate = NSPredicate(format: "id == %@", entry.id as CVarArg)
-            let expensesFound = try context.fetch(requestSingle)
-            let expense = expensesFound.first ?? Expense(context: context)
-            expense.id = entry.id
+            let entryID = entry.id
+            let fetchSingle = FetchDescriptor<Expense>(
+                predicate: #Predicate { $0.id == entryID }
+            )
+            let expensesFound = try modelContext.fetch(fetchSingle)
+            let expense: Expense
+            if let found = expensesFound.first {
+                expense = found
+            } else {
+                expense = Expense(
+                    id: entry.id,
+                    amount: 0,
+                    complement: entry.complement,
+                    day: -1,
+                    endDate: entry.endDate,
+                    kind: entry.kind.rawValue,
+                    months: nil,
+                    note: nil,
+                    periodicity: entry.periodicity,
+                    provider: nil
+                )
+                modelContext.insert(expense)
+            }
             expense.kind = entry.kind.rawValue
             expense.amount = Double(entry.amount.replacingOccurrences(of: ",", with: ".")) ?? 0
             expense.periodicity = entry.periodicity
@@ -399,9 +436,7 @@ struct ExpensesView: View {
             expense.endDate = entry.endDate
         }
 
-        if context.hasChanges {
-            try context.save()
-        }
+        try modelContext.save()
     }
 
     private func parseComplement(_ complement: String) -> (months: String?, day: Int16?)? {
@@ -435,64 +470,53 @@ struct ExpensesView: View {
             let keyVal = part.split(separator: "=", maxSplits: 1)
             if keyVal.count == 2 {
                 let key = keyVal[0].trimmingCharacters(in: .whitespaces).lowercased()
-                let val = String(keyVal[1]).trimmingCharacters(in: .whitespaces)
-                if key == "comment" {
-                    return val.removingPercentEncoding ?? val
+                let val = keyVal[1].trimmingCharacters(in: .whitespaces)
+                if key == "comment" || key == "note" || key == "desc" {
+                    return val.isEmpty ? nil : val
                 }
             }
         }
         return nil
     }
 
-    private func buildComplement(monthsCSV: String?, day: Int16?) -> String {
-        var parts: [String] = []
-        if let m = monthsCSV, !m.isEmpty {
-            parts.append("mois=\(m)")
+    private func monthShortNames(from csv: String) -> String {
+        // Parse CSV into concrete [Int]
+        let components: [Substring] = csv.split(separator: ",")
+        let months: [Int] = components.compactMap { comp in
+            let trimmed = comp.trimmingCharacters(in: .whitespaces)
+            return Int(trimmed)
         }
-        if let d = day, d > 0 {
-            parts.append("jour=\(d)")
-        }
-        return parts.joined(separator: ";")
-    }
-    
-    private func monthShortNames(from monthsCSV: String) -> String {
-        let df = DateFormatter()
-        df.locale = Locale(identifier: "fr")
-        let symbols = df.shortMonthSymbols ?? df.monthSymbols ?? []
-        let nums = monthsCSV
-            .split(separator: ",")
-            .compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }
-            .filter { (1...12).contains($0) }
-        if symbols.isEmpty {
-            // Fallback to raw CSV if symbols unavailable
-            return nums.map(String.init).joined(separator: ", ")
-        }
-        let names = nums.compactMap { idx in
-            let i = idx - 1
-            return (i >= 0 && i < symbols.count) ? symbols[i] : nil
+
+        let symbols: [String] = Calendar.current.shortMonthSymbols
+        let names: [String] = months.compactMap { idx -> String? in
+            guard idx >= 1, idx <= symbols.count else { return nil }
+            return symbols[idx - 1].lowercased()
         }
         return names.joined(separator: ", ")
     }
-
+    
     private func deleteEntry(_ entry: ExpenseEntry) {
-        entries.removeAll(where: { $0.id == entry.id })
+        // Remove from in-memory list
+        if let idx = entries.firstIndex(where: { $0.id == entry.id }) {
+            entries.remove(at: idx)
+        }
+        
+        // Remove from persistent store if present
         do {
-            try persistEntries()
+            let entryID = entry.id
+            let fetch = FetchDescriptor<Expense>(
+                predicate: #Predicate { $0.id == entryID }
+            )
+            let matches = try modelContext.fetch(fetch)
+            for exp in matches {
+                modelContext.delete(exp)
+            }
+            if modelContext.hasChanges {
+                try modelContext.save()
+            }
         } catch {
-            saveError = error.localizedDescription
+            // Not fatal for UI; persistence will reconcile on next saveAll
+            print("Failed to delete expense: \(error)")
         }
     }
 }
-
-private extension Optional where Wrapped == String {
-    var isNilOrEmpty: Bool {
-        self?.isEmpty ?? true
-    }
-}
-
-#Preview {
-    ExpensesView()
-        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-        .environmentObject(QuestionnaireViewModel())
-}
-

@@ -1,8 +1,8 @@
 import SwiftUI
-import CoreData
+import SwiftData
 
 struct AppEntryView: View {
-    @Environment(\.managedObjectContext) var context
+    @Environment(\.modelContext) var modelContext
     @EnvironmentObject var vm: QuestionnaireViewModel
     
     @State private var shouldShowDashboard = false
@@ -26,23 +26,29 @@ struct AppEntryView: View {
     }
     
     private func checkBudgetEntries() async {
-        let monthKey = BudgetProjectionManager.monthKey(for: Date())
-        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "BudgetEntryOccurrence")
-        fetchRequest.predicate = NSPredicate(format: "monthKey == %@", monthKey)
-        fetchRequest.fetchLimit = 1
+        let monthKey = monthKey(for: Date())
+        let fetchDescriptor = FetchDescriptor<BudgetEntryOccurrence>(
+            predicate: #Predicate { $0.monthKey == monthKey }
+        )
         
         do {
-            let count = try context.count(for: fetchRequest)
-            shouldShowDashboard = (count > 0)
+            let entries = try modelContext.fetch(fetchDescriptor)
+            shouldShowDashboard = !entries.isEmpty
         } catch {
             shouldShowDashboard = false
         }
         checked = true
     }
+    
+    private func monthKey(for date: Date, calendar: Calendar = .current) -> String {
+        let components = calendar.dateComponents([.year, .month], from: date)
+        guard let year = components.year, let month = components.month else { return "" }
+        return String(format: "%04d-%02d", year, month)
+    }
 }
 
 #Preview {
     AppEntryView()
-        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        .modelContainer(DataController.preview.modelContainer)
         .environmentObject(QuestionnaireViewModel())
 }

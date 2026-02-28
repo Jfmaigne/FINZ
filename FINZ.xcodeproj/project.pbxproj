@@ -1,621 +1,618 @@
 // !$*UTF8*$!
 {
-	archiveVersion = 1;
-	classes = {
-	};
-	objectVersion = 77;
-	objects = {
+    archiveVersion = 1;
+    classes = {
+    };
+    objectVersion = 77;
+    objects = {
 
 /* Begin PBXBuildFile section */
-		763B7F002F40D8560010A21C /* AddIncomeQuickSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763B7EFF2F40D8550010A21C /* AddIncomeQuickSheet.swift */; };
-		76913EFB2F4129DD002E94E6 /* AddExpenseQuickSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76913EFA2F4129DD002E94E6 /* AddExpenseQuickSheet.swift */; };
+        763B7F002F40D8560010A21C /* AddIncomeQuickSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763B7EFF2F40D8550010A21C /* AddIncomeQuickSheet.swift */; };
+        76913EFB2F4129DD002E94E6 /* AddExpenseQuickSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76913EFA2F4129DD002E94E6 /* AddExpenseQuickSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		767524292F2F4A7900A3B61D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7675240E2F2F4A7900A3B61D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 767524152F2F4A7900A3B61D;
-			remoteInfo = Auth;
-		};
-		767524332F2F4A7900A3B61D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7675240E2F2F4A7900A3B61D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 767524152F2F4A7900A3B61D;
-			remoteInfo = Auth;
-		};
+        767524292F2F4A7900A3B61D /* PBXContainerItemProxy */ = {
+            isa = PBXContainerItemProxy;
+            containerPortal = 7675240E2F2F4A7900A3B61D /* Project object */;
+            proxyType = 1;
+            remoteGlobalIDString = 767524152F2F4A7900A3B61D;
+            remoteInfo = Auth;
+        };
+        767524332F2F4A7900A3B61D /* PBXContainerItemProxy */ = {
+            isa = PBXContainerItemProxy;
+            containerPortal = 7675240E2F2F4A7900A3B61D /* Project object */;
+            proxyType = 1;
+            remoteGlobalIDString = 767524152F2F4A7900A3B61D;
+            remoteInfo = Auth;
+        };
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		763B7EFF2F40D8550010A21C /* AddIncomeQuickSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddIncomeQuickSheet.swift; sourceTree = "<group>"; };
-		767524162F2F4A7900A3B61D /* FINZ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FINZ.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		767524282F2F4A7900A3B61D /* FINZTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FINZTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		767524322F2F4A7900A3B61D /* FINZUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FINZUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		76913EFA2F4129DD002E94E6 /* AddExpenseQuickSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExpenseQuickSheet.swift; sourceTree = "<group>"; };
+        767524162F2F4A7900A3B61D /* FINZ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FINZ.app; sourceTree = BUILT_PRODUCTS_DIR; };
+        767524282F2F4A7900A3B61D /* FINZTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FINZTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+        767524322F2F4A7900A3B61D /* FINZUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FINZUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+        76913EFA2F4129DD002E94E6 /* AddExpenseQuickSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExpenseQuickSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		76A28A6C2F461F8400DA7D2A /* Exceptions for "FINZ" folder in "FINZTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Assets.xcassets,
-			);
-			target = 767524272F2F4A7900A3B61D /* FINZTests */;
-		};
-		76A28A6D2F461F8400DA7D2A /* Exceptions for "FINZ" folder in "FINZUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Assets.xcassets,
-			);
-			target = 767524312F2F4A7900A3B61D /* FINZUITests */;
-		};
+        76A28A6C2F461F8400DA7D2A /* Exceptions for "FINZ" folder in "FINZTests" target */ = {
+            isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+            membershipExceptions = (
+                Assets.xcassets,
+            );
+            target = 767524272F2F4A7900A3B61D /* FINZTests */;
+        };
+        76A28A6D2F461F8400DA7D2A /* Exceptions for "FINZ" folder in "FINZUITests" target */ = {
+            isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+            membershipExceptions = (
+                Assets.xcassets,
+            );
+            target = 767524312F2F4A7900A3B61D /* FINZUITests */;
+        };
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		767524182F2F4A7900A3B61D /* FINZ */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				76A28A6C2F461F8400DA7D2A /* Exceptions for "FINZ" folder in "FINZTests" target */,
-				76A28A6D2F461F8400DA7D2A /* Exceptions for "FINZ" folder in "FINZUITests" target */,
-			);
-			path = FINZ;
-			sourceTree = "<group>";
-		};
-		7675242B2F2F4A7900A3B61D /* AuthTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AuthTests;
-			sourceTree = "<group>";
-		};
-		767524352F2F4A7900A3B61D /* AuthUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AuthUITests;
-			sourceTree = "<group>";
-		};
+        767524182F2F4A7900A3B61D /* FINZ */ = {
+            isa = PBXFileSystemSynchronizedRootGroup;
+            exceptions = (
+                76A28A6C2F461F8400DA7D2A /* Exceptions for "FINZ" folder in "FINZTests" target */,
+                76A28A6D2F461F8400DA7D2A /* Exceptions for "FINZ" folder in "FINZUITests" target */,
+            );
+            path = FINZ;
+            sourceTree = "<group>";
+        };
+        7675242B2F2F4A7900A3B61D /* AuthTests */ = {
+            isa = PBXFileSystemSynchronizedRootGroup;
+            path = AuthTests;
+            sourceTree = "<group>";
+        };
+        767524352F2F4A7900A3B61D /* AuthUITests */ = {
+            isa = PBXFileSystemSynchronizedRootGroup;
+            path = AuthUITests;
+            sourceTree = "<group>";
+        };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		767524132F2F4A7900A3B61D /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		767524252F2F4A7900A3B61D /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7675242F2F2F4A7900A3B61D /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+        767524132F2F4A7900A3B61D /* Frameworks */ = {
+            isa = PBXFrameworksBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        767524252F2F4A7900A3B61D /* Frameworks */ = {
+            isa = PBXFrameworksBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        7675242F2F2F4A7900A3B61D /* Frameworks */ = {
+            isa = PBXFrameworksBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7675240D2F2F4A7900A3B61D = {
-			isa = PBXGroup;
-			children = (
-				767524182F2F4A7900A3B61D /* FINZ */,
-				7675242B2F2F4A7900A3B61D /* AuthTests */,
-				767524352F2F4A7900A3B61D /* AuthUITests */,
-				767524172F2F4A7900A3B61D /* Products */,
-				763B7EFF2F40D8550010A21C /* AddIncomeQuickSheet.swift */,
-				76913EFA2F4129DD002E94E6 /* AddExpenseQuickSheet.swift */,
-			);
-			sourceTree = "<group>";
-		};
-		767524172F2F4A7900A3B61D /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				767524162F2F4A7900A3B61D /* FINZ.app */,
-				767524282F2F4A7900A3B61D /* FINZTests.xctest */,
-				767524322F2F4A7900A3B61D /* FINZUITests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
+        7675240D2F2F4A7900A3B61D = {
+            isa = PBXGroup;
+            children = (
+                767524182F2F4A7900A3B61D /* FINZ */,
+                7675242B2F2F4A7900A3B61D /* AuthTests */,
+                767524352F2F4A7900A3B61D /* AuthUITests */,
+                767524172F2F4A7900A3B61D /* Products */,
+                76913EFA2F4129DD002E94E6 /* AddExpenseQuickSheet.swift */,
+            );
+            sourceTree = "<group>";
+        };
+        767524172F2F4A7900A3B61D /* Products */ = {
+            isa = PBXGroup;
+            children = (
+                767524162F2F4A7900A3B61D /* FINZ.app */,
+                767524282F2F4A7900A3B61D /* FINZTests.xctest */,
+                767524322F2F4A7900A3B61D /* FINZUITests.xctest */,
+            );
+            name = Products;
+            sourceTree = "<group>";
+        };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		767524152F2F4A7900A3B61D /* FINZ */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 7675243C2F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZ" */;
-			buildPhases = (
-				767524122F2F4A7900A3B61D /* Sources */,
-				767524132F2F4A7900A3B61D /* Frameworks */,
-				76A28A6E2F46209D00DA7D2A /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				767524182F2F4A7900A3B61D /* FINZ */,
-			);
-			name = FINZ;
-			packageProductDependencies = (
-			);
-			productName = Auth;
-			productReference = 767524162F2F4A7900A3B61D /* FINZ.app */;
-			productType = "com.apple.product-type.application";
-		};
-		767524272F2F4A7900A3B61D /* FINZTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 7675243F2F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZTests" */;
-			buildPhases = (
-				767524242F2F4A7900A3B61D /* Sources */,
-				767524252F2F4A7900A3B61D /* Frameworks */,
-				767524262F2F4A7900A3B61D /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				7675242A2F2F4A7900A3B61D /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				7675242B2F2F4A7900A3B61D /* AuthTests */,
-			);
-			name = FINZTests;
-			packageProductDependencies = (
-			);
-			productName = AuthTests;
-			productReference = 767524282F2F4A7900A3B61D /* FINZTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		767524312F2F4A7900A3B61D /* FINZUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 767524422F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZUITests" */;
-			buildPhases = (
-				7675242E2F2F4A7900A3B61D /* Sources */,
-				7675242F2F2F4A7900A3B61D /* Frameworks */,
-				767524302F2F4A7900A3B61D /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				767524342F2F4A7900A3B61D /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				767524352F2F4A7900A3B61D /* AuthUITests */,
-			);
-			name = FINZUITests;
-			packageProductDependencies = (
-			);
-			productName = AuthUITests;
-			productReference = 767524322F2F4A7900A3B61D /* FINZUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
+        767524152F2F4A7900A3B61D /* FINZ */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = 7675243C2F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZ" */;
+            buildPhases = (
+                767524122F2F4A7900A3B61D /* Sources */,
+                767524132F2F4A7900A3B61D /* Frameworks */,
+                76A28A6E2F46209D00DA7D2A /* Resources */,
+            );
+            buildRules = (
+            );
+            dependencies = (
+            );
+            fileSystemSynchronizedGroups = (
+                767524182F2F4A7900A3B61D /* FINZ */,
+            );
+            name = FINZ;
+            packageProductDependencies = (
+            );
+            productName = Auth;
+            productReference = 767524162F2F4A7900A3B61D /* FINZ.app */;
+            productType = "com.apple.product-type.application";
+        };
+        767524272F2F4A7900A3B61D /* FINZTests */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = 7675243F2F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZTests" */;
+            buildPhases = (
+                767524242F2F4A7900A3B61D /* Sources */,
+                767524252F2F4A7900A3B61D /* Frameworks */,
+                767524262F2F4A7900A3B61D /* Resources */,
+            );
+            buildRules = (
+            );
+            dependencies = (
+                7675242A2F2F4A7900A3B61D /* PBXTargetDependency */,
+            );
+            fileSystemSynchronizedGroups = (
+                7675242B2F2F4A7900A3B61D /* AuthTests */,
+            );
+            name = FINZTests;
+            packageProductDependencies = (
+            );
+            productName = AuthTests;
+            productReference = 767524282F2F4A7900A3B61D /* FINZTests.xctest */;
+            productType = "com.apple.product-type.bundle.unit-test";
+        };
+        767524312F2F4A7900A3B61D /* FINZUITests */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = 767524422F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZUITests" */;
+            buildPhases = (
+                7675242E2F2F4A7900A3B61D /* Sources */,
+                7675242F2F2F4A7900A3B61D /* Frameworks */,
+                767524302F2F4A7900A3B61D /* Resources */,
+            );
+            buildRules = (
+            );
+            dependencies = (
+                767524342F2F4A7900A3B61D /* PBXTargetDependency */,
+            );
+            fileSystemSynchronizedGroups = (
+                767524352F2F4A7900A3B61D /* AuthUITests */,
+            );
+            name = FINZUITests;
+            packageProductDependencies = (
+            );
+            productName = AuthUITests;
+            productReference = 767524322F2F4A7900A3B61D /* FINZUITests.xctest */;
+            productType = "com.apple.product-type.bundle.ui-testing";
+        };
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		7675240E2F2F4A7900A3B61D /* Project object */ = {
-			isa = PBXProject;
-			attributes = {
-				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2620;
-				LastUpgradeCheck = 2630;
-				TargetAttributes = {
-					767524152F2F4A7900A3B61D = {
-						CreatedOnToolsVersion = 26.2;
-					};
-					767524272F2F4A7900A3B61D = {
-						CreatedOnToolsVersion = 26.2;
-						TestTargetID = 767524152F2F4A7900A3B61D;
-					};
-					767524312F2F4A7900A3B61D = {
-						CreatedOnToolsVersion = 26.2;
-						TestTargetID = 767524152F2F4A7900A3B61D;
-					};
-				};
-			};
-			buildConfigurationList = 767524112F2F4A7900A3B61D /* Build configuration list for PBXProject "FINZ" */;
-			developmentRegion = en;
-			hasScannedForEncodings = 0;
-			knownRegions = (
-				en,
-				Base,
-			);
-			mainGroup = 7675240D2F2F4A7900A3B61D;
-			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
-			productRefGroup = 767524172F2F4A7900A3B61D /* Products */;
-			projectDirPath = "";
-			projectRoot = "";
-			targets = (
-				767524152F2F4A7900A3B61D /* FINZ */,
-				767524272F2F4A7900A3B61D /* FINZTests */,
-				767524312F2F4A7900A3B61D /* FINZUITests */,
-			);
-		};
+        7675240E2F2F4A7900A3B61D /* Project object */ = {
+            isa = PBXProject;
+            attributes = {
+                BuildIndependentTargetsInParallel = 1;
+                LastSwiftUpdateCheck = 2620;
+                LastUpgradeCheck = 2630;
+                TargetAttributes = {
+                    767524152F2F4A7900A3B61D = {
+                        CreatedOnToolsVersion = 26.2;
+                    };
+                    767524272F2F4A7900A3B61D = {
+                        CreatedOnToolsVersion = 26.2;
+                        TestTargetID = 767524152F2F4A7900A3B61D;
+                    };
+                    767524312F2F4A7900A3B61D = {
+                        CreatedOnToolsVersion = 26.2;
+                        TestTargetID = 767524152F2F4A7900A3B61D;
+                    };
+                };
+            };
+            buildConfigurationList = 767524112F2F4A7900A3B61D /* Build configuration list for PBXProject "FINZ" */;
+            developmentRegion = en;
+            hasScannedForEncodings = 0;
+            knownRegions = (
+                en,
+                Base,
+            );
+            mainGroup = 7675240D2F2F4A7900A3B61D;
+            minimizedProjectReferenceProxies = 1;
+            preferredProjectObjectVersion = 77;
+            productRefGroup = 767524172F2F4A7900A3B61D /* Products */;
+            projectDirPath = "";
+            projectRoot = "";
+            targets = (
+                767524152F2F4A7900A3B61D /* FINZ */,
+                767524272F2F4A7900A3B61D /* FINZTests */,
+                767524312F2F4A7900A3B61D /* FINZUITests */,
+            );
+        };
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		767524262F2F4A7900A3B61D /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		767524302F2F4A7900A3B61D /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		76A28A6E2F46209D00DA7D2A /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+        767524262F2F4A7900A3B61D /* Resources */ = {
+            isa = PBXResourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        767524302F2F4A7900A3B61D /* Resources */ = {
+            isa = PBXResourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        76A28A6E2F46209D00DA7D2A /* Resources */ = {
+            isa = PBXResourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		767524122F2F4A7900A3B61D /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				76913EFB2F4129DD002E94E6 /* AddExpenseQuickSheet.swift in Sources */,
-				763B7F002F40D8560010A21C /* AddIncomeQuickSheet.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		767524242F2F4A7900A3B61D /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7675242E2F2F4A7900A3B61D /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+        767524122F2F4A7900A3B61D /* Sources */ = {
+            isa = PBXSourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+                76913EFB2F4129DD002E94E6 /* AddExpenseQuickSheet.swift in Sources */,
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        767524242F2F4A7900A3B61D /* Sources */ = {
+            isa = PBXSourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        7675242E2F2F4A7900A3B61D /* Sources */ = {
+            isa = PBXSourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		7675242A2F2F4A7900A3B61D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 767524152F2F4A7900A3B61D /* FINZ */;
-			targetProxy = 767524292F2F4A7900A3B61D /* PBXContainerItemProxy */;
-		};
-		767524342F2F4A7900A3B61D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 767524152F2F4A7900A3B61D /* FINZ */;
-			targetProxy = 767524332F2F4A7900A3B61D /* PBXContainerItemProxy */;
-		};
+        7675242A2F2F4A7900A3B61D /* PBXTargetDependency */ = {
+            isa = PBXTargetDependency;
+            target = 767524152F2F4A7900A3B61D /* FINZ */;
+            targetProxy = 767524292F2F4A7900A3B61D /* PBXContainerItemProxy */;
+        };
+        767524342F2F4A7900A3B61D /* PBXTargetDependency */ = {
+            isa = PBXTargetDependency;
+            target = 767524152F2F4A7900A3B61D /* FINZ */;
+            targetProxy = 767524332F2F4A7900A3B61D /* PBXContainerItemProxy */;
+        };
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		7675243A2F2F4A7900A3B61D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-			};
-			name = Debug;
-		};
-		7675243B2F2F4A7900A3B61D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		7675243D2F2F4A7900A3B61D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = FINZ/FINZ.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7K338C6K6X;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Finz.;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.domainname.finz;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		7675243E2F2F4A7900A3B61D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = FINZ/FINZ.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7K338C6K6X;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Finz.;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.domainname.finz;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		767524402F2F4A7900A3B61D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = V1.AuthTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FINZ.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FINZ";
-			};
-			name = Debug;
-		};
-		767524412F2F4A7900A3B61D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = V1.AuthTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FINZ.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FINZ";
-			};
-			name = Release;
-		};
-		767524432F2F4A7900A3B61D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = V1.AuthUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Auth;
-			};
-			name = Debug;
-		};
-		767524442F2F4A7900A3B61D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = V1.AuthUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Auth;
-			};
-			name = Release;
-		};
+        7675243A2F2F4A7900A3B61D /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+                CLANG_ANALYZER_NONNULL = YES;
+                CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+                CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+                CLANG_ENABLE_MODULES = YES;
+                CLANG_ENABLE_OBJC_ARC = YES;
+                CLANG_ENABLE_OBJC_WEAK = YES;
+                CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+                CLANG_WARN_BOOL_CONVERSION = YES;
+                CLANG_WARN_COMMA = YES;
+                CLANG_WARN_CONSTANT_CONVERSION = YES;
+                CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+                CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+                CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+                CLANG_WARN_EMPTY_BODY = YES;
+                CLANG_WARN_ENUM_CONVERSION = YES;
+                CLANG_WARN_INFINITE_RECURSION = YES;
+                CLANG_WARN_INT_CONVERSION = YES;
+                CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+                CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+                CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+                CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+                CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+                CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+                CLANG_WARN_STRICT_PROTOTYPES = YES;
+                CLANG_WARN_SUSPICIOUS_MOVE = YES;
+                CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+                CLANG_WARN_UNREACHABLE_CODE = YES;
+                CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+                COPY_PHASE_STRIP = NO;
+                DEBUG_INFORMATION_FORMAT = dwarf;
+                ENABLE_STRICT_OBJC_MSGSEND = YES;
+                ENABLE_TESTABILITY = YES;
+                ENABLE_USER_SCRIPT_SANDBOXING = YES;
+                GCC_C_LANGUAGE_STANDARD = gnu17;
+                GCC_DYNAMIC_NO_PIC = NO;
+                GCC_NO_COMMON_BLOCKS = YES;
+                GCC_OPTIMIZATION_LEVEL = 0;
+                GCC_PREPROCESSOR_DEFINITIONS = (
+                    "DEBUG=1",
+                    "$(inherited)",
+                );
+                GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+                GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+                GCC_WARN_UNDECLARED_SELECTOR = YES;
+                GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+                GCC_WARN_UNUSED_FUNCTION = YES;
+                GCC_WARN_UNUSED_VARIABLE = YES;
+                IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+                LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+                MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+                MTL_FAST_MATH = YES;
+                ONLY_ACTIVE_ARCH = YES;
+                SDKROOT = iphoneos;
+                STRING_CATALOG_GENERATE_SYMBOLS = YES;
+                SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+                SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+            };
+            name = Debug;
+        };
+        7675243B2F2F4A7900A3B61D /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+                CLANG_ANALYZER_NONNULL = YES;
+                CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+                CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+                CLANG_ENABLE_MODULES = YES;
+                CLANG_ENABLE_OBJC_ARC = YES;
+                CLANG_ENABLE_OBJC_WEAK = YES;
+                CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+                CLANG_WARN_BOOL_CONVERSION = YES;
+                CLANG_WARN_COMMA = YES;
+                CLANG_WARN_CONSTANT_CONVERSION = YES;
+                CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+                CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+                CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+                CLANG_WARN_EMPTY_BODY = YES;
+                CLANG_WARN_ENUM_CONVERSION = YES;
+                CLANG_WARN_INFINITE_RECURSION = YES;
+                CLANG_WARN_INT_CONVERSION = YES;
+                CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+                CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+                CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+                CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+                CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+                CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+                CLANG_WARN_STRICT_PROTOTYPES = YES;
+                CLANG_WARN_SUSPICIOUS_MOVE = YES;
+                CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+                CLANG_WARN_UNREACHABLE_CODE = YES;
+                CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+                COPY_PHASE_STRIP = NO;
+                DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+                ENABLE_NS_ASSERTIONS = NO;
+                ENABLE_STRICT_OBJC_MSGSEND = YES;
+                ENABLE_USER_SCRIPT_SANDBOXING = YES;
+                GCC_C_LANGUAGE_STANDARD = gnu17;
+                GCC_NO_COMMON_BLOCKS = YES;
+                GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+                GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+                GCC_WARN_UNDECLARED_SELECTOR = YES;
+                GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+                GCC_WARN_UNUSED_FUNCTION = YES;
+                GCC_WARN_UNUSED_VARIABLE = YES;
+                IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+                LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+                MTL_ENABLE_DEBUG_INFO = NO;
+                MTL_FAST_MATH = YES;
+                SDKROOT = iphoneos;
+                STRING_CATALOG_GENERATE_SYMBOLS = YES;
+                SWIFT_COMPILATION_MODE = wholemodule;
+                VALIDATE_PRODUCT = YES;
+            };
+            name = Release;
+        };
+        7675243D2F2F4A7900A3B61D /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+                ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+                ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+                CODE_SIGN_ENTITLEMENTS = FINZ/FINZ.entitlements;
+                CODE_SIGN_IDENTITY = "Apple Development";
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                DEVELOPMENT_TEAM = 7K338C6K6X;
+                ENABLE_PREVIEWS = YES;
+                GENERATE_INFOPLIST_FILE = YES;
+                INFOPLIST_KEY_CFBundleDisplayName = Finz.;
+                INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+                INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+                INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                LD_RUNPATH_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "@executable_path/Frameworks",
+                );
+                MARKETING_VERSION = 2.0;
+                PRODUCT_BUNDLE_IDENTIFIER = com.domainname.finz;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                PROVISIONING_PROFILE_SPECIFIER = "";
+                STRING_CATALOG_GENERATE_SYMBOLS = YES;
+                SWIFT_APPROACHABLE_CONCURRENCY = YES;
+                SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+                SWIFT_EMIT_LOC_STRINGS = YES;
+                SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+            };
+            name = Debug;
+        };
+        7675243E2F2F4A7900A3B61D /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+                ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+                ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+                CODE_SIGN_ENTITLEMENTS = FINZ/FINZ.entitlements;
+                CODE_SIGN_IDENTITY = "Apple Development";
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                DEVELOPMENT_TEAM = 7K338C6K6X;
+                ENABLE_PREVIEWS = YES;
+                GENERATE_INFOPLIST_FILE = YES;
+                INFOPLIST_KEY_CFBundleDisplayName = Finz.;
+                INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+                INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+                INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                LD_RUNPATH_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "@executable_path/Frameworks",
+                );
+                MARKETING_VERSION = 2.0;
+                PRODUCT_BUNDLE_IDENTIFIER = com.domainname.finz;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                PROVISIONING_PROFILE_SPECIFIER = "";
+                STRING_CATALOG_GENERATE_SYMBOLS = YES;
+                SWIFT_APPROACHABLE_CONCURRENCY = YES;
+                SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+                SWIFT_EMIT_LOC_STRINGS = YES;
+                SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+            };
+            name = Release;
+        };
+        767524402F2F4A7900A3B61D /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                BUNDLE_LOADER = "$(TEST_HOST)";
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                GENERATE_INFOPLIST_FILE = YES;
+                IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+                MARKETING_VERSION = 1.0;
+                PRODUCT_BUNDLE_IDENTIFIER = V1.AuthTests;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                STRING_CATALOG_GENERATE_SYMBOLS = NO;
+                SWIFT_APPROACHABLE_CONCURRENCY = YES;
+                SWIFT_EMIT_LOC_STRINGS = NO;
+                SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FINZ.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FINZ";
+            };
+            name = Debug;
+        };
+        767524412F2F4A7900A3B61D /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                BUNDLE_LOADER = "$(TEST_HOST)";
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                GENERATE_INFOPLIST_FILE = YES;
+                IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+                MARKETING_VERSION = 1.0;
+                PRODUCT_BUNDLE_IDENTIFIER = V1.AuthTests;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                STRING_CATALOG_GENERATE_SYMBOLS = NO;
+                SWIFT_APPROACHABLE_CONCURRENCY = YES;
+                SWIFT_EMIT_LOC_STRINGS = NO;
+                SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FINZ.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FINZ";
+            };
+            name = Release;
+        };
+        767524432F2F4A7900A3B61D /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                GENERATE_INFOPLIST_FILE = YES;
+                MARKETING_VERSION = 1.0;
+                PRODUCT_BUNDLE_IDENTIFIER = V1.AuthUITests;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                STRING_CATALOG_GENERATE_SYMBOLS = NO;
+                SWIFT_APPROACHABLE_CONCURRENCY = YES;
+                SWIFT_EMIT_LOC_STRINGS = NO;
+                SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                TEST_TARGET_NAME = Auth;
+            };
+            name = Debug;
+        };
+        767524442F2F4A7900A3B61D /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                GENERATE_INFOPLIST_FILE = YES;
+                MARKETING_VERSION = 1.0;
+                PRODUCT_BUNDLE_IDENTIFIER = V1.AuthUITests;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                STRING_CATALOG_GENERATE_SYMBOLS = NO;
+                SWIFT_APPROACHABLE_CONCURRENCY = YES;
+                SWIFT_EMIT_LOC_STRINGS = NO;
+                SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                TEST_TARGET_NAME = Auth;
+            };
+            name = Release;
+        };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		767524112F2F4A7900A3B61D /* Build configuration list for PBXProject "FINZ" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7675243A2F2F4A7900A3B61D /* Debug */,
-				7675243B2F2F4A7900A3B61D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		7675243C2F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZ" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7675243D2F2F4A7900A3B61D /* Debug */,
-				7675243E2F2F4A7900A3B61D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		7675243F2F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				767524402F2F4A7900A3B61D /* Debug */,
-				767524412F2F4A7900A3B61D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		767524422F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				767524432F2F4A7900A3B61D /* Debug */,
-				767524442F2F4A7900A3B61D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
+        767524112F2F4A7900A3B61D /* Build configuration list for PBXProject "FINZ" */ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (
+                7675243A2F2F4A7900A3B61D /* Debug */,
+                7675243B2F2F4A7900A3B61D /* Release */,
+            );
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+        7675243C2F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZ" */ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (
+                7675243D2F2F4A7900A3B61D /* Debug */,
+                7675243E2F2F4A7900A3B61D /* Release */,
+            );
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+        7675243F2F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZTests" */ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (
+                767524402F2F4A7900A3B61D /* Debug */,
+                767524412F2F4A7900A3B61D /* Release */,
+            );
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+        767524422F2F4A7900A3B61D /* Build configuration list for PBXNativeTarget "FINZUITests" */ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (
+                767524432F2F4A7900A3B61D /* Debug */,
+                767524442F2F4A7900A3B61D /* Release */,
+            );
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
 /* End XCConfigurationList section */
-	};
-	rootObject = 7675240E2F2F4A7900A3B61D /* Project object */;
+    };
+    rootObject = 7675240E2F2F4A7900A3B61D /* Project object */;
 }

@@ -1,51 +1,61 @@
 import SwiftUI
-import CoreData
+import SwiftData
 import UIKit
 
 struct DepensesFixesSheet: View {
-    @Environment(\.managedObjectContext) private var context
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    
-    @FetchRequest var occurrences: FetchedResults<BudgetEntryOccurrence>
+
+    @Query private var allOccurrences: [BudgetEntryOccurrence]
     @State private var editedOccurrence: BudgetEntryOccurrence?
     @State private var showEditSheet: Bool = false
-    
+
+    private let monthKey: String
+
     init(monthKey: String) {
-        let request: NSFetchRequest<BudgetEntryOccurrence> = BudgetEntryOccurrence.fetchRequest()
-        request.predicate = NSPredicate(format: "monthKey == %@ AND kind == %@ AND (isManual == YES OR isManual == NO)", monthKey, "expense")
-        request.sortDescriptors = [NSSortDescriptor(key: "date", ascending: true)]
-        _occurrences = FetchRequest(fetchRequest: request)
+        self.monthKey = monthKey
+
+        let predicate = #Predicate<BudgetEntryOccurrence> { occurrence in
+            occurrence.monthKey == monthKey && occurrence.kind == "expense"
+        }
+
+        _allOccurrences = Query(
+            filter: predicate,
+            sort: [SortDescriptor(\.date, order: .forward)]
+        )
     }
-    
+
+    private var occurrences: [BudgetEntryOccurrence] {
+        allOccurrences.filter { $0.monthKey == monthKey && $0.kind == "expense" }
+    }
+
     private var fixedExpenses: [BudgetEntryOccurrence] {
         occurrences.filter { $0.isManual == false }
     }
-    
+
     private var complementaryExpenses: [BudgetEntryOccurrence] {
         occurrences.filter { $0.isManual == true }
     }
-    
+
     private func todayInsertionIndex(in items: [BudgetEntryOccurrence]) -> Int {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         for (idx, item) in items.enumerated() {
-            if let d = item.date {
-                let day = cal.startOfDay(for: d)
-                if day >= today { return idx }
-            }
+            let day = cal.startOfDay(for: item.date)
+            if day >= today { return idx }
         }
         return items.count
     }
-    
+
     private func startEditing(_ occurrence: BudgetEntryOccurrence) {
         editedOccurrence = occurrence
         showEditSheet = true
     }
 
     private func deleteOccurrence(_ occurrence: BudgetEntryOccurrence) {
-        context.delete(occurrence)
+        modelContext.delete(occurrence)
         do {
-            try context.save()
+            try modelContext.save()
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)
         } catch {
@@ -86,7 +96,7 @@ struct DepensesFixesSheet: View {
             .padding(.vertical, 4)
         }
     }
-    
+
     var body: some View {
         NavigationStack {
             List {
@@ -144,9 +154,9 @@ struct DepensesFixesSheet: View {
             }
             .sheet(isPresented: $showEditSheet) {
                 if let occurrence = editedOccurrence {
-                    EditExpenseOccurrenceSheet(occurrence: occurrence) { updated in
+                    EditExpenseOccurrenceSheet(occurrence: occurrence) { _ in
                         do {
-                            try context.save()
+                            try modelContext.save()
                             let generator = UINotificationFeedbackGenerator()
                             generator.notificationOccurred(.success)
                         } catch {
@@ -167,11 +177,10 @@ private struct ExpenseRow: View {
     let onDelete: () -> Void
 
     private var dateFormatted: String {
-        guard let date = occurrence.date else { return "" }
         let formatter = DateFormatter()
         formatter.dateFormat = "dd MMM"
         formatter.locale = Locale(identifier: "fr_FR")
-        return formatter.string(from: date)
+        return formatter.string(from: occurrence.date)
     }
 
     private var amountFormatted: String {
@@ -216,66 +225,8 @@ private struct ExpenseRow: View {
     }
 }
 
-struct DepensesFixesSheet_Previews: PreviewProvider {
-    static var context: NSManagedObjectContext = {
-        let container = NSPersistentContainer(name: "Model")
-        container.loadPersistentStores { _, error in
-            if let error = error {
-                fatalError("Failed to load persistent stores: \(error)")
-            }
-        }
-        return container.viewContext
-    }()
-    
-    static func addSampleData(context: NSManagedObjectContext, monthKey: String) {
-        let fixed1 = BudgetEntryOccurrence(context: context)
-        fixed1.id = UUID()
-        fixed1.title = "Loyer"
-        fixed1.amount = -700
-        fixed1.date = Calendar.current.date(from: DateComponents(year: 2026, month: 2, day: 3))
-        fixed1.monthKey = monthKey
-        fixed1.kind = "expense"
-        fixed1.isManual = false
-        
-        let fixed2 = BudgetEntryOccurrence(context: context)
-        fixed2.id = UUID()
-        fixed2.title = "Electricité"
-        fixed2.amount = -60
-        fixed2.date = Calendar.current.date(from: DateComponents(year: 2026, month: 2, day: 10))
-        fixed2.monthKey = monthKey
-        fixed2.kind = "expense"
-        fixed2.isManual = false
-        
-        let comp1 = BudgetEntryOccurrence(context: context)
-        comp1.id = UUID()
-        comp1.title = "Courses bio"
-        comp1.amount = -120
-        comp1.date = Calendar.current.date(from: DateComponents(year: 2026, month: 2, day: 15))
-        comp1.monthKey = monthKey
-        comp1.kind = "expense"
-        comp1.isManual = true
-        
-        let comp2 = BudgetEntryOccurrence(context: context)
-        comp2.id = UUID()
-        comp2.title = "Essence"
-        comp2.amount = -45
-        comp2.date = Calendar.current.date(from: DateComponents(year: 2026, month: 2, day: 20))
-        comp2.monthKey = monthKey
-        comp2.kind = "expense"
-        comp2.isManual = true
-        
-        try? context.save()
-    }
-    
-    static var previews: some View {
-        let monthKey = "2026-02"
-        addSampleData(context: context, monthKey: monthKey)
-        return DepensesFixesSheet(monthKey: monthKey)
-            .environment(\.managedObjectContext, context)
-    }
-}
 private struct EditExpenseOccurrenceSheet: View {
-    @ObservedObject var occurrence: BudgetEntryOccurrence
+    @Bindable var occurrence: BudgetEntryOccurrence
     var onSave: (BudgetEntryOccurrence) -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -300,21 +251,24 @@ private struct EditExpenseOccurrenceSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Enregistrer") {
-                        occurrence.title = title
-                        occurrence.amount = -abs(amount)
-                        occurrence.date = date
-                        occurrence.isManual = true
-                        onSave(occurrence)
-                        dismiss()
+                        saveChanges()
                     }
                 }
             }
             .onAppear {
                 title = occurrence.title ?? ""
                 amount = abs(occurrence.amount)
-                date = occurrence.date ?? Date()
+                date = occurrence.date
             }
         }
     }
-}
 
+    private func saveChanges() {
+        occurrence.title = title
+        occurrence.amount = -abs(amount)
+        occurrence.date = date
+        occurrence.isManual = true
+        onSave(occurrence)
+        dismiss()
+    }
+}

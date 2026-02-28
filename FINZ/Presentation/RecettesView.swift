@@ -1,10 +1,10 @@
 import SwiftUI
-import CoreData
+import SwiftData
 import UIKit
 
 struct RecettesView: View {
     @EnvironmentObject private var vm: QuestionnaireViewModel
-    @Environment(\.managedObjectContext) private var context
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.continueAction) private var continueAction
 
     enum IncomeCategory: String, CaseIterable, Hashable {
@@ -70,12 +70,16 @@ struct RecettesView: View {
         var amount: String
         var periodicity: String
         var complement: String
-        init(id: UUID = UUID(), kind: IncomeKind, amount: String = "", periodicity: String = "Mensuel", complement: String = "") {
+        var mainCategoryID: UUID?
+        var subCategoryID: UUID?
+        init(id: UUID = UUID(), kind: IncomeKind, amount: String = "", periodicity: String = "Mensuel", complement: String = "", mainCategoryID: UUID? = nil, subCategoryID: UUID? = nil) {
             self.id = id
             self.kind = kind
             self.amount = amount
             self.periodicity = periodicity
             self.complement = complement
+            self.mainCategoryID = mainCategoryID
+            self.subCategoryID = subCategoryID
         }
     }
 
@@ -233,7 +237,6 @@ struct RecettesView: View {
             }
             .fullScreenCover(isPresented: $showExpenses) {
                 ExpensesView()
-                    .environment(\.managedObjectContext, context)
                     .environmentObject(vm)
             }
             .onAppear(perform: setupEntries)
@@ -258,22 +261,20 @@ struct RecettesView: View {
             kinds.insert(.allocationLogement)
         }
         do {
-            let fetch = NSFetchRequest<NSManagedObject>(entityName: "Income")
-            let objs = try context.fetch(fetch)
+            let fetchDescriptor = FetchDescriptor<Income>()
+            let objs = try modelContext.fetch(fetchDescriptor)
             let existing: [IncomeEntry] = objs.compactMap { obj in
-                guard let id = obj.value(forKey: "id") as? UUID,
-                      let kindStr = obj.value(forKey: "kind") as? String,
-                      let kind = IncomeKind(rawValue: kindStr) else { return nil }
-                let amount = (obj.value(forKey: "amount") as? Double).map { String($0) } ?? ""
-                let periodicity = obj.value(forKey: "periodicity") as? String ?? "Mensuel"
-                let complementStored = obj.value(forKey: "complement") as? String ?? ""
-                let monthsCSV = obj.value(forKey: "months") as? String
-                let dayVal = obj.value(forKey: "day") as? Int16
+                let amount = String(obj.amount)
+                let periodicity = obj.periodicity
+                let complementStored = obj.complement ?? ""
+                let monthsCSV = obj.months
+                let dayVal = obj.day
                 let complement: String = {
                     if !complementStored.isEmpty { return complementStored }
                     return buildComplement(monthsCSV: monthsCSV, day: dayVal)
                 }()
-                return IncomeEntry(id: id, kind: kind, amount: amount, periodicity: periodicity, complement: complement)
+                guard let kind = IncomeKind(rawValue: obj.kind) else { return nil }
+                return IncomeEntry(id: obj.id, kind: kind, amount: amount, periodicity: periodicity, complement: complement)
             }
             if !existing.isEmpty {
                 entries = existing
@@ -317,7 +318,7 @@ struct RecettesView: View {
             
             // Project incomes into monthly occurrences for the dashboard
             do {
-                try BudgetProjectionManager.projectIncomes(for: Date(), context: context)
+                try BudgetProjectionManager.projectIncomes(for: Date(), modelContext: modelContext)
             } catch {
                 // Non-fatal: record an error message but continue navigation
                 saveError = "Projection des recettes échouée: \(error.localizedDescription)"
@@ -413,39 +414,46 @@ struct RecettesView: View {
     }
 
     private func persistEntries() throws {
-        // Expect a Core Data entity named "Income" with attributes: id(UUID), kind(String), amount(Double), periodicity(String), complement(String), months(Data optional), day(Int16 optional)
         for e in entries {
-            let fetch = NSFetchRequest<NSManagedObject>(entityName: "Income")
-            fetch.predicate = NSPredicate(format: "id == %@", e.id as CVarArg)
-            let existing = try context.fetch(fetch).first
-            let obj: NSManagedObject
+            let entryID = e.id
+            let fetchDescriptor = FetchDescriptor<Income>(
+                predicate: #Predicate { $0.id == entryID }
+            )
+            let existing = try modelContext.fetch(fetchDescriptor).first
+            let obj: Income
             if let existing = existing {
                 obj = existing
             } else {
-                let entity = NSEntityDescription.entity(forEntityName: "Income", in: context)!
-                obj = NSManagedObject(entity: entity, insertInto: context)
-                obj.setValue(e.id, forKey: "id")
+                let amount = Double(e.amount.replacingOccurrences(of: ",", with: ".")) ?? 0
+                obj = Income(
+                    id: e.id,
+                    amount: amount,
+                    complement: e.complement,
+                    day: 0,
+                    kind: e.kind.rawValue,
+                    months: nil,
+                    periodicity: e.periodicity
+                )
+                modelContext.insert(obj)
             }
-            obj.setValue(e.kind.rawValue, forKey: "kind")
+            obj.kind = e.kind.rawValue
             let amount = Double(e.amount.replacingOccurrences(of: ",", with: ".")) ?? 0
-            obj.setValue(amount, forKey: "amount")
-            obj.setValue(e.periodicity, forKey: "periodicity")
-            obj.setValue(e.complement, forKey: "complement")
+            obj.amount = amount
+            obj.periodicity = e.periodicity
+            obj.complement = e.complement
             let parsed = parseComplement(e.complement)
             if let monthsCSV = parsed.monthsCSV {
-                obj.setValue(monthsCSV, forKey: "months")
+                obj.months = monthsCSV
             } else {
-                obj.setValue(nil, forKey: "months")
+                obj.months = nil
             }
             if let d = parsed.day {
-                obj.setValue(d, forKey: "day")
+                obj.day = Int16(d)
             } else {
-                obj.setValue(nil, forKey: "day")
+                obj.day = 0
             }
         }
-        if context.hasChanges {
-            try context.save()
-        }
+        try modelContext.save()
     }
 
     private func deleteEntry(_ entry: IncomeEntry) {
@@ -453,12 +461,14 @@ struct RecettesView: View {
         if let idx = entries.firstIndex(where: { $0.id == entry.id }) {
             entries.remove(at: idx)
         }
-        // Also delete from Core Data if exists
-        let fetch = NSFetchRequest<NSManagedObject>(entityName: "Income")
-        fetch.predicate = NSPredicate(format: "id == %@", entry.id as CVarArg)
-        if let obj = try? context.fetch(fetch).first {
-            context.delete(obj)
-            try? context.save()
+        // Also delete from SwiftData if exists
+        let entryID = entry.id
+        let fetchDescriptor = FetchDescriptor<Income>(
+            predicate: #Predicate { $0.id == entryID }
+        )
+        if let obj = try? modelContext.fetch(fetchDescriptor).first {
+            modelContext.delete(obj)
+            try? modelContext.save()
         }
     }
 }

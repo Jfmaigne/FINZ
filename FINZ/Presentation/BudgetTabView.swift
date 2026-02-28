@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 import Foundation
-import CoreData
+import SwiftData
 import Combine
 import UniformTypeIdentifiers
 
@@ -25,7 +25,7 @@ private func justified(_ string: String) -> AttributedString {
 struct BudgetTabView: View {
     @State private var selectedTab: Tab = .budget
     @EnvironmentObject var vm: QuestionnaireViewModel
-    @Environment(\.managedObjectContext) var context
+    @Environment(\.modelContext) var modelContext
 
     enum Tab: Hashable {
         case budget, stats, learn, lexicon, account
@@ -355,7 +355,7 @@ private struct LearnRowView: View {
 }
 
 struct AccountView: View {
-    @Environment(\.managedObjectContext) private var context
+    @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var vm: QuestionnaireViewModel
     @EnvironmentObject var authService: AuthenticationService
     @State private var showingResetAlert = false
@@ -374,6 +374,7 @@ struct AccountView: View {
     @State private var showingImportSuccess = false
     @State private var pendingImportURL: URL? = nil
     @State private var showingSignOutAlert = false
+    @State private var showingCategoryManagement = false
 
     var body: some View {
         NavigationStack {
@@ -393,16 +394,19 @@ struct AccountView: View {
                     NavigationLink {
                         RecettesView()
                             .environmentObject(vm)
-                            .environment(\.managedObjectContext, context)
                     } label: {
                         Label("Modifier les recettes fixes", systemImage: "arrow.up.circle")
                     }
                     NavigationLink {
                         ExpensesView()
                             .environmentObject(vm)
-                            .environment(\.managedObjectContext, context)
                     } label: {
                         Label("Modifier les dépenses fixes", systemImage: "arrow.down.circle")
+                    }
+                    NavigationLink {
+                        CategoryManagementView()
+                    } label: {
+                        Label("Gérer les catégories", systemImage: "tag.circle")
                     }
                     Button {
                         showingProfileConfirm = true
@@ -554,22 +558,31 @@ struct AccountView: View {
     private func resetAllData() {
         isResetting = true
         resetError = nil
-        let entityNames = ["Income", "Expense", "BudgetEntryOccurrence"]
+        
         do {
-            for name in entityNames {
-                let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: name)
-                let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetch)
-                deleteRequest.resultType = .resultTypeObjectIDs
-                if let result = try context.execute(deleteRequest) as? NSBatchDeleteResult,
-                   let objectIDs = result.result as? [NSManagedObjectID],
-                   !objectIDs.isEmpty {
-                    let changes: [AnyHashable: Any] = [NSDeletedObjectsKey: objectIDs]
-                    NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context])
-                }
+            // Fetch and delete all Income entities
+            let incomeFetch = FetchDescriptor<Income>()
+            let incomes = try modelContext.fetch(incomeFetch)
+            for income in incomes {
+                modelContext.delete(income)
             }
-            if context.hasChanges {
-                try context.save()
+            
+            // Fetch and delete all Expense entities
+            let expenseFetch = FetchDescriptor<Expense>()
+            let expenses = try modelContext.fetch(expenseFetch)
+            for expense in expenses {
+                modelContext.delete(expense)
             }
+            
+            // Fetch and delete all BudgetEntryOccurrence entities
+            let occurrenceFetch = FetchDescriptor<BudgetEntryOccurrence>()
+            let occurrences = try modelContext.fetch(occurrenceFetch)
+            for occurrence in occurrences {
+                modelContext.delete(occurrence)
+            }
+            
+            try modelContext.save()
+            
             // Notify UI and switch to questionnaire tab
             NotificationCenter.default.post(name: .didResetAllData, object: nil)
             showingSuccessAlert = true
@@ -580,7 +593,6 @@ struct AccountView: View {
     }
     
     private func exportBackup() async {
-        let entityNames = ["Income", "Expense", "BudgetEntryOccurrence"]
         let iso = ISO8601DateFormatter()
         var payload: [String: Any] = [
             "version": 1,
@@ -591,42 +603,74 @@ struct AccountView: View {
 
         do {
             var entitiesData: [String: [[String: Any]]] = [:]
-            for name in entityNames {
-                let fetch = NSFetchRequest<NSManagedObject>(entityName: name)
-                let objects = try context.fetch(fetch)
-                let mapped: [[String: Any]] = objects.compactMap { obj in
-                    let entity = obj.entity.attributesByName
-                    var dict: [String: Any] = [:]
-                    for key in entity.keys {
-                        let raw = obj.value(forKey: key)
-                        if let date = raw as? Date {
-                            dict[key] = iso.string(from: date)
-                        } else if let uuid = raw as? UUID {
-                            dict[key] = uuid.uuidString
-                        } else if let data = raw as? Data {
-                            dict[key] = data.base64EncodedString()
-                        } else if let number = raw as? NSNumber {
-                            dict[key] = number
-                        } else if let str = raw as? String {
-                            dict[key] = str
-                        }
-                    }
-                    return dict.isEmpty ? nil : dict
-                }
-                entitiesData[name] = mapped
+            
+            // Export Income
+            let incomeFetch = FetchDescriptor<Income>()
+            let incomes = try modelContext.fetch(incomeFetch)
+            entitiesData["Income"] = incomes.map { income in
+                [
+                    "id": income.id.uuidString,
+                    "amount": income.amount,
+                    "complement": income.complement ?? "",
+                    "day": income.day,
+                    "kind": income.kind,
+                    "months": income.months ?? "",
+                    "periodicity": income.periodicity
+                ]
             }
+            
+            // Export Expense
+            let expenseFetch = FetchDescriptor<Expense>()
+            let expenses = try modelContext.fetch(expenseFetch)
+            entitiesData["Expense"] = expenses.map { expense in
+                var dict: [String: Any] = [
+                    "id": expense.id.uuidString,
+                    "amount": expense.amount,
+                    "day": expense.day,
+                    "kind": expense.kind,
+                    "periodicity": expense.periodicity
+                ]
+                if let complement = expense.complement { dict["complement"] = complement }
+                if let endDate = expense.endDate { dict["endDate"] = iso.string(from: endDate) }
+                if let months = expense.months { dict["months"] = months }
+                if let note = expense.note { dict["note"] = note }
+                if let provider = expense.provider { dict["provider"] = provider }
+                return dict
+            }
+            
+            // Export BudgetEntryOccurrence
+            let occurrenceFetch = FetchDescriptor<BudgetEntryOccurrence>()
+            let occurrences = try modelContext.fetch(occurrenceFetch)
+            entitiesData["BudgetEntryOccurrence"] = occurrences.map { occ in
+                var dict: [String: Any] = [
+                    "id": occ.id.uuidString,
+                    "date": iso.string(from: occ.date),
+                    "amount": occ.amount,
+                    "kind": occ.kind,
+                    "monthKey": occ.monthKey,
+                    "isManual": occ.isManual,
+                    "createdAt": iso.string(from: occ.createdAt),
+                    "updatedAt": iso.string(from: occ.updatedAt)
+                ]
+                if let title = occ.title { dict["title"] = title }
+                if let sourceid = occ.sourceid { dict["sourceid"] = sourceid.uuidString }
+                return dict
+            }
+            
             payload["entities"] = entitiesData
 
             let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted])
             let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("finz_backup.json")
             try data.write(to: tmp, options: .atomic)
 
-            DispatchQueue.main.async {
+            await MainActor.run {
                 exportURL = tmp
                 showingExportSheet = true
             }
         } catch {
-            exportError = "Erreur lors de l'export : \(error.localizedDescription)"
+            await MainActor.run {
+                exportError = "Erreur lors de l'export : \(error.localizedDescription)"
+            }
         }
     }
     
@@ -637,7 +681,7 @@ struct AccountView: View {
                 let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                 let entities = json["entities"] as? [String: Any]
             else {
-                importError = "Fichier invalide"
+                await MainActor.run { importError = "Fichier invalide" }
                 return
             }
             if let profile = json["profile"] as? [String: Any], let first = profile["firstName"] as? String {
@@ -646,57 +690,121 @@ struct AccountView: View {
             }
 
             let iso = ISO8601DateFormatter()
-            let entityNames = ["Income", "Expense", "BudgetEntryOccurrence"]
 
             // Purge existing data
-            for name in entityNames {
-                let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: name)
-                let delete = NSBatchDeleteRequest(fetchRequest: fetch)
-                _ = try context.execute(delete)
+            let incomeFetch = FetchDescriptor<Income>()
+            let incomes = try modelContext.fetch(incomeFetch)
+            for income in incomes {
+                modelContext.delete(income)
             }
-            context.reset()
+            
+            let expenseFetch = FetchDescriptor<Expense>()
+            let expenses = try modelContext.fetch(expenseFetch)
+            for expense in expenses {
+                modelContext.delete(expense)
+            }
+            
+            let occurrenceFetch = FetchDescriptor<BudgetEntryOccurrence>()
+            let occurrences = try modelContext.fetch(occurrenceFetch)
+            for occurrence in occurrences {
+                modelContext.delete(occurrence)
+            }
 
-            // Import
-            for name in entityNames {
-                guard let array = entities[name] as? [[String: Any]] else { continue }
-                guard let entityDesc = NSEntityDescription.entity(forEntityName: name, in: context) else { continue }
-                for dict in array {
-                    let obj = NSManagedObject(entity: entityDesc, insertInto: context)
-                    for (key, value) in dict {
-                        guard let attr = entityDesc.attributesByName[key] else { continue }
-                        let attrType = attr.attributeType
-                        switch attrType {
-                        case .UUIDAttributeType:
-                            if let str = value as? String, let uuid = UUID(uuidString: str) { obj.setValue(uuid, forKey: key) }
-                        case .dateAttributeType:
-                            if let str = value as? String, let date = iso.date(from: str) { obj.setValue(date, forKey: key) }
-                        case .stringAttributeType:
-                            obj.setValue(value as? String, forKey: key)
-                        case .doubleAttributeType, .floatAttributeType, .decimalAttributeType:
-                            if let num = value as? NSNumber { obj.setValue(num, forKey: key) }
-                        case .integer16AttributeType, .integer32AttributeType, .integer64AttributeType:
-                            if let num = value as? NSNumber { obj.setValue(num.int64Value, forKey: key) }
-                        case .booleanAttributeType:
-                            if let num = value as? NSNumber { obj.setValue(num.boolValue, forKey: key) }
-                        case .binaryDataAttributeType:
-                            if let str = value as? String, let data = Data(base64Encoded: str) { obj.setValue(data, forKey: key) }
-                        default:
-                            obj.setValue(value, forKey: key)
-                        }
+            // Import Income
+            if let incomeArray = entities["Income"] as? [[String: Any]] {
+                for dict in incomeArray {
+                    guard let idStr = dict["id"] as? String,
+                          let id = UUID(uuidString: idStr),
+                          let kind = dict["kind"] as? String,
+                          let periodicity = dict["periodicity"] as? String else { continue }
+                    
+                    let income = Income(
+                        id: id,
+                        amount: dict["amount"] as? Double ?? 0,
+                        complement: dict["complement"] as? String,
+                        day: Int16(dict["day"] as? Int ?? 0),
+                        kind: kind,
+                        months: dict["months"] as? String,
+                        periodicity: periodicity
+                    )
+                    modelContext.insert(income)
+                }
+            }
+            
+            // Import Expense
+            if let expenseArray = entities["Expense"] as? [[String: Any]] {
+                for dict in expenseArray {
+                    guard let idStr = dict["id"] as? String,
+                          let id = UUID(uuidString: idStr),
+                          let kind = dict["kind"] as? String,
+                          let periodicity = dict["periodicity"] as? String else { continue }
+                    
+                    var endDate: Date? = nil
+                    if let endDateStr = dict["endDate"] as? String {
+                        endDate = iso.date(from: endDateStr)
                     }
+                    
+                    let expense = Expense(
+                        id: id,
+                        amount: dict["amount"] as? Double ?? 0,
+                        complement: dict["complement"] as? String,
+                        day: Int16(dict["day"] as? Int ?? 0),
+                        endDate: endDate,
+                        kind: kind,
+                        months: dict["months"] as? String,
+                        note: dict["note"] as? String,
+                        periodicity: periodicity,
+                        provider: dict["provider"] as? String
+                    )
+                    modelContext.insert(expense)
+                }
+            }
+            
+            // Import BudgetEntryOccurrence
+            if let occurrenceArray = entities["BudgetEntryOccurrence"] as? [[String: Any]] {
+                for dict in occurrenceArray {
+                    guard let idStr = dict["id"] as? String,
+                          let id = UUID(uuidString: idStr),
+                          let dateStr = dict["date"] as? String,
+                          let date = iso.date(from: dateStr),
+                          let kind = dict["kind"] as? String,
+                          let monthKey = dict["monthKey"] as? String else { continue }
+                    
+                    var sourceid: UUID? = nil
+                    if let sourceidStr = dict["sourceid"] as? String {
+                        sourceid = UUID(uuidString: sourceidStr)
+                    }
+                    
+                    let createdAt = (dict["createdAt"] as? String).flatMap { iso.date(from: $0) } ?? Date()
+                    let updatedAt = (dict["updatedAt"] as? String).flatMap { iso.date(from: $0) } ?? Date()
+                    
+                    let occurrence = BudgetEntryOccurrence(
+                        id: id,
+                        date: date,
+                        amount: dict["amount"] as? Double ?? 0,
+                        kind: kind,
+                        title: dict["title"] as? String,
+                        monthKey: monthKey,
+                        isManual: dict["isManual"] as? Bool ?? false,
+                        sourceid: sourceid,
+                        createdAt: createdAt,
+                        updatedAt: updatedAt
+                    )
+                    modelContext.insert(occurrence)
                 }
             }
 
-            if context.hasChanges {
-                try context.save()
-            }
+            try modelContext.save()
+            
             await MainActor.run {
                 pendingImportURL = nil
                 showingImportConfirm = false
                 showingImportSuccess = true
             }
         } catch {
-            importError = "Erreur lors de l'import : \(error.localizedDescription)"
+            await MainActor.run {
+                importError = "Erreur lors de l'import : \(error.localizedDescription)"
+            }
         }
     }
 

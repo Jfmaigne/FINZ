@@ -1,9 +1,9 @@
 import SwiftUI
-import CoreData
+import SwiftData
 
 struct RootView: View {
     @EnvironmentObject private var session: SessionManager
-    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.modelContext) private var modelContext
     @State private var showSplash: Bool = true
     @StateObject private var authService = AuthenticationService()
     @StateObject private var questionnaireVM = QuestionnaireViewModel()
@@ -90,11 +90,14 @@ struct RootView: View {
             await MainActor.run { self.hasIncomeData = false }
             return
         }
-        let context = viewContext
-        let fetch = NSFetchRequest<NSManagedObject>(entityName: "Income")
-        fetch.fetchLimit = 1
+        
+        let fetchDescriptor = FetchDescriptor<Income>(
+            predicate: nil,
+            sortBy: []
+        )
+        
         do {
-            let result = try context.fetch(fetch)
+            let result = try modelContext.fetch(fetchDescriptor)
             await MainActor.run {
                 self.hasIncomeData = !result.isEmpty
             }

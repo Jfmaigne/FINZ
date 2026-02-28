@@ -1,9 +1,9 @@
 import SwiftUI
-import CoreData
+import SwiftData
 import Charts
 
 struct StatisticsView: View {
-    @Environment(\.managedObjectContext) private var context
+    @Environment(\.modelContext) private var modelContext
 
     private struct Slice: Identifiable, Equatable {
         let id = UUID()
@@ -457,24 +457,32 @@ struct StatisticsView: View {
         let r = range(for: period, anchoredAt: anchor)
         let startOfRange = r.start
         let endOfRange = r.end
-        let request = NSFetchRequest<NSManagedObject>(entityName: "BudgetEntryOccurrence")
-        request.predicate = NSPredicate(format: "(date >= %@) AND (date < %@) AND (kind != %@)", startOfRange as NSDate, endOfRange as NSDate, "balance")
+        
+        let fetchDescriptor = FetchDescriptor<BudgetEntryOccurrence>(
+            predicate: #Predicate { occurrence in
+                occurrence.date >= startOfRange && occurrence.date < endOfRange && occurrence.kind != "balance"
+            }
+        )
+        
         do {
-            let objs = try context.fetch(request)
+            let objs = try modelContext.fetch(fetchDescriptor)
             var incomeTotals: [String: Double] = [:]
             var expenseTotals: [String: Double] = [:]
+            
             for obj in objs {
-                let kind = (obj.value(forKey: "kind") as? String) ?? "expense"
-                let rawTitle = (obj.value(forKey: "title") as? String) ?? "Autre"
+                let kind = obj.kind
+                let rawTitle = obj.title ?? "Autre"
                 let category = rawTitle.split(separator: "—").first.map { String($0).trimmingCharacters(in: .whitespaces) } ?? rawTitle
-                let amount = (obj.value(forKey: "amount") as? Double) ?? 0
+                let amount = obj.amount
                 guard amount.isFinite else { continue }
+                
                 if kind == "income" {
                     incomeTotals[category, default: 0] += max(0, amount)
                 } else {
                     expenseTotals[category, default: 0] += abs(amount)
                 }
             }
+            
             let incomes = incomeTotals.filter { $0.value > 0 }.sorted { $0.value > $1.value }.map { Slice(label: $0.key, value: $0.value) }
             let expenses = expenseTotals.filter { $0.value > 0 }.sorted { $0.value > $1.value }.map { Slice(label: $0.key, value: $0.value) }
             return (incomes, expenses)
@@ -486,6 +494,5 @@ struct StatisticsView: View {
 
 #Preview {
     StatisticsView()
-        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
 

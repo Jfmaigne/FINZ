@@ -1,9 +1,11 @@
 import SwiftUI
+import SwiftData
 
 struct AddFixedIncomeSheet: View {
     @Binding var entry: RecettesView.IncomeEntry?
     var onSave: (RecettesView.IncomeEntry?) -> Void
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     
     @State private var localKind: RecettesView.IncomeKind = .salaire
     @State private var amountText: String = ""
@@ -13,6 +15,11 @@ struct AddFixedIncomeSheet: View {
     @State private var error: String?
     @FocusState private var amountFocused: Bool
     @State private var comment: String = ""
+    
+    // Category states
+    @State private var mainCategories: [MainCategory] = []
+    @State private var selectedMainCategory: MainCategory?
+    @State private var selectedSubCategory: SubCategory?
     
     private let kinds = RecettesView.IncomeKind.availableKinds
     
@@ -74,7 +81,10 @@ struct AddFixedIncomeSheet: View {
                 .accessibilityLabel("Enregistrer")
             }
         }
-        .onAppear(perform: loadFromBinding)
+        .onAppear {
+            loadCategories()
+            loadFromBinding()
+        }
     }
     
     private var amountCard: some View {
@@ -101,23 +111,23 @@ struct AddFixedIncomeSheet: View {
     }
 
     private var typeCard: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(.white)
-                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 8)
-            VStack(alignment: .leading, spacing: 8) {
-                Picker("Type", selection: $localKind) {
-                    ForEach(kinds, id: \.self) { kind in
-                        Text(kind.rawValue).tag(kind)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(height: 110)
-                .clipped()
+        VStack(spacing: 16) {
+            if !mainCategories.isEmpty {
+                CategorySelectionView(
+                    selectedMainCategory: $selectedMainCategory,
+                    selectedSubCategory: $selectedSubCategory,
+                    mainCategories: mainCategories
+                )
+                
+                SubCategorySelectionView(
+                    selectedSubCategory: $selectedSubCategory,
+                    mainCategory: selectedMainCategory
+                )
+            } else {
+                Text("Chargement des catégories...")
+                    .foregroundColor(.secondary)
             }
-            .padding()
         }
-        .frame(height: 140)
     }
 
     private var periodicityCard: some View {
@@ -210,6 +220,24 @@ struct AddFixedIncomeSheet: View {
         }
     }
     
+    private func loadCategories() {
+        let fetchDescriptor = FetchDescriptor<MainCategory>(
+            predicate: #Predicate { $0.categoryType == "income" },
+            sortBy: [SortDescriptor(\.order, order: .forward)]
+        )
+        
+        do {
+            mainCategories = try modelContext.fetch(fetchDescriptor)
+            // Sélectionner la première catégorie par défaut
+            if let first = mainCategories.first {
+                selectedMainCategory = first
+                selectedSubCategory = first.subCategories.first
+            }
+        } catch {
+            print("Erreur lors du chargement des catégories: \(error)")
+        }
+    }
+    
     private func parseJour(from complement: String) -> Int? {
         // complement format: "jour=xx"
         let comps = complement.split(separator: "=")
@@ -285,13 +313,24 @@ struct AddFixedIncomeSheet: View {
             }
         }
         
-        let newEntry = RecettesView.IncomeEntry(
+        var newEntry = RecettesView.IncomeEntry(
             id: entry?.id ?? UUID(),
             kind: localKind,
             amount: amountText,
             periodicity: periodicity,
             complement: complement
         )
+        
+        // Ajouter les IDs des catégories si sélectionnées
+        if let subCat = selectedSubCategory {
+            newEntry.mainCategoryID = subCat.mainCategory?.id
+            newEntry.subCategoryID = subCat.id
+            // Update localKind based on the selected sub-category
+            if let mappedKind = CategoryToIncomeMapper.mapSubCategoryToIncomeKind(subCat) {
+                newEntry.kind = mappedKind
+            }
+        }
+        
         onSave(newEntry)
         dismiss()
     }
@@ -346,4 +385,3 @@ struct AddFixedIncomeSheet_Previews: PreviewProvider {
     }
 }
 #endif
-

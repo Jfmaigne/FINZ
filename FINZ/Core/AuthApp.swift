@@ -7,19 +7,49 @@
 
 import SwiftUI
 import UIKit
-import CoreData
+import SwiftData
 
 @main
 struct AuthApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var sessionManager = SessionManager()
-    let persistenceController = PersistenceController.shared
+    
+    // SwiftData ModelContainer
+    let modelContainer: ModelContainer = {
+        let schema = Schema([
+            BudgetEntryOccurrence.self,
+            Income.self,
+            Expense.self,
+            MainCategory.self,
+            SubCategory.self
+        ])
+        
+        let modelConfiguration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false
+        )
+        
+        do {
+            let container = try ModelContainer(
+                for: schema,
+                configurations: [modelConfiguration]
+            )
+            
+            // Seed categories on app launch
+            let context = ModelContext(container)
+            try? DataController.seedCategories(in: context)
+            
+            return container
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
+    }()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(sessionManager)
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .modelContainer(modelContainer)
         }
     }
 }

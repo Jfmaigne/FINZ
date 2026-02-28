@@ -1,263 +1,262 @@
 import SwiftUI
+import SwiftData
+import UIKit
 
 struct AddIncomeSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @Binding var entry: RecettesView.IncomeEntry?
-    var onSave: (RecettesView.IncomeEntry?) -> Void
+    var defaultDate: Date
+    var onSaved: () -> Void
+    var onCancel: () -> Void
 
-    @State private var localKind: RecettesView.IncomeKind = .salaire
     @State private var amountText: String = ""
+    @State private var date: Date
+    @State private var note: String = ""
+    @State private var error: String?
+    @FocusState private var amountFocused: Bool
+    @State private var pulse: Bool = false
+
+    // Category states
+    @State private var mainCategories: [MainCategory] = []
+    @State private var selectedMainCategory: MainCategory?
+    @State private var selectedSubCategory: SubCategory?
+
+    // Periodicity
     @State private var periodicity: String = "Mensuel"
     @State private var selectedMonths: Set<Int> = []
     @State private var day: Int = 1
-    @State private var error: String? = nil
-    @FocusState private var amountFieldFocused: Bool
 
-    private let periodicities = ["Mensuel", "Mois spécifiques"]
-    private let months = Array(1...12)
+    @Environment(\.modelContext) private var modelContext
 
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    // Type card
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Type").font(.headline)
-                        Picker("Type", selection: $localKind) {
-                            ForEach(RecettesView.IncomeKind.allCases, id: \.self) { k in
-                                Text(k.rawValue).tag(k)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color(.secondarySystemBackground), Color(.secondarySystemBackground)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-
-                    // Amount card
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Montant").font(.headline)
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Spacer()
-                            TextField("0", text: $amountText)
-                                .keyboardType(.decimalPad)
-                                .focused($amountFieldFocused)
-                                .multilineTextAlignment(.trailing)
-                                .font(.system(size: 34, weight: .bold, design: .rounded))
-                                .minimumScaleFactor(0.8)
-                            Text("€")
-                                .font(.title3)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color(.secondarySystemBackground), Color(.secondarySystemBackground)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-
-                    // Periodicity card
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Périodicité").font(.headline)
-                        Picker("Périodicité", selection: $periodicity) {
-                            Text("Mensuel").tag("Mensuel")
-                            Text("Mois spécifiques").tag("Mois spécifiques")
-                        }
-                        .pickerStyle(.segmented)
-
-                        if periodicity == "Mois spécifiques" {
-                            MonthGrid(selectedMonths: $selectedMonths)
-                        }
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color(.secondarySystemBackground), Color(.secondarySystemBackground)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-
-                    // Day card
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Jour dans le mois").font(.headline)
-                        HStack {
-                            Stepper("Jour \(day)", value: $day, in: 1...31)
-                        }
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color(.secondarySystemBackground), Color(.secondarySystemBackground)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-
-                    if let error {
-                        Text(error)
-                            .foregroundStyle(.red)
-                            .font(.footnote)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-                .padding()
-            }
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color.blue.opacity(0.08),
-                        Color.purple.opacity(0.08),
-                        Color.pink.opacity(0.08)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-            )
-            .navigationTitle(entry == nil ? "Nouvelle recette" : "Modifier la recette")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Image(systemName: "xmark") }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Enregistrer") { save() }
-                        .disabled((Double(amountText.replacingOccurrences(of: ",", with: ".")) ?? 0) <= 0 || (periodicity == "Mois spécifiques" && selectedMonths.isEmpty))
-                }
-            }
-            .onAppear { loadFromBinding() }
-        }
+    init(defaultDate: Date, onSaved: @escaping () -> Void, onCancel: @escaping () -> Void) {
+        self.defaultDate = defaultDate
+        self.onSaved = onSaved
+        self.onCancel = onCancel
+        _date = State(initialValue: defaultDate)
     }
 
-    private func loadFromBinding() {
-        guard let e = entry else { return }
-        localKind = e.kind
-        amountText = e.amount
-        selectedMonths = []
-        day = 1
-
-        var hasSpecificMonths = false
-        let complement = e.complement
-        if !complement.isEmpty {
-            let parts = complement.split(separator: ";")
-            for part in parts {
-                let pair = part.split(separator: "=")
-                if pair.count == 2 {
-                    let key = pair[0].trimmingCharacters(in: .whitespaces)
-                    let value = pair[1].trimmingCharacters(in: .whitespaces)
-                    if key == "jour", let d = Int(value) {
-                        day = d
-                    } else if key == "mois" {
-                        let monthsStr = value.split(separator: ",")
-                        let monthsSet = Set(monthsStr.compactMap { Int($0.trimmingCharacters(in: .whitespaces)) })
-                        selectedMonths = monthsSet
-                        hasSpecificMonths = !monthsSet.isEmpty
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 8) {
+                // Header with buttons and centered FINZ logo
+                HStack {
+                    Button(action: { onCancel() }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .padding(8)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
+                    }
+                    Spacer()
+                    Image("finz_logo_couleur")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 110)
+                        .accessibilityLabel("Finz")
+                    Spacer()
+                    Button(action: { save() }) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(8)
+                            .background(
+                                LinearGradient(colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)], startPoint: .leading, endPoint: .trailing)
+                            )
+                            .clipShape(Circle())
+                            .shadow(color: Color.black.opacity(0.12), radius: 4, x: 0, y: 2)
                     }
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 0)
+                .padding(.bottom, 4)
+
+                VStack(spacing: 2) {
+                    HStack { Spacer()
+                        Text("Renseigne les infos de ta recette")
+                            .font(.system(size: 22, weight: .semibold, design: .rounded))
+                            .foregroundStyle(
+                                LinearGradient(colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)], startPoint: .leading, endPoint: .trailing)
+                            )
+                        Spacer() }
+                }
+                .padding(.bottom, 0)
+
+                // Amount field
+                VStack(alignment: .center, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Spacer()
+                        TextField("0", text: $amountText)
+                            .keyboardType(.decimalPad)
+                            .focused($amountFocused)
+                            .multilineTextAlignment(.center)
+                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color(white: 0.1))
+                            .minimumScaleFactor(0.8)
+                        Text("€")
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color.white)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                .padding(.horizontal, 20)
+
+                // Category Selection
+                if !mainCategories.isEmpty {
+                    VStack(spacing: 12) {
+                        CategorySelectionView(
+                            selectedMainCategory: $selectedMainCategory,
+                            selectedSubCategory: $selectedSubCategory,
+                            mainCategories: mainCategories
+                        )
+
+                        SubCategorySelectionView(
+                            selectedSubCategory: $selectedSubCategory,
+                            mainCategory: selectedMainCategory
+                        )
+                    }
+                    .padding()
+                }
+
+                // DatePicker
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack { Spacer()
+                        DatePicker("", selection: $date, displayedComponents: .date)
+                            .datePickerStyle(.compact)
+                            .labelsHidden()
+                        Spacer() }
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color.white)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                .padding(.horizontal, 20)
+
+                // Comment field
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Commentaire (optionnel)").font(.headline)
+                    TextField("Source, note…", text: $note)
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color.white)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 4)
+                .padding(.horizontal, 20)
+
+                if let error = error {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                        .padding(.top, 4)
+                }
+
+                Spacer().frame(height: 40)
             }
         }
-        periodicity = hasSpecificMonths ? "Mois spécifiques" : "Mensuel"
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .background(
+            LinearGradient(
+                colors: [
+                    Color.blue.opacity(0.04),
+                    Color.purple.opacity(0.04),
+                    Color.pink.opacity(0.04)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+        )
+        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .onTapGesture {
+            amountFocused = false
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+        .onAppear {
+            loadCategories()
+        }
     }
 
     private func save() {
         error = nil
-        let amt = Double(amountText.replacingOccurrences(of: ",", with: ".")) ?? 0
-        guard amt > 0 else {
-            error = "Veuillez saisir un montant valide"
+        let cleanAmountText = amountText.replacingOccurrences(of: ",", with: ".")
+        guard let amountDouble = Double(cleanAmountText), amountDouble > 0 else {
+            error = "Veuillez entrer un montant valide supérieur à zéro."
+            pulseAmountField()
             return
         }
-        if periodicity == "Mois spécifiques" && selectedMonths.isEmpty {
-            error = "Sélectionnez au moins un mois"
-            return
+
+        let amount = abs(amountDouble) // positive for income
+        let categoryName = selectedSubCategory?.displayName ?? selectedMainCategory?.displayName ?? "Recette"
+        let title = note.isEmpty ? categoryName : "\(categoryName) - \(note)"
+
+        let occurrence = BudgetEntryOccurrence(
+            date: date,
+            amount: amount,
+            kind: "income",
+            title: title,
+            monthKey: BudgetProjectionManager.monthKey(for: date),
+            isManual: true
+        )
+
+        if let subCat = selectedSubCategory {
+            occurrence.mainCategoryID = subCat.mainCategory?.id
+            occurrence.subCategoryID = subCat.id
         }
-        var updated = entry ?? RecettesView.IncomeEntry(kind: localKind)
-        updated.kind = localKind
-        updated.amount = amountText
-        updated.periodicity = periodicity
-        if periodicity == "Mensuel" {
-            updated.complement = "jour=\(day)"
-        } else {
-            let monthsStr = selectedMonths.sorted().map(String.init).joined(separator: ",")
-            updated.complement = "mois=\(monthsStr);jour=\(day)"
+
+        modelContext.insert(occurrence)
+
+        do {
+            try modelContext.save()
+            onSaved()
+        } catch {
+            self.error = "Erreur lors de la sauvegarde."
+            pulseAmountField()
         }
-        onSave(updated)
-        dismiss()
     }
-}
 
-private struct MonthGrid: View {
-    @Binding var selectedMonths: Set<Int>
-    private let monthSymbols = Calendar.current.monthSymbols
-
-    var body: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-            ForEach(1...12, id: \.self) { m in
-                let isOn = selectedMonths.contains(m)
-                Button(action: { toggle(m) }) {
-                    Text(shortName(for: m))
-                        .font(.footnote)
-                        .padding(8)
-                        .frame(maxWidth: .infinity)
-                        .background(isOn ? Color.accentColor.opacity(0.2) : Color.secondary.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-                .buttonStyle(PlainButtonStyle())
+    private func loadCategories() {
+        let fetchDescriptor = FetchDescriptor<MainCategory>(
+            predicate: #Predicate { $0.categoryType == "income" },
+            sortBy: [SortDescriptor(\.order, order: .forward)]
+        )
+        do {
+            mainCategories = try modelContext.fetch(fetchDescriptor)
+            if let first = mainCategories.first {
+                selectedMainCategory = first
+                selectedSubCategory = first.subCategories.first
             }
-        }
-        .padding(.vertical, 4)
-    }
-
-    private func toggle(_ m: Int) {
-        if selectedMonths.contains(m) {
-            selectedMonths.remove(m)
-        } else {
-            selectedMonths.insert(m)
+        } catch {
+            print("Erreur lors du chargement des catégories: \(error)")
         }
     }
 
-    private func shortName(for month: Int) -> String {
-        let name = monthSymbols[month - 1]
-        return String(name.prefix(3))
+    private func pulseAmountField() {
+        withAnimation(.easeInOut(duration: 0.25)) { pulse = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            withAnimation(.easeInOut(duration: 0.25)) { pulse = false }
+        }
     }
 }
