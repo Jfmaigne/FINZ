@@ -35,35 +35,35 @@ struct FinzHeader: ViewModifier {
     var title: String? = nil
 
     func body(content: Content) -> some View {
-        content
-            .safeAreaInset(edge: .top) {
-                VStack(spacing: 8) {
-                    HStack {
-                        Spacer()
-                        Image("finz_logo_couleur")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 144)
-                            .accessibilityLabel("Finz")
-                        Spacer()
-                    }
-                    .padding(.top, -15)
-                    .padding(.bottom, title == nil ? 2 : 0)
-
-                    if let title = title {
-                        HStack {
-                            Text(title)
-                                .font(.system(size: 40, weight: .heavy, design: .rounded))
-                                .foregroundStyle(Color(white: 0.1))
-                                .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 5)
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 2)
-                    }
+        ZStack(alignment: .top) {
+            content
+                .padding(.top, 110)
+            
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    Image("finz_logo_couleur")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 144)
+                        .accessibilityLabel("Finz")
+                    Spacer()
                 }
-                .background(Color.clear)
+                .padding(.top, -35)
             }
+            .frame(maxWidth: .infinity)
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color.blue.opacity(0.04),
+                        Color.purple.opacity(0.04),
+                        Color.pink.opacity(0.04)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+        }
     }
 }
 

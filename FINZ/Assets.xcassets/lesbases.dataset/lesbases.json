@@ -1,0 +1,62 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-02-28",
+  "category": {
+    "title": "Les bases",
+    "description": "Apprends les fondamentaux de la gestion financière",
+    "image": "Bases",
+    "buttonTitle": "Je débute"
+  },
+  "articles": [
+    {
+      "id": 1,
+      "title": "C'est quoi vraiment un budget ?",
+      "slug": "cest-quoi-vraiment-un-budget",
+      "excerpt": "Les bases pour comprendre",
+      "content": "Un budget, c'est tout simplement un plan qui te permet de savoir où va ton argent chaque mois.\n\n## Pourquoi faire un budget ?\n\nFaire un budget te permet de :\n- Savoir exactement combien tu gagnes et dépenses\n- Éviter les mauvaises surprises en fin de mois\n- Mettre de l'argent de côté pour tes projets\n- Réduire le stress lié à l'argent\n\n## Comment ça marche ?\n\nC'est simple : tu listes tes revenus (salaire, aides...) d'un côté, et tes dépenses de l'autre. La différence te donne ce qu'il te reste.\n\n## Les 3 catégories de dépenses\n\n1. **Dépenses fixes** : loyer, abonnements, assurances\n2. **Dépenses variables** : courses, sorties, vêtements\n3. **Épargne** : ce que tu mets de côté\n\nL'idéal c'est de suivre la règle 50/30/20 :\n- 50% pour les besoins essentiels\n- 30% pour les envies\n- 20% pour l'épargne",
+      "tags": ["budget", "bases", "débutant"],
+      "audience": "genz",
+      "reading_time_minutes": 3
+    },
+    {
+      "id": 2,
+      "title": "Revenus vs dépenses : la règle d'or",
+      "slug": "revenus-vs-depenses-la-regle-dor",
+      "excerpt": "L'équilibre essentiel",
+      "content": "La règle d'or de la gestion financière est simple : ne jamais dépenser plus que ce que tu gagnes.\n\n## L'équation magique\n\n**Revenus - Dépenses = Épargne (ou Dette)**\n\nSi le résultat est positif, tu épargnes. S'il est négatif, tu t'endettes.\n\n## Comment équilibrer ?\n\n### 1. Connais tes revenus\nAdditionne tout ce qui rentre :\n- Salaire net\n- Aides (APL, bourses...)\n- Revenus complémentaires\n\n### 2. Liste tes dépenses\nSois honnête et note tout :\n- Loyer et charges\n- Abonnements (téléphone, streaming...)\n- Courses et restaurants\n- Transport\n- Loisirs\n\n### 3. Ajuste si nécessaire\nSi tes dépenses dépassent tes revenus, il faut :\n- Réduire certaines dépenses\n- Ou augmenter tes revenus\n\n## Le secret des riches\n\nLes personnes qui réussissent financièrement ont toutes un point commun : elles dépensent moins qu'elles ne gagnent, peu importe leur niveau de revenus.",
+      "tags": ["budget", "revenus", "dépenses"],
+      "audience": "genz",
+      "reading_time_minutes": 4
+    },
+    {
+      "id": 3,
+      "title": "Lire un relevé bancaire sans stress",
+      "slug": "lire-un-releve-bancaire-sans-stress",
+      "excerpt": "À quoi correspond chaque ligne ?",
+      "content": "Ton relevé bancaire peut sembler compliqué, mais une fois que tu connais les codes, c'est facile !\n\n## Les informations essentielles\n\n### En-tête du relevé\n- **Période** : les dates couvertes\n- **Solde initial** : ce que tu avais au début\n- **Solde final** : ce qu'il te reste à la fin\n\n### Les opérations\nChaque ligne représente un mouvement :\n- **Date d'opération** : quand tu as fait l'achat\n- **Date de valeur** : quand c'est pris en compte\n- **Libellé** : description de l'opération\n- **Débit** : ce qui sort (en négatif)\n- **Crédit** : ce qui rentre (en positif)\n\n## Les codes mystérieux\n\n- **VIR** : Virement\n- **PRLV** : Prélèvement automatique\n- **CB** : Paiement par carte\n- **CHQ** : Chèque\n- **RET DAB** : Retrait au distributeur\n\n## Astuce FINZ\n\nVérifie ton relevé chaque mois pour repérer :\n- Les abonnements oubliés\n- Les erreurs de prélèvement\n- Les dépenses inhabituelles",
+      "tags": ["banque", "relevé", "bases"],
+      "audience": "genz",
+      "reading_time_minutes": 4
+    },
+    {
+      "id": 4,
+      "title": "Comprendre le reste à vivre",
+      "slug": "comprendre-le-reste-a-vivre",
+      "excerpt": "Calculer ce qu'il te reste vraiment",
+      "content": "Le reste à vivre, c'est l'argent qu'il te reste une fois toutes tes charges fixes payées.\n\n## Le calcul simple\n\n**Reste à vivre = Revenus - Charges fixes**\n\n### Les charges fixes incluent :\n- Loyer / Crédit immobilier\n- Électricité, gaz, eau\n- Assurances obligatoires\n- Abonnements téléphone/internet\n- Remboursement de crédits\n- Transport (abonnement)\n\n## Pourquoi c'est important ?\n\nTon reste à vivre te dit :\n- Combien tu peux dépenser pour vivre (courses, sorties...)\n- Si tu peux prendre un nouveau crédit\n- Combien tu peux épargner\n\n## Le minimum vital\n\nLes banques considèrent qu'il faut au minimum :\n- 400€ par mois pour une personne seule\n- 800€ pour un couple\n- +150€ par enfant\n\n## Comment l'augmenter ?\n\n1. **Renégocie** tes abonnements et assurances\n2. **Regroupe** tes crédits si possible\n3. **Compare** les offres d'énergie\n4. **Augmente** tes revenus (side project, heures sup...)",
+      "tags": ["budget", "reste à vivre", "calcul"],
+      "audience": "genz",
+      "reading_time_minutes": 4
+    },
+    {
+      "id": 5,
+      "title": "Pourquoi tu finis parfois à découvert",
+      "slug": "pourquoi-tu-finis-parfois-a-decouvert",
+      "excerpt": "Signes d'alerte et solutions",
+      "content": "Le découvert bancaire, c'est quand ton compte passe en négatif. C'est un piège coûteux qu'il faut éviter.\n\n## Pourquoi ça arrive ?\n\n### Les causes fréquentes :\n- **Dépenses non prévues** : réparation voiture, santé...\n- **Mauvais timing** : dépenses avant l'arrivée du salaire\n- **Abonnements oubliés** : qui se cumulent\n- **Achats impulsifs** : promos, sorties...\n- **Pas de suivi** : on ne regarde pas son compte\n\n## Combien ça coûte ?\n\nLe découvert n'est pas gratuit :\n- **Agios** : intérêts sur le montant négatif (15-20%/an)\n- **Frais de rejet** : si un prélèvement ne passe pas\n- **Commission d'intervention** : à chaque opération en découvert\n\nUn découvert de 500€ pendant un mois peut coûter 20-30€ de frais !\n\n## Comment l'éviter ?\n\n1. **Épargne de précaution** : 1 mois de salaire minimum\n2. **Suivi régulier** : vérifie ton compte 2x par semaine\n3. **Alertes SMS** : quand le solde baisse\n4. **Décalage des prélèvements** : après ton salaire\n5. **Utilise FINZ** : pour anticiper tes dépenses !",
+      "tags": ["découvert", "banque", "problèmes"],
+      "audience": "genz",
+      "reading_time_minutes": 5
+    }
+  ]
+}

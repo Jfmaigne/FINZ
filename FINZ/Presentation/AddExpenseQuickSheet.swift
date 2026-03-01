@@ -8,6 +8,7 @@ struct AddExpenseQuickSheet: View {
     var onCancel: () -> Void
 
     @Environment(\.modelContext) private var modelContext
+    @Query(filter: #Predicate<DeferredCard> { $0.isActive == true }, sort: \DeferredCard.name) private var deferredCards: [DeferredCard]
 
     @State private var amountText: String = ""
     @State private var date: Date
@@ -20,6 +21,9 @@ struct AddExpenseQuickSheet: View {
     @State private var mainCategories: [MainCategory] = []
     @State private var selectedMainCategory: MainCategory?
     @State private var selectedSubCategory: SubCategory?
+    
+    // Deferred card selection
+    @State private var selectedDeferredCard: DeferredCard? = nil
 
     init(defaultDate: Date = Date(), onSaved: @escaping () -> Void, onCancel: @escaping () -> Void) {
         self.defaultDate = defaultDate
@@ -117,6 +121,15 @@ struct AddExpenseQuickSheet: View {
                     )
                     .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
                     .padding(.horizontal, 20)
+                    
+                    // Deferred Card Selection (if any cards exist)
+                    if !deferredCards.isEmpty {
+                        DeferredCardSelectionView(
+                            cards: deferredCards,
+                            selectedCard: $selectedDeferredCard
+                        )
+                        .padding(.horizontal, 20)
+                    }
                     
                     // Category Selection
                     if !mainCategories.isEmpty {
@@ -225,6 +238,28 @@ struct AddExpenseQuickSheet: View {
             return
         }
         
+        // Si une carte à débit différé est sélectionnée
+        if let card = selectedDeferredCard {
+            // Ajouter comme dépense différée
+            DeferredCardService.addExpense(
+                to: card,
+                amount: amountDouble,
+                description: note.isEmpty ? nil : note,
+                expenseDate: date,
+                modelContext: modelContext
+            )
+            
+            let success = UINotificationFeedbackGenerator()
+            success.notificationOccurred(.success)
+            withAnimation(.easeInOut(duration: 0.12)) { pulse = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                withAnimation(.easeOut(duration: 0.12)) { pulse = false }
+                onSaved()
+            }
+            return
+        }
+        
+        // Sinon, ajouter comme dépense normale
         let amount = -abs(amountDouble) // negative for expense
         
         let title = note.isEmpty ? "Dépense" : "\(note)"
@@ -273,7 +308,135 @@ struct AddExpenseQuickSheet: View {
     }
 }
 
+// MARK: - Deferred Card Selection View
+private struct DeferredCardSelectionView: View {
+    let cards: [DeferredCard]
+    @Binding var selectedCard: DeferredCard?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Payer avec une carte différée")
+                .font(.headline)
+                .foregroundStyle(.primary)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    // Option "Pas de carte" (paiement direct)
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            selectedCard = nil
+                        }
+                    } label: {
+                        VStack(spacing: 6) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(selectedCard == nil ? finzGradient : inactiveGradient)
+                                    .frame(width: 50, height: 32)
+                                Image(systemName: "banknote")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(selectedCard == nil ? .white : .secondary)
+                            }
+                            Text("Direct")
+                                .font(.caption2)
+                                .foregroundStyle(selectedCard == nil ? .primary : .secondary)
+                        }
+                        .frame(width: 60)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    // Cards
+                    ForEach(cards) { card in
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                selectedCard = card
+                            }
+                        } label: {
+                            DeferredCardChip(card: card, isSelected: selectedCard?.id == card.id)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.white)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.6), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+    }
+    
+    private var finzGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+    
+    private var inactiveGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color.secondary.opacity(0.1), Color.secondary.opacity(0.1)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+}
+
+// MARK: - Deferred Card Chip
+private struct DeferredCardChip: View {
+    let card: DeferredCard
+    let isSelected: Bool
+    
+    var body: some View {
+        VStack(spacing: 6) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(isSelected ? finzGradient : inactiveGradient)
+                    .frame(width: 50, height: 32)
+                Image(systemName: "creditcard.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(isSelected ? .white : .secondary)
+            }
+            VStack(spacing: 0) {
+                Text(card.name)
+                    .font(.caption2)
+                    .fontWeight(isSelected ? .semibold : .regular)
+                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .lineLimit(1)
+                if let digits = card.lastFourDigits, !digits.isEmpty {
+                    Text("•••\(digits)")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .frame(width: 60)
+    }
+    
+    private var finzGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+    
+    private var inactiveGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color.secondary.opacity(0.1), Color.secondary.opacity(0.1)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+}
+
 #Preview {
     AddExpenseQuickSheet(defaultDate: Date(), onSaved: {}, onCancel: {})
-        .modelContainer(DataController.preview.modelContainer)
+        .modelContainer(for: [BudgetEntryOccurrence.self, MainCategory.self, SubCategory.self, DeferredCard.self, DeferredCardExpense.self], inMemory: true)
 }

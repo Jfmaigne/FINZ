@@ -127,3 +127,73 @@ final class Expense {
         self.subCategoryID = subCategoryID
     }
 }
+
+@Model
+final class DeferredCard {
+    @Attribute(.unique) var id: UUID
+    var name: String                    // Nom de la carte (ex: "Visa Gold")
+    var lastFourDigits: String?         // 4 derniers chiffres (optionnel)
+    var cutoffDay: Int16                // Jour de bascule du différé (ex: 25)
+    var debitDay: Int16                 // Jour de prélèvement (ex: 4 du mois suivant)
+    var monthlyBudget: Double           // Enveloppe mensuelle théorique
+    var isActive: Bool                  // Carte active ou non
+    var createdAt: Date
+    var updatedAt: Date
+    
+    init(
+        id: UUID = UUID(),
+        name: String,
+        lastFourDigits: String? = nil,
+        cutoffDay: Int16 = 25,
+        debitDay: Int16 = 4,
+        monthlyBudget: Double = 0,
+        isActive: Bool = true,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date()
+    ) {
+        self.id = id
+        self.name = name
+        self.lastFourDigits = lastFourDigits
+        self.cutoffDay = cutoffDay
+        self.debitDay = debitDay
+        self.monthlyBudget = monthlyBudget
+        self.isActive = isActive
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}
+
+@Model
+final class DeferredCardExpense {
+    @Attribute(.unique) var id: UUID
+    var cardID: UUID                    // Référence à la carte
+    var amount: Double                  // Montant de la dépense
+    var expenseDate: Date               // Date de la dépense
+    var expenseDescription: String?     // Description de la dépense
+    var cycleStartDate: Date            // Date de début du cycle de différé
+    var cycleEndDate: Date              // Date de fin du cycle (bascule)
+    var isSettled: Bool                 // Dépense déjà prélevée ou non
+    var createdAt: Date
+    
+    init(
+        id: UUID = UUID(),
+        cardID: UUID,
+        amount: Double,
+        expenseDate: Date,
+        expenseDescription: String? = nil,
+        cycleStartDate: Date,
+        cycleEndDate: Date,
+        isSettled: Bool = false,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.cardID = cardID
+        self.amount = amount
+        self.expenseDate = expenseDate
+        self.expenseDescription = expenseDescription
+        self.cycleStartDate = cycleStartDate
+        self.cycleEndDate = cycleEndDate
+        self.isSettled = isSettled
+        self.createdAt = createdAt
+    }
+}

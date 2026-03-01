@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct RecettesFixesSheet: View {
     @Environment(\.modelContext) private var modelContext
@@ -23,16 +24,40 @@ struct RecettesFixesSheet: View {
         allOccurrences.filter { $0.monthKey == monthKey && $0.kind == "income" }
     }
 
+    private var fixedIncomes: [BudgetEntryOccurrence] {
+        occurrences.filter { $0.isManual == false }
+    }
+
+    private var complementaryIncomes: [BudgetEntryOccurrence] {
+        occurrences.filter { $0.isManual == true }
+    }
+
     private func todayInsertionIndex(in items: [BudgetEntryOccurrence]) -> Int {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         for (idx, item) in items.enumerated() {
             let day = cal.startOfDay(for: item.date)
-            if day >= today {
-                return idx
-            }
+            if day >= today { return idx }
         }
         return items.count
+    }
+
+    private func startEditing(_ occurrence: BudgetEntryOccurrence) {
+        editedOccurrence = occurrence
+        showEditSheet = true
+    }
+
+    private func deleteOccurrence(_ occurrence: BudgetEntryOccurrence) {
+        modelContext.delete(occurrence)
+        do {
+            try modelContext.save()
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
+        } catch {
+            print("Failed to delete occurrence: \(error.localizedDescription)")
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.error)
+        }
     }
 
     private struct TodaySeparatorView: View {
@@ -41,7 +66,7 @@ struct RecettesFixesSheet: View {
                 Rectangle()
                     .fill(Color.secondary.opacity(0.25))
                     .frame(height: 1)
-                Text("Aujourd’hui")
+                Text("Aujourd'hui")
                     .font(.caption2.weight(.semibold))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -80,9 +105,7 @@ struct RecettesFixesSheet: View {
                                     .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                                     .listRowSeparator(.hidden)
                             }
-                            RowView(occurrence: occurrence, onEdit: { startEditing(occurrence) }) {
-                                deleteOccurrence(occurrence)
-                            }
+                            IncomeRow(occurrence: occurrence, onEdit: { startEditing(occurrence) }, onDelete: { deleteOccurrence(occurrence) })
                         }
                         if fixedIdx == fixedIncomes.count {
                             TodaySeparatorView()
@@ -102,9 +125,7 @@ struct RecettesFixesSheet: View {
                                     .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                                     .listRowSeparator(.hidden)
                             }
-                            RowView(occurrence: occurrence, onEdit: { startEditing(occurrence) }) {
-                                deleteOccurrence(occurrence)
-                            }
+                            IncomeRow(occurrence: occurrence, onEdit: { startEditing(occurrence) }, onDelete: { deleteOccurrence(occurrence) })
                         }
                         if compIdx == complementaryIncomes.count {
                             TodaySeparatorView()
@@ -128,7 +149,7 @@ struct RecettesFixesSheet: View {
             }
             .sheet(isPresented: $showEditSheet) {
                 if let occurrence = editedOccurrence {
-                    EditOccurrenceSheet(occurrence: occurrence) { _ in
+                    EditIncomeOccurrenceSheet(occurrence: occurrence) { _ in
                         do {
                             try modelContext.save()
                             let generator = UINotificationFeedbackGenerator()
@@ -136,120 +157,167 @@ struct RecettesFixesSheet: View {
                         } catch {
                             let generator = UINotificationFeedbackGenerator()
                             generator.notificationOccurred(.error)
-                            print("Failed to save occurrence: \(error.localizedDescription)")
+                            print("Failed to save income occurrence: \(error.localizedDescription)")
                         }
                     }
                 }
             }
         }
     }
+}
 
-    private var fixedIncomes: [BudgetEntryOccurrence] {
-        occurrences.filter { $0.kind == "income" && $0.isManual == false }
-    }
-    private var complementaryIncomes: [BudgetEntryOccurrence] {
-        occurrences.filter { $0.kind == "income" && $0.isManual == true }
+private struct IncomeRow: View {
+    let occurrence: BudgetEntryOccurrence
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+
+    private var dateFormatted: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MMM"
+        formatter.locale = Locale(identifier: "fr_FR")
+        return formatter.string(from: occurrence.date)
     }
 
-    private func deleteOccurrence(_ occurrence: BudgetEntryOccurrence) {
-        modelContext.delete(occurrence)
-        do {
-            try modelContext.save()
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
-        } catch {
-            print("Failed to delete occurrence: \(error.localizedDescription)")
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.error)
+    private var amountFormatted: String {
+        let val = Int(abs(occurrence.amount))
+        return "+\(val) €"
+    }
+
+    var body: some View {
+        HStack {
+            Text(dateFormatted)
+                .font(.callout)
+                .foregroundColor(.secondary)
+                .frame(width: 70, alignment: .leading)
+            Text(occurrence.title ?? "")
+                .font(.body)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Text(amountFormatted)
+                .foregroundColor(.green)
+                .font(.body.monospacedDigit())
+                .frame(alignment: .trailing)
         }
-    }
-
-    private func startEditing(_ occurrence: BudgetEntryOccurrence) {
-        editedOccurrence = occurrence
-        showEditSheet = true
-    }
-
-    private struct RowView: View {
-        let occurrence: BudgetEntryOccurrence
-        let onEdit: () -> Void
-        let onDelete: () -> Void
-
-        var body: some View {
-            HStack {
-                Text(dateFormatted(occurrence.date))
-                    .font(.callout)
-                    .frame(width: 70, alignment: .leading)
-                VStack(alignment: .leading) {
-                    Text(occurrence.title ?? "")
-                        .font(.body)
-                }
-                Spacer()
-                Text(amountFormatted(occurrence.amount))
-                    .font(.body.monospacedDigit())
-                    .foregroundColor(.green)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(UIColor.secondarySystemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
+        )
+        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+            Button { onEdit() } label: {
+                Label("Modifier", systemImage: "pencil")
             }
-            .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(UIColor.secondarySystemBackground))
-                    .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
-            )
-            .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                Button {
-                    onEdit()
-                } label: {
-                    Label("Modifier", systemImage: "pencil")
-                }
-                .tint(.blue)
+            .tint(.blue)
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) { onDelete() } label: {
+                Label("Supprimer", systemImage: "trash")
             }
-            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                Button(role: .destructive) {
-                    onDelete()
-                } label: {
-                    Label("Supprimer", systemImage: "trash")
-                }
-            }
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
         }
-
-        private func dateFormatted(_ date: Date) -> String {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "dd MMM"
-            formatter.locale = Locale(identifier: "fr_FR")
-            return formatter.string(from: date)
-        }
-
-        private func amountFormatted(_ amount: Double) -> String {
-            let formatter = NumberFormatter()
-            formatter.numberStyle = .currency
-            formatter.currencyCode = "EUR"
-            formatter.maximumFractionDigits = 0
-            formatter.minimumFractionDigits = 0
-            formatter.positivePrefix = "+"
-            return formatter.string(from: NSNumber(value: amount)) ?? "+\(Int(amount))"
-        }
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
     }
 }
 
-private struct EditOccurrenceSheet: View {
+private struct EditIncomeOccurrenceSheet: View {
     @Bindable var occurrence: BudgetEntryOccurrence
     var onSave: (BudgetEntryOccurrence) -> Void
     @Environment(\.dismiss) private var dismiss
+
     @State private var title: String = ""
-    @State private var amount: Double = 0
+    @State private var amountText: String = ""
     @State private var date: Date = Date()
+    @FocusState private var amountFocused: Bool
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Informations") {
-                    TextField("Titre", text: $title)
-                    TextField("Montant", value: $amount, format: .number)
-                        .keyboardType(.decimalPad)
-                    DatePicker("Date", selection: $date, displayedComponents: .date)
+            ScrollView {
+                VStack(spacing: 16) {
+                    // Title field
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Titre").font(.headline)
+                        TextField("Titre", text: $title)
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color.white)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                    )
+                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+
+                    // Amount field (styled like AddIncomeSheet)
+                    VStack(alignment: .center, spacing: 8) {
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Spacer()
+                            TextField("0", text: $amountText)
+                                .keyboardType(.decimalPad)
+                                .focused($amountFocused)
+                                .multilineTextAlignment(.center)
+                                .font(.system(size: 34, weight: .bold, design: .rounded))
+                                .foregroundStyle(Color(white: 0.1))
+                                .minimumScaleFactor(0.8)
+                            Text("€")
+                                .font(.title3)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                        }
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color.white)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                    )
+                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+
+                    // Date field
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Date").font(.headline)
+                        HStack { Spacer()
+                            DatePicker("", selection: $date, displayedComponents: .date)
+                                .datePickerStyle(.compact)
+                                .labelsHidden()
+                            Spacer() }
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color.white)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                    )
+                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+
+                    Spacer()
                 }
+                .padding()
+            }
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color.blue.opacity(0.04),
+                        Color.purple.opacity(0.04),
+                        Color.pink.opacity(0.04)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+            )
+            .onTapGesture {
+                amountFocused = false
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             }
             .navigationTitle("Modifier")
             .toolbar {
@@ -258,21 +326,28 @@ private struct EditOccurrenceSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Enregistrer") {
-                        occurrence.title = title
-                        occurrence.amount = amount
-                        occurrence.date = date
-                        occurrence.isManual = true
-                        onSave(occurrence)
-                        dismiss()
+                        saveChanges()
                     }
                 }
             }
             .onAppear {
                 title = occurrence.title ?? ""
-                amount = occurrence.amount
+                amountText = String(Int(abs(occurrence.amount)))
                 date = occurrence.date
             }
         }
+    }
+
+    private func saveChanges() {
+        occurrence.title = title
+        let cleanAmount = amountText.replacingOccurrences(of: ",", with: ".")
+        if let amount = Double(cleanAmount) {
+            occurrence.amount = abs(amount)
+        }
+        occurrence.date = date
+        occurrence.isManual = true
+        onSave(occurrence)
+        dismiss()
     }
 }
 

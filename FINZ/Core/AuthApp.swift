@@ -21,7 +21,9 @@ struct AuthApp: App {
             Income.self,
             Expense.self,
             MainCategory.self,
-            SubCategory.self
+            SubCategory.self,
+            DeferredCard.self,
+            DeferredCardExpense.self
         ])
         
         let modelConfiguration = ModelConfiguration(

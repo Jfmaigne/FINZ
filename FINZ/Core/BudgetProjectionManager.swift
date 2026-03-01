@@ -93,10 +93,12 @@ struct BudgetProjectionManager {
             switch periodicity {
             case "mensuel":
                 return true
+            case "mois spécifiques", "personnaliser":
+                return monthsCSV.isEmpty || monthsCSV.contains(targetMonth)
             case "bimestriel", "trimestriel", "semestriel", "annuel", "ponctuel":
                 return monthsCSV.contains(targetMonth)
             default:
-                return false
+                return true
             }
         }
         
@@ -185,10 +187,12 @@ struct BudgetProjectionManager {
             switch periodicity {
             case "mensuel":
                 return true
+            case "mois spécifiques", "personnaliser":
+                return monthsCSV.isEmpty || monthsCSV.contains(targetMonth)
             case "bimestriel", "trimestriel", "semestriel", "annuel", "ponctuel":
                 return monthsCSV.contains(targetMonth)
             default:
-                return false
+                return true
             }
         }
         

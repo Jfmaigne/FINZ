@@ -136,51 +136,17 @@ struct RecettesView: View {
                 ForEach(groupedEntries, id: \.category) { group in
                     Section(group.category.rawValue) {
                         ForEach(group.items, id: \.id) { entry in
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text(entry.label)
-                                        .font(.headline)
-                                    Spacer()
-                                    Text(entry.amount.isEmpty ? "—" : entry.amount)
-                                        .font(.headline)
-                                        .foregroundStyle(.primary)
-                                }
-                                Text(detailText(for: entry))
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                editingEntry = entry
-                                showingAddSheet = true
-                            }
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    deleteEntry(entry)
-                                } label: {
-                                    Label("Supprimer", systemImage: "trash")
-                                }
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    let generator = UINotificationFeedbackGenerator()
-                                    generator.notificationOccurred(.success)
-                                    deleteEntry(entry)
-                                } label: {
-                                    Label("Supprimer", systemImage: "trash")
-                                }
-                            }
-                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                                Button {
-                                    let generator = UIImpactFeedbackGenerator(style: .light)
-                                    generator.impactOccurred()
+                            IncomeEntryRow(
+                                entry: entry,
+                                detailText: detailText(for: entry),
+                                onEdit: {
                                     editingEntry = entry
                                     showingAddSheet = true
-                                } label: {
-                                    Label("Modifier", systemImage: "pencil")
+                                },
+                                onDelete: {
+                                    deleteEntry(entry)
                                 }
-                                .tint(.blue)
-                            }
+                            )
                         }
                     }
                 }
@@ -223,14 +189,12 @@ struct RecettesView: View {
                 }
             }
             .sheet(isPresented: $showingAddSheet) {
-                NavigationStack {
-                    AddFixedIncomeSheet(entry: $editingEntry) { saved in
-                        if let saved = saved {
-                            if let idx = entries.firstIndex(where: { $0.id == saved.id }) {
-                                entries[idx] = saved
-                            } else {
-                                entries.append(saved)
-                            }
+                AddFixedIncomeSheet(entry: $editingEntry) { saved in
+                    if let saved = saved {
+                        if let idx = entries.firstIndex(where: { $0.id == saved.id }) {
+                            entries[idx] = saved
+                        } else {
+                            entries.append(saved)
                         }
                     }
                 }
@@ -469,6 +433,60 @@ struct RecettesView: View {
         if let obj = try? modelContext.fetch(fetchDescriptor).first {
             modelContext.delete(obj)
             try? modelContext.save()
+        }
+    }
+}
+
+// MARK: - Income Entry Row
+private struct IncomeEntryRow: View {
+    let entry: RecettesView.IncomeEntry
+    let detailText: String
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(entry.label)
+                    .font(.headline)
+                Spacer()
+                Text(entry.amount.isEmpty ? "—" : entry.amount)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+            }
+            Text(detailText)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onEdit()
+        }
+        .contextMenu {
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Label("Supprimer", systemImage: "trash")
+            }
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.success)
+                onDelete()
+            } label: {
+                Label("Supprimer", systemImage: "trash")
+            }
+        }
+        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+            Button {
+                let generator = UIImpactFeedbackGenerator(style: .light)
+                generator.impactOccurred()
+                onEdit()
+            } label: {
+                Label("Modifier", systemImage: "pencil")
+            }
+            .tint(.blue)
         }
     }
 }

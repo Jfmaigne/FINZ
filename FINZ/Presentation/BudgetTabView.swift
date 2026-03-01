@@ -119,7 +119,8 @@ struct BudgetProfileSetupView: View {
 
 struct LearnView: View {
     @State private var carouselIndex: Int = 0
-    private let carouselTimer = Timer.publish(every: 4.0, on: .main, in: .common).autoconnect()
+    @State private var timerSubscription: AnyCancellable?
+    @Environment(\.scenePhase) private var scenePhase
 
     // Carousel items (banners)
     private let banners: [CarouselItem] = [
@@ -176,9 +177,6 @@ struct LearnView: View {
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
                 .frame(height: 120)
-                .onReceive(carouselTimer) { _ in
-                    withAnimation { carouselIndex = (carouselIndex + 1) % max(banners.count, 1) }
-                }
 
                 // Sections with 9 buttons (inchangées)
                 VStack(alignment: .leading, spacing: 10) {
@@ -202,6 +200,35 @@ struct LearnView: View {
             )
             .ignoresSafeArea()
         )
+        .onAppear {
+            startCarouselTimer()
+        }
+        .onDisappear {
+            stopCarouselTimer()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                startCarouselTimer()
+            } else {
+                stopCarouselTimer()
+            }
+        }
+    }
+    
+    private func startCarouselTimer() {
+        // Cancel any existing timer first
+        timerSubscription?.cancel()
+        // Create new timer that fires every 4 seconds
+        timerSubscription = Timer.publish(every: 4.0, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                withAnimation { carouselIndex = (carouselIndex + 1) % max(banners.count, 1) }
+            }
+    }
+    
+    private func stopCarouselTimer() {
+        timerSubscription?.cancel()
+        timerSubscription = nil
     }
 }
 
@@ -279,7 +306,12 @@ private struct LearnSection: View {
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(items) { item in
                     NavigationLink {
-                        ArticlesListView(assetName: item.asset, title: item.title)
+                        // Use CategoryArticlesView for items with dedicated JSON files
+                        if item.title == "Les bases" {
+                            CategoryArticlesView(assetName: "lesbases")
+                        } else {
+                            ArticlesListView(assetName: item.asset, title: item.title)
+                        }
                     } label: {
                         LearnGridButton(title: item.title, imageName: item.imageName)
                     }
@@ -303,9 +335,11 @@ private struct LearnGridButton: View {
                 if let name = imageName, let ui = UIImage(named: name) {
                     Image(uiImage: ui)
                         .resizable()
-                        .scaledToFit()
-                        .frame(height: 120) // autorise le logo à déborder visuellement de la carte
-                        .padding(.vertical, -6)
+                        .scaledToFill()
+                        .scaleEffect(1.15)
+                        .frame(width: 96, height: 96)
+                        .clipped()
+                        .offset(y: -5)
                 } else {
                     Image(systemName: "book.fill")
                         .font(.system(size: 52))
@@ -314,6 +348,7 @@ private struct LearnGridButton: View {
             }
         }
         .frame(height: 96)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -407,6 +442,11 @@ struct AccountView: View {
                         CategoryManagementView()
                     } label: {
                         Label("Gérer les catégories", systemImage: "tag.circle")
+                    }
+                    NavigationLink {
+                        DeferredCardManagementView()
+                    } label: {
+                        Label("Cartes à débit différé", systemImage: "creditcard.circle")
                     }
                     Button {
                         showingProfileConfirm = true
