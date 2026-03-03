@@ -1,4 +1,4 @@
-;import SwiftUI
+import SwiftUI
 import SwiftData
 import UIKit
 
@@ -33,6 +33,9 @@ struct BudgetDashboardView: View {
     @State private var initialBalance: Decimal = 0
     @State private var actualCurrentBalance: Decimal = 0 // solde réel du mois en cours
     @State private var appDataResetObserver: NSObjectProtocol?
+    @State private var deferredCardsTotal: Decimal = 0 // total cartes différées (séparé des dépenses normales)
+    @State private var selectedCardForDetail: DeferredCard? = nil
+    @State private var selectedCardForPreviousCycle: DeferredCard? = nil
 
     // Projection navigation
     @State private var projections: [MonthProjection] = []
@@ -283,7 +286,9 @@ struct BudgetDashboardView: View {
                             DeferredCardsForecastView(
                                 cards: deferredCards,
                                 expenses: deferredCardExpenses,
-                                selectedMonthDate: selectedMonthDate
+                                selectedMonthDate: selectedMonthDate,
+                                selectedCardForDetail: $selectedCardForDetail,
+                                selectedCardForPreviousCycle: $selectedCardForPreviousCycle
                             )
                         }
                     }
@@ -330,6 +335,22 @@ struct BudgetDashboardView: View {
             }
             .sheet(isPresented: $showingFixedExpensesSheet) {
                 DepensesFixesSheet(monthKey: BudgetProjectionManager.monthKey(for: selectedMonthDate))
+            }
+            .sheet(item: $selectedCardForDetail) { card in
+                    DeferredCardDetailView(
+                        card: card,
+                        selectedMonthDate: selectedMonthDate,
+                        preloadedExpenses: Array(deferredCardExpenses),
+                        cycleOffset: 0
+                    )
+            }
+            .sheet(item: $selectedCardForPreviousCycle) { card in
+                    DeferredCardDetailView(
+                        card: card,
+                        selectedMonthDate: selectedMonthDate,
+                        preloadedExpenses: Array(deferredCardExpenses),
+                        cycleOffset: -1
+                    )
             }
             .sheet(isPresented: $showingProfileCreation) {
                 ProfileCreationView()
@@ -512,11 +533,13 @@ struct BudgetDashboardView: View {
     private func applyProjection(at index: Int) {
         guard index < projections.count else { return }
         let proj = projections[index]
+        // fixedExpenses inclut les cartes différées (elles sont visibles en fin de liste des dépenses)
+        let deferredImpact = calculateDeferredCardsImpact(for: proj.monthDate)
         fixedIncomes = proj.incomes
         fixedExpenses = proj.expenses
+        deferredCardsTotal = Decimal(deferredImpact)
         initialBalance = proj.startBalance
         forecast = proj.endBalance
-        // Pour le mois courant, on affiche le solde réel actuel ; pour les mois futurs on affiche le solde initial prévisionnel
         currentBalance = (index == 0) ? actualCurrentBalance : proj.startBalance
 
         let incomes = (try? fetchOccurrences(monthKey: proj.monthKey, kind: "income")) ?? []
@@ -805,7 +828,9 @@ private struct DeferredCardsForecastView: View {
     let cards: [DeferredCard]
     let expenses: [DeferredCardExpense]
     let selectedMonthDate: Date
-    
+    @Binding var selectedCardForDetail: DeferredCard?
+    @Binding var selectedCardForPreviousCycle: DeferredCard?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
@@ -824,12 +849,18 @@ private struct DeferredCardsForecastView: View {
                     .foregroundStyle(.secondary)
                 Spacer()
             }
-            
+
             ForEach(cards) { card in
                 DeferredCardForecastRow(
                     card: card,
                     expenses: expenses,
-                    selectedMonthDate: selectedMonthDate
+                    selectedMonthDate: selectedMonthDate,
+                    onTapDetail: {
+                        selectedCardForDetail = card
+                    },
+                    onTapPreviousCycle: {
+                        selectedCardForPreviousCycle = card
+                    }
                 )
             }
         }
@@ -841,6 +872,8 @@ private struct DeferredCardForecastRow: View {
     let card: DeferredCard
     let expenses: [DeferredCardExpense]
     let selectedMonthDate: Date
+    var onTapDetail: (() -> Void)? = nil
+    var onTapPreviousCycle: (() -> Void)? = nil
     
     private var calendar: Calendar { Calendar.current }
     
@@ -860,29 +893,43 @@ private struct DeferredCardForecastRow: View {
         calendar.range(of: .day, in: .month, for: selectedMonthDate)?.count ?? 30
     }
     
-    /// Mois du prélèvement (basé sur le cycle, pas le mois calendaire)
-    private var debitMonth: Date {
-        currentCycle.debit
+    /// Mois du prélèvement (basé sur le cycle PRÉCÉDENT, celui qui sera prélevé prochainement)
+    private var previousCycleRefDate: Date {
+        DeferredCardService.previousCycleReferenceDate(for: card, referenceDate: selectedMonthDate)
     }
     
-    /// Dernier jour du mois de prélèvement
-    private var lastDayOfDebitMonth: Int {
-        calendar.range(of: .day, in: .month, for: debitMonth)?.count ?? 30
+    private var previousCycle: (start: Date, cutoff: Date, debit: Date) {
+        DeferredCardService.getCurrentCycle(for: card, referenceDate: previousCycleRefDate)
     }
     
-    /// Jour de prélèvement effectif
-    /// Logique : si l'utilisateur a configuré un jour >= 28, on considère qu'il veut le dernier jour du mois
-    /// Sinon, on utilise le jour configuré (ajusté si le mois est plus court)
+    /// Jour de prélèvement effectif (extrait de la date de prélèvement déjà ajustée par DeferredCardService)
     private var effectiveDebitDay: Int {
-        let configuredDay = Int(card.debitDay)
-        
-        // Si le jour configuré est >= 28, c'est "dernier jour du mois"
-        if configuredDay >= 28 {
-            return lastDayOfDebitMonth
-        }
-        
-        // Sinon, utiliser le jour configuré (ou le dernier jour si le mois est plus court)
-        return min(configuredDay, lastDayOfDebitMonth)
+        calendar.component(.day, from: previousCycle.debit)
+    }
+    
+    /// Total des dépenses du cycle précédent
+    private var previousCycleTotalExpenses: Double {
+        let prevCycle = previousCycle
+        let cardID = card.id
+        return expenses
+            .filter {
+                $0.cardID == cardID &&
+                $0.expenseDate >= prevCycle.start &&
+                $0.expenseDate <= prevCycle.cutoff
+            }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    /// Date de prélèvement effective du cycle précédent (déjà ajustée par DeferredCardService)
+    private var previousCycleDebitDate: Date {
+        previousCycle.debit
+    }
+    
+    /// Le prélèvement du cycle précédent a-t-il déjà eu lieu ?
+    private var isPreviousCycleDebited: Bool {
+        let today = Calendar.current.startOfDay(for: Date())
+        let debitDate = Calendar.current.startOfDay(for: previousCycleDebitDate)
+        return today >= debitDate
     }
     
     /// Total des dépenses pour le cycle en cours (basé sur le cycle de la carte, pas le mois calendaire)
@@ -917,7 +964,7 @@ private struct DeferredCardForecastRow: View {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "fr_FR")
         formatter.dateFormat = "MMM"
-        return formatter.string(from: debitMonth).capitalized
+        return formatter.string(from: previousCycle.debit).capitalized
     }
     
     /// Jour de bascule pour l'affichage
@@ -927,98 +974,8 @@ private struct DeferredCardForecastRow: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            // Card header
-            HStack(spacing: 8) {
-                // Card icon
-                ZStack {
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 28, height: 18)
-                    Image(systemName: "creditcard.fill")
-                        .font(.system(size: 10))
-                        .foregroundStyle(.white)
-                }
-                
-                Text(card.name)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.primary)
-                
-                if let digits = card.lastFourDigits, !digits.isEmpty {
-                    Text("•••• \(digits)")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-                
-                Spacer()
-                
-                // Budget indicator
-                if card.monthlyBudget > 0 {
-                    let usagePercent = min(totalExpensesForCycle / card.monthlyBudget, 1.0)
-                    Text("\(Int(usagePercent * 100))%")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(usagePercent > 0.9 ? .red : (usagePercent > 0.7 ? .orange : .green))
-                }
-            }
-            
-            // Amounts row
-            HStack(spacing: 16) {
-                // Cycle cutoff (bascule)
-                VStack(alignment: .center, spacing: 2) {
-                    Text("Bascule \(currentMonthName) (\(cutoffDay))")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    Text(formatAmount(displayAmount))
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(.primary)
-                    if isBeforeCutoff && totalExpensesForCycle < card.monthlyBudget {
-                        Text("(env. \(formatAmount(card.monthlyBudget)))")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(.secondarySystemBackground).opacity(0.5))
-                )
-                
-                // Arrow
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                
-                // Debit date
-                VStack(alignment: .center, spacing: 2) {
-                    Text("Prélèvement \(debitMonthName)")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    Text(formatAmount(displayAmount))
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(.red)
-                    Text("le \(effectiveDebitDay)")
-                        .font(.system(size: 10))
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.red.opacity(0.08))
-                )
-            }
+            cardHeaderView
+            amountsRowView
         }
         .padding(10)
         .background(
@@ -1029,6 +986,152 @@ private struct DeferredCardForecastRow: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.white.opacity(0.3), lineWidth: 1)
         )
+    }
+    
+    // MARK: - Card Header
+    private var cardHeaderView: some View {
+        HStack(spacing: 8) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 28, height: 18)
+                Image(systemName: "creditcard.fill")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.white)
+            }
+            
+            Text(card.name)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.primary)
+            
+            if let digits = card.lastFourDigits, !digits.isEmpty {
+                Text("•••• \(digits)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            
+            Spacer()
+            
+            if card.monthlyBudget > 0 {
+                let usagePercent = min(totalExpensesForCycle / card.monthlyBudget, 1.0)
+                Text("\(Int(usagePercent * 100))%")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(usagePercent > 0.9 ? .red : (usagePercent > 0.7 ? .orange : .green))
+            }
+        }
+    }
+    
+    // MARK: - Amounts Row
+    private var amountsRowView: some View {
+        HStack(spacing: 16) {
+            cutoffButtonView
+            
+            Image(systemName: "arrow.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+            
+            debitButtonView
+        }
+    }
+    
+    // MARK: - Cutoff Button (gauche)
+    private var cutoffButtonView: some View {
+        Button(action: { onTapDetail?() }) {
+            VStack(alignment: .center, spacing: 2) {
+                Text("Bascule \(currentMonthName) (\(cutoffDay))")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text(formatAmount(displayAmount))
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                if isBeforeCutoff && totalExpensesForCycle < card.monthlyBudget {
+                    Text("(env. \(formatAmount(card.monthlyBudget)))")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                }
+                HStack(spacing: 2) {
+                    Text("Voir détail")
+                        .font(.system(size: 9))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 8, weight: .semibold))
+                }
+                .foregroundStyle(Color(red: 0.52, green: 0.21, blue: 0.93).opacity(0.8))
+                .padding(.top, 2)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(.secondarySystemBackground).opacity(0.5))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color(red: 0.52, green: 0.21, blue: 0.93).opacity(0.2), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+    
+    // MARK: - Debit Button (droite)
+    private var debitButtonView: some View {
+        let prevAmount = previousCycleTotalExpenses
+        let debited = isPreviousCycleDebited
+        return Button(action: { onTapPreviousCycle?() }) {
+            VStack(alignment: .center, spacing: 2) {
+                if debited {
+                    Text("Cycle clôturé")
+                        .font(.caption2)
+                        .foregroundStyle(.green)
+                    Text(formatAmount(prevAmount))
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.red)
+                    Text("Prélevé le \(effectiveDebitDay) \(debitMonthName)")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(.green)
+                } else {
+                    Text("Prélèvement à venir")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                    Text(formatAmount(prevAmount))
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.red)
+                    Text("le \(effectiveDebitDay) \(debitMonthName)")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                }
+                HStack(spacing: 2) {
+                    Text("Voir détail")
+                        .font(.system(size: 9))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 8, weight: .semibold))
+                }
+                .foregroundStyle(Color.red.opacity(0.7))
+                .padding(.top, 2)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(debited ? Color.green.opacity(0.06) : Color.red.opacity(0.08))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(debited ? Color.green.opacity(0.2) : Color.red.opacity(0.2), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
     
     private func formatAmount(_ value: Double) -> String {

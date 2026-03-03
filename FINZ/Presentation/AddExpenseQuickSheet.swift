@@ -13,17 +13,28 @@ struct AddExpenseQuickSheet: View {
     @State private var amountText: String = ""
     @State private var date: Date
     @State private var note: String = ""
-    @State private var error: String? = nil
+    @State private var error: String?
     @FocusState private var amountFocused: Bool
     @State private var pulse: Bool = false
-    
+    @State private var showSuccess: Bool = false
+    @State private var isReady: Bool = false
+
     // Category states
     @State private var mainCategories: [MainCategory] = []
     @State private var selectedMainCategory: MainCategory?
     @State private var selectedSubCategory: SubCategory?
-    
+
     // Deferred card selection
     @State private var selectedDeferredCard: DeferredCard? = nil
+
+    // FINZ gradient colors
+    private let finzPurple = Color(red: 0.52, green: 0.21, blue: 0.93)
+    private let finzPink = Color(red: 1.00, green: 0.29, blue: 0.63)
+    private var finzGradient: LinearGradient {
+        LinearGradient(colors: [finzPurple, finzPink], startPoint: .leading, endPoint: .trailing)
+    }
+    private let grayFill = LinearGradient(colors: [Color(.systemGray6), Color(.systemGray6)], startPoint: .top, endPoint: .bottom)
+    private let clearGradient = LinearGradient(colors: [Color.clear, Color.clear], startPoint: .leading, endPoint: .trailing)
 
     init(defaultDate: Date = Date(), onSaved: @escaping () -> Void, onCancel: @escaping () -> Void) {
         self.defaultDate = defaultDate
@@ -33,214 +44,410 @@ struct AddExpenseQuickSheet: View {
     }
 
     var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    Color.blue.opacity(0.04),
-                    Color.purple.opacity(0.04),
-                    Color.pink.opacity(0.04)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
-            // EVERYTHING SCROLLABLE INCLUDING HEADER
-            ScrollView(.vertical, showsIndicators: true) {
-                VStack(spacing: 12) {
-                    // Header SCROLLABLE with buttons
-                    HStack {
-                        Button(action: { onCancel() }) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(.secondary)
-                                .padding(8)
-                                .background(Color.white)
-                                .clipShape(Circle())
-                                .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
-                        }
-                        Spacer()
-                        Image("finz_logo_couleur")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: 110)
-                            .accessibilityLabel("Finz")
-                        Spacer()
-                        Button(action: { save() }) {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .padding(8)
-                                .background(
-                                    LinearGradient(colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)], startPoint: .leading, endPoint: .trailing)
-                                )
-                                .clipShape(Circle())
-                                .shadow(color: Color.black.opacity(0.12), radius: 4, x: 0, y: 2)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    
-                    VStack(spacing: 2) {
-                        HStack { Spacer()
-                            Text("Renseigne les infos de ta dépense")
-                                .font(.system(size: 22, weight: .semibold, design: .rounded))
-                                .foregroundStyle(
-                                    LinearGradient(colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)], startPoint: .leading, endPoint: .trailing)
-                                )
-                            Spacer() }
-                    }
-                    .padding(.bottom, 8)
-                    
-                    // Amount field
-                    VStack(alignment: .center, spacing: 8) {
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Spacer()
-                            TextField("0", text: $amountText)
-                                .keyboardType(.decimalPad)
-                                .focused($amountFocused)
-                                .multilineTextAlignment(.center)
-                                .font(.system(size: 34, weight: .bold, design: .rounded))
-                                .foregroundStyle(Color(white: 0.1))
-                                .minimumScaleFactor(0.8)
-                            Text("€")
-                                .font(.title3)
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                        }
-                    }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-                    .padding(.horizontal, 20)
-                    
-                    // Deferred Card Selection (if any cards exist)
-                    if !deferredCards.isEmpty {
-                        DeferredCardSelectionView(
-                            cards: deferredCards,
-                            selectedCard: $selectedDeferredCard
-                        )
-                        .padding(.horizontal, 20)
-                    }
-                    
-                    // Category Selection
-                    if !mainCategories.isEmpty {
-                        VStack(spacing: 12) {
-                            CategorySelectionView(
-                                selectedMainCategory: $selectedMainCategory,
-                                selectedSubCategory: $selectedSubCategory,
-                                mainCategories: mainCategories
-                            )
-                            
-                            SubCategorySelectionView(
-                                selectedSubCategory: $selectedSubCategory,
-                                mainCategory: selectedMainCategory
-                            )
-                        }
-                        .padding()
-                    }
+        NavigationStack {
+            ZStack {
+                LinearGradient(
+                    colors: [Color.blue.opacity(0.04), Color.purple.opacity(0.04), Color.pink.opacity(0.04)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
-                    // DatePicker
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack { Spacer()
-                            DatePicker("", selection: $date, displayedComponents: .date)
-                                .datePickerStyle(.compact)
-                                .labelsHidden()
-                            Spacer() }
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        headerView
+                        amountCardView
+                        if isReady {
+                            if !deferredCards.isEmpty {
+                                deferredCardSectionView
+                            }
+                            if !mainCategories.isEmpty {
+                                categorySectionView
+                                subCategorySectionView
+                            }
+                            dateSectionView
+                            errorView
+                            saveButtonView
+                        }
+                        Color.clear.frame(height: 40)
                     }
                     .padding(.vertical, 8)
-                    .padding(.horizontal, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-                    .padding(.horizontal, 20)
-                    
-                    // Comment field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Commentaire (optionnel)").font(.headline)
-                        TextField("Source, note…", text: $note)
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 4)
-                    .padding(.horizontal, 20)
-                    
-                    if let error = error {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .font(.footnote)
-                            .padding(.top, 4)
-                    }
-                    
-                    // Extra space to ensure we can scroll past keyboard
-                    Color.clear.frame(height: 20)
                 }
-                .padding(.vertical, 12)
+                .scrollDismissesKeyboard(.immediately)
+
+                if showSuccess {
+                    successOverlay
+                }
+            }
+            .navigationBarHidden(true)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("OK") {
+                        amountFocused = false
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(finzPurple)
+                }
             }
         }
-        .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 0) }
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        .onTapGesture {
-            // Dismiss keyboard when tapping anywhere
-            amountFocused = false
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        }
         .onAppear {
             loadCategories()
-        }
-    }
-    
-    private func loadCategories() {
-        let fetchDescriptor = FetchDescriptor<MainCategory>(
-            predicate: #Predicate { $0.categoryType == "expense" },
-            sortBy: [SortDescriptor(\.order, order: .forward)]
-        )
-        
-        do {
-            mainCategories = try modelContext.fetch(fetchDescriptor)
-            if let first = mainCategories.first {
-                selectedMainCategory = first
-                selectedSubCategory = first.subCategories.first
+            DispatchQueue.main.async {
+                isReady = true
             }
-        } catch {
-            print("Erreur lors du chargement des catégories: \(error)")
         }
     }
 
+    // MARK: - Header
+    private var headerView: some View {
+        HStack {
+            Button(action: { onCancel() }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 36, height: 36)
+                    .background(.ultraThinMaterial, in: Circle())
+            }
+            Spacer()
+            Text("Nouvelle dépense")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary)
+            Spacer()
+            Color.clear.frame(width: 36, height: 36)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 12)
+    }
+
+    // MARK: - Amount Card
+    private var amountCardView: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            TextField("0", text: $amountText)
+                .keyboardType(.decimalPad)
+                .focused($amountFocused)
+                .multilineTextAlignment(.center)
+                .font(.system(size: 44, weight: .bold, design: .rounded))
+                .foregroundStyle(Color(white: 0.1))
+                .minimumScaleFactor(0.5)
+            Text("€")
+                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .padding(.horizontal, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.white)
+                .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(pulse ? finzGradient : clearGradient, lineWidth: 2)
+        )
+        .scaleEffect(pulse ? 1.02 : 1.0)
+        .animation(.easeInOut(duration: 0.2), value: pulse)
+        .padding(.horizontal, 20)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Deferred Card Section
+    private var deferredCardSectionView: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("PAIEMENT", icon: "creditcard.fill")
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    // Option paiement direct
+                    Button {
+                        amountFocused = false
+                        withAnimation(.easeInOut(duration: 0.2)) { selectedDeferredCard = nil }
+                    } label: {
+                        VStack(spacing: 6) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(selectedDeferredCard == nil ? finzGradient : grayFill)
+                                    .frame(width: 50, height: 32)
+                                Image(systemName: "banknote")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(selectedDeferredCard == nil ? .white : .secondary)
+                            }
+                            Text("Direct")
+                                .font(.caption2.weight(selectedDeferredCard == nil ? .semibold : .regular))
+                                .foregroundStyle(selectedDeferredCard == nil ? .primary : .secondary)
+                        }
+                        .frame(width: 64)
+                    }
+                    .buttonStyle(.plain)
+
+                    ForEach(deferredCards) { card in
+                        let isSelected = selectedDeferredCard?.id == card.id
+                        Button {
+                            amountFocused = false
+                            withAnimation(.easeInOut(duration: 0.2)) { selectedDeferredCard = card }
+                        } label: {
+                            VStack(spacing: 6) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(isSelected ? finzGradient : grayFill)
+                                        .frame(width: 50, height: 32)
+                                    Image(systemName: "creditcard.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundStyle(isSelected ? .white : .secondary)
+                                }
+                                VStack(spacing: 0) {
+                                    Text(card.name)
+                                        .font(.caption2.weight(isSelected ? .semibold : .regular))
+                                        .foregroundStyle(isSelected ? .primary : .secondary)
+                                        .lineLimit(1)
+                                    if let digits = card.lastFourDigits, !digits.isEmpty {
+                                        Text("•••\(digits)")
+                                            .font(.system(size: 8))
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                            .frame(width: 64)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 4)
+                .padding(.vertical, 4)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(.white)
+                .shadow(color: Color.black.opacity(0.05), radius: 12, x: 0, y: 6)
+        )
+        .padding(.horizontal, 20)
+        .padding(.bottom, 12)
+    }
+
+    // MARK: - Category Section
+    private var categorySectionView: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("CATÉGORIE", icon: "square.grid.2x2.fill")
+
+            let columns = [
+                GridItem(.flexible(), spacing: 10),
+                GridItem(.flexible(), spacing: 10),
+                GridItem(.flexible(), spacing: 10)
+            ]
+
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(mainCategories.sorted { $0.order < $1.order }) { category in
+                    ExpenseCategoryCellView(
+                        category: category,
+                        isSelected: selectedMainCategory?.id == category.id,
+                        onSelect: {
+                            amountFocused = false
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                selectedMainCategory = category
+                                selectedSubCategory = category.subCategories.sorted { $0.order < $1.order }.first
+                            }
+                        }
+                    )
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(.white)
+                .shadow(color: Color.black.opacity(0.05), radius: 12, x: 0, y: 6)
+        )
+        .padding(.horizontal, 20)
+        .padding(.bottom, 12)
+    }
+
+    // MARK: - SubCategory Section
+    private var subCategorySectionView: some View {
+        Group {
+            if let mainCat = selectedMainCategory {
+                let subs = mainCat.subCategories.sorted { $0.order < $1.order }
+                if !subs.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        sectionLabel("SOUS-CATÉGORIE", icon: "tag.fill")
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(subs, id: \.id) { subCat in
+                                    let isSelected = selectedSubCategory?.id == subCat.id
+                                    Button {
+                                        amountFocused = false
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            selectedSubCategory = subCat
+                                        }
+                                    } label: {
+                                        HStack(spacing: 6) {
+                                            Text(subCat.icon)
+                                                .font(.system(size: 14))
+                                            Text(subCat.displayName)
+                                                .font(.system(size: 13, weight: .medium))
+                                                .lineLimit(1)
+                                        }
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 9)
+                                        .background(
+                                            Capsule()
+                                                .fill(isSelected ? finzGradient : grayFill)
+                                        )
+                                        .foregroundStyle(isSelected ? .white : .primary)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal, 4)
+                        }
+                    }
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(.white)
+                            .shadow(color: Color.black.opacity(0.05), radius: 12, x: 0, y: 6)
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 12)
+                }
+            }
+        }
+    }
+
+    // MARK: - Date & Comment Section (fusionnés)
+    private var dateSectionView: some View {
+        VStack(spacing: 0) {
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(finzPurple)
+                    Text("Date")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(.primary)
+                }
+                Spacer()
+                DatePicker("", selection: $date, displayedComponents: .date)
+                    .datePickerStyle(.compact)
+                    .labelsHidden()
+                    .tint(finzPurple)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+
+            Divider().padding(.horizontal, 16)
+
+            HStack(alignment: .top, spacing: 6) {
+                Image(systemName: "text.bubble")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(finzPurple)
+                    .padding(.top, 2)
+                TextField("Commentaire (optionnel)", text: $note, axis: .vertical)
+                    .lineLimit(1...3)
+                    .font(.system(size: 15))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.white)
+                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+        )
+        .padding(.horizontal, 20)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Error View
+    @ViewBuilder
+    private var errorView: some View {
+        if let error = error {
+            HStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.red)
+                Text(error)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.red)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.red.opacity(0.08))
+            )
+            .padding(.horizontal, 20)
+            .padding(.bottom, 8)
+            .transition(.opacity.combined(with: .move(edge: .top)))
+        }
+    }
+
+    // MARK: - Save Button
+    private var saveButtonView: some View {
+        Button(action: { save() }) {
+            HStack(spacing: 10) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                Text("Enregistrer la dépense")
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(finzGradient)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .shadow(color: finzPurple.opacity(0.3), radius: 12, x: 0, y: 6)
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
+    }
+
+    // MARK: - Success Overlay
+    private var successOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.3).ignoresSafeArea()
+            VStack(spacing: 16) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 56))
+                    .foregroundStyle(.green)
+                Text("Dépense enregistrée !")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+            }
+            .padding(32)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
+        }
+        .transition(.opacity.combined(with: .scale))
+    }
+
+    // MARK: - Section Label Helper
+    private func sectionLabel(_ text: String, icon: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(finzGradient)
+            Text(text)
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .foregroundStyle(.secondary)
+                .tracking(1.5)
+        }
+    }
+
+    // MARK: - Save Logic
     private func save() {
         error = nil
-        
         let cleanAmountText = amountText.replacingOccurrences(of: ",", with: ".")
         guard let amountDouble = Double(cleanAmountText), amountDouble > 0 else {
-            error = "Veuillez entrer un montant valide supérieur à zéro."
+            withAnimation { error = "Montant invalide. Saisis un montant supérieur à zéro." }
             pulseAmountField()
             return
         }
-        
-        // Si une carte à débit différé est sélectionnée
+
+        // Carte à débit différé
         if let card = selectedDeferredCard {
-            // Ajouter comme dépense différée
             DeferredCardService.addExpense(
                 to: card,
                 amount: amountDouble,
@@ -248,22 +455,18 @@ struct AddExpenseQuickSheet: View {
                 expenseDate: date,
                 modelContext: modelContext
             )
-            
-            let success = UINotificationFeedbackGenerator()
-            success.notificationOccurred(.success)
-            withAnimation(.easeInOut(duration: 0.12)) { pulse = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
-                withAnimation(.easeOut(duration: 0.12)) { pulse = false }
-                onSaved()
-            }
+            let gen = UINotificationFeedbackGenerator()
+            gen.notificationOccurred(.success)
+            withAnimation(.spring(response: 0.3)) { showSuccess = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { onSaved() }
             return
         }
-        
-        // Sinon, ajouter comme dépense normale
-        let amount = -abs(amountDouble) // negative for expense
-        
-        let title = note.isEmpty ? "Dépense" : "\(note)"
-        
+
+        // Dépense normale
+        let amount = -abs(amountDouble)
+        let categoryName = selectedSubCategory?.displayName ?? selectedMainCategory?.displayName ?? "Dépense"
+        let title = note.isEmpty ? categoryName : "\(categoryName) - \(note)"
+
         let occurrence = BudgetEntryOccurrence(
             date: date,
             amount: amount,
@@ -272,167 +475,88 @@ struct AddExpenseQuickSheet: View {
             monthKey: BudgetProjectionManager.monthKey(for: date),
             isManual: true
         )
-        
-        // Ajouter les IDs des catégories si sélectionnées
+
         if let subCat = selectedSubCategory {
             occurrence.mainCategoryID = subCat.mainCategory?.id
             occurrence.subCategoryID = subCat.id
         }
-        
+
         modelContext.insert(occurrence)
-        
+
         do {
             try modelContext.save()
-            let success = UINotificationFeedbackGenerator()
-            success.notificationOccurred(.success)
-            withAnimation(.easeInOut(duration: 0.12)) { pulse = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
-                withAnimation(.easeOut(duration: 0.12)) { pulse = false }
-                onSaved()
-            }
+            let gen = UINotificationFeedbackGenerator()
+            gen.notificationOccurred(.success)
+            withAnimation(.spring(response: 0.3)) { showSuccess = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { onSaved() }
         } catch {
             self.error = "Erreur lors de la sauvegarde."
             pulseAmountField()
         }
     }
-    
+
+    private func loadCategories() {
+        let fetchDescriptor = FetchDescriptor<MainCategory>(
+            predicate: #Predicate { $0.categoryType == "expense" },
+            sortBy: [SortDescriptor(\.order, order: .forward)]
+        )
+        do {
+            let categories = try modelContext.fetch(fetchDescriptor)
+            mainCategories = categories
+            if let first = categories.first {
+                selectedMainCategory = first
+            }
+        } catch {
+            print("Erreur chargement catégories: \(error)")
+        }
+    }
+
     private func pulseAmountField() {
-        withAnimation(.easeInOut(duration: 0.25)) {
-            pulse = true
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            withAnimation(.easeInOut(duration: 0.25)) {
-                pulse = false
-            }
+        withAnimation(.easeInOut(duration: 0.2)) { pulse = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            withAnimation(.easeInOut(duration: 0.2)) { pulse = false }
         }
     }
 }
 
-// MARK: - Deferred Card Selection View
-private struct DeferredCardSelectionView: View {
-    let cards: [DeferredCard]
-    @Binding var selectedCard: DeferredCard?
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Payer avec une carte différée")
-                .font(.headline)
-                .foregroundStyle(.primary)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    // Option "Pas de carte" (paiement direct)
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            selectedCard = nil
-                        }
-                    } label: {
-                        VStack(spacing: 6) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(selectedCard == nil ? finzGradient : inactiveGradient)
-                                    .frame(width: 50, height: 32)
-                                Image(systemName: "banknote")
-                                    .font(.system(size: 16))
-                                    .foregroundStyle(selectedCard == nil ? .white : .secondary)
-                            }
-                            Text("Direct")
-                                .font(.caption2)
-                                .foregroundStyle(selectedCard == nil ? .primary : .secondary)
-                        }
-                        .frame(width: 60)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    // Cards
-                    ForEach(cards) { card in
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                selectedCard = card
-                            }
-                        } label: {
-                            DeferredCardChip(card: card, isSelected: selectedCard?.id == card.id)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-                .padding(.vertical, 4)
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.6), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-    }
-    
-    private var finzGradient: LinearGradient {
-        LinearGradient(
-            colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-    
-    private var inactiveGradient: LinearGradient {
-        LinearGradient(
-            colors: [Color.secondary.opacity(0.1), Color.secondary.opacity(0.1)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-}
-
-// MARK: - Deferred Card Chip
-private struct DeferredCardChip: View {
-    let card: DeferredCard
+// MARK: - Expense Category Cell (sous-vue isolée pour perf)
+private struct ExpenseCategoryCellView: View {
+    let category: MainCategory
     let isSelected: Bool
-    
+    let onSelect: () -> Void
+
+    private static let finzPurple = Color(red: 0.52, green: 0.21, blue: 0.93)
+    private static let finzPink = Color(red: 1.00, green: 0.29, blue: 0.63)
+    private static let finzGradient = LinearGradient(colors: [finzPurple, finzPink], startPoint: .leading, endPoint: .trailing)
+    private static let grayFill = LinearGradient(colors: [Color(.systemGray6), Color(.systemGray6)], startPoint: .top, endPoint: .bottom)
+
     var body: some View {
-        VStack(spacing: 6) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? finzGradient : inactiveGradient)
-                    .frame(width: 50, height: 32)
-                Image(systemName: "creditcard.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(isSelected ? .white : .secondary)
-            }
-            VStack(spacing: 0) {
-                Text(card.name)
-                    .font(.caption2)
-                    .fontWeight(isSelected ? .semibold : .regular)
-                    .foregroundStyle(isSelected ? .primary : .secondary)
+        Button(action: onSelect) {
+            VStack(spacing: 6) {
+                Text(category.icon)
+                    .font(.system(size: 26))
+                    .frame(width: 48, height: 48)
+                    .background(
+                        Circle().fill(isSelected ? Self.finzGradient : Self.grayFill)
+                    )
+                Text(category.displayName)
+                    .font(.system(size: 11, weight: .semibold))
                     .lineLimit(1)
-                if let digits = card.lastFourDigits, !digits.isEmpty {
-                    Text("•••\(digits)")
-                        .font(.system(size: 8))
-                        .foregroundStyle(.secondary)
-                }
+                    .minimumScaleFactor(0.7)
             }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(isSelected ? Self.finzPurple.opacity(0.08) : Color.white)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(isSelected ? Self.finzPurple.opacity(0.4) : Color(.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+            )
+            .foregroundStyle(isSelected ? Self.finzPurple : .primary)
         }
-        .frame(width: 60)
-    }
-    
-    private var finzGradient: LinearGradient {
-        LinearGradient(
-            colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-    
-    private var inactiveGradient: LinearGradient {
-        LinearGradient(
-            colors: [Color.secondary.opacity(0.1), Color.secondary.opacity(0.1)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        .buttonStyle(.plain)
     }
 }
 

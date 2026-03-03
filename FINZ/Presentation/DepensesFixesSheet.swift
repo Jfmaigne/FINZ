@@ -136,48 +136,6 @@ struct DepensesFixesSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                // Cartes à débit différé - affichage avec enveloppe ou montant réel selon la bascule
-                ForEach(deferredCards) { card in
-                    let cardExpenses = deferredExpensesForCycle(card: card)
-                    let cycleSummary = DeferredCardService.getCycleSummary(for: card, expenses: Array(deferredCardExpenses), referenceDate: monthDate)
-                    
-                    // Afficher seulement si il y a une enveloppe configurée ou des dépenses
-                    if card.monthlyBudget > 0 || !cardExpenses.isEmpty {
-                        Section(header: DeferredCardSectionHeader(
-                            card: card,
-                            cycleSummary: cycleSummary
-                        )) {
-                            // Afficher les dépenses individuelles pour permettre l'édition/suppression
-                            ForEach(cardExpenses) { expense in
-                                DeferredExpenseRow(
-                                    expense: expense,
-                                    card: card,
-                                    onEdit: {
-                                        editedDeferredExpense = expense
-                                        showEditDeferredExpenseSheet = true
-                                    },
-                                    onDelete: {
-                                        deleteDeferredExpense(expense)
-                                    }
-                                )
-                            }
-                            
-                            // Si avant la bascule et pas de dépenses, afficher un message
-                            if cardExpenses.isEmpty && cycleSummary.isBeforeCutoff {
-                                HStack {
-                                    Image(systemName: "info.circle")
-                                        .foregroundStyle(.secondary)
-                                    Text("Aucune dépense enregistrée pour ce cycle")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                .padding(.vertical, 8)
-                                .listRowBackground(Color.clear)
-                            }
-                        }
-                    }
-                }
-                
                 // Dépenses fixes
                 if !fixedExpenses.isEmpty {
                     Section(header: Text("Dépenses fixes").font(.headline)) {
@@ -214,6 +172,68 @@ struct DepensesFixesSheet: View {
                             TodaySeparatorView()
                                 .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                                 .listRowSeparator(.hidden)
+                        }
+                    }
+                }
+                
+                // Cartes à débit différé (en fin de liste, prélèvement en fin de mois)
+                ForEach(deferredCards) { card in
+                    let calendar = Calendar.current
+                    let cardID = card.id
+                    
+                    // --- Cycle PRÉCÉDENT (prélèvement déjà effectué ou à venir dans ce mois) ---
+                    let prevRefDate = DeferredCardService.previousCycleReferenceDate(for: card, referenceDate: monthDate)
+                    let prevCycle = DeferredCardService.getCurrentCycle(for: card, referenceDate: prevRefDate)
+                    let prevTotal = deferredCardExpenses
+                        .filter { $0.cardID == cardID && $0.expenseDate >= prevCycle.start && $0.expenseDate <= prevCycle.cutoff }
+                        .reduce(0.0) { $0 + $1.amount }
+                    let prevDebitDay = calendar.component(.day, from: prevCycle.debit)
+                    let prevDebitMonth = calendar.component(.month, from: prevCycle.debit)
+                    let selectedMonth = calendar.component(.month, from: monthDate)
+                    let isPrevPast = Date() >= calendar.startOfDay(for: prevCycle.debit)
+                    let showPrevCycle = prevDebitMonth == selectedMonth && (prevTotal > 0 || card.monthlyBudget > 0)
+                    
+                    // --- Cycle EN COURS (enveloppe estimée ou montant réel, prélèvement à venir) ---
+                    let currentCycle = DeferredCardService.getCurrentCycle(for: card, referenceDate: monthDate)
+                    let currentTotal = deferredCardExpenses
+                        .filter { $0.cardID == cardID && $0.expenseDate >= currentCycle.start && $0.expenseDate <= currentCycle.cutoff }
+                        .reduce(0.0) { $0 + $1.amount }
+                    let isBeforeCutoff = Date() <= currentCycle.cutoff
+                    let currentDisplayAmount = isBeforeCutoff ? max(card.monthlyBudget, currentTotal) : currentTotal
+                    let currentDebitDay = calendar.component(.day, from: currentCycle.debit)
+                    let currentDebitMonth = calendar.component(.month, from: currentCycle.debit)
+                    let isCurrentPast = Date() >= calendar.startOfDay(for: currentCycle.debit)
+                    let showCurrentCycle = currentDebitMonth == selectedMonth && (currentDisplayAmount > 0 || card.monthlyBudget > 0)
+                    
+                    let isSameDebit = prevDebitMonth == currentDebitMonth && prevDebitDay == currentDebitDay
+                    
+                    if showPrevCycle && !isSameDebit {
+                        Section {
+                            DeferredCardDebitRow(
+                                card: card,
+                                amount: prevTotal,
+                                effectiveDebitDay: prevDebitDay,
+                                debitDate: prevCycle.debit,
+                                isDebited: isPrevPast,
+                                isEstimate: false
+                            )
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                        }
+                    }
+                    
+                    if showCurrentCycle {
+                        Section {
+                            DeferredCardDebitRow(
+                                card: card,
+                                amount: currentDisplayAmount,
+                                effectiveDebitDay: currentDebitDay,
+                                debitDate: currentCycle.debit,
+                                isDebited: isCurrentPast,
+                                isEstimate: isBeforeCutoff && currentTotal < card.monthlyBudget
+                            )
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                         }
                     }
                 }
@@ -450,6 +470,93 @@ private struct EditExpenseOccurrenceSheet: View {
 }
 
 // MARK: - Deferred Card Section Header
+// MARK: - Deferred Card Debit Row (affiche le prélèvement réel à la bonne date)
+private struct DeferredCardDebitRow: View {
+    let card: DeferredCard
+    let amount: Double
+    let effectiveDebitDay: Int
+    let debitDate: Date
+    let isDebited: Bool
+    var isEstimate: Bool = false
+    
+    private var dateFormatted: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MMM"
+        formatter.locale = Locale(identifier: "fr_FR")
+        return formatter.string(from: debitDate)
+    }
+    
+    var body: some View {
+        HStack(spacing: 10) {
+            // Date
+            Text(dateFormatted)
+                .font(.callout)
+                .foregroundColor(.secondary)
+                .frame(width: 70, alignment: .leading)
+            
+            // Icône carte + infos
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Image(systemName: "creditcard.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                    Text(card.name)
+                        .font(.body)
+                    if let digits = card.lastFourDigits, !digits.isEmpty {
+                        Text("•••• \(digits)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                
+                if isDebited {
+                    Text("Prélèvement effectué")
+                        .font(.caption2)
+                        .foregroundStyle(.green)
+                } else if isEstimate {
+                    Text("Prélèvement à venir (enveloppe)")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                } else {
+                    Text("Prélèvement à venir")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                }
+            }
+            
+            Spacer()
+            
+            // Montant
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("-\(Int(amount)) €")
+                    .foregroundColor(.red)
+                    .font(.body.monospacedDigit())
+                if isEstimate {
+                    Text("estimé")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                }
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(isDebited ? Color.green.opacity(0.05) : Color.orange.opacity(0.05))
+                .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isDebited ? Color.green.opacity(0.15) : Color.orange.opacity(0.15), lineWidth: 1)
+        )
+    }
+}
+
 private struct DeferredCardSectionHeader: View {
     let card: DeferredCard
     let cycleSummary: DeferredCardService.CycleSummary

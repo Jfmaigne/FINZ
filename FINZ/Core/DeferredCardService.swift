@@ -56,19 +56,40 @@ struct DeferredCardService {
             }
         }
         
-        // Date de prélèvement (généralement le mois suivant la bascule)
-        if cutoffMonth == 12 {
-            debitMonth = 1
-            debitYear = cutoffYear + 1
-        } else {
-            debitMonth = cutoffMonth + 1
+        // Date de prélèvement
+        // Si le jour de prélèvement est APRÈS le jour de bascule dans le mois,
+        // le prélèvement a lieu dans le MÊME mois que la bascule.
+        // Sinon (debitDay <= cutoffDay), le prélèvement est le mois suivant.
+        if debitDay > cutoffDay {
+            // Prélèvement dans le même mois que la bascule
+            debitMonth = cutoffMonth
             debitYear = cutoffYear
+        } else {
+            // Prélèvement le mois suivant la bascule
+            if cutoffMonth == 12 {
+                debitMonth = 1
+                debitYear = cutoffYear + 1
+            } else {
+                debitMonth = cutoffMonth + 1
+                debitYear = cutoffYear
+            }
         }
         
         // Construire les dates
         let cycleStart = calendar.date(from: DateComponents(year: cycleStartYear, month: cycleStartMonth, day: cutoffDay + 1)) ?? referenceDate
         let cutoffDate = calendar.date(from: DateComponents(year: cutoffYear, month: cutoffMonth, day: cutoffDay)) ?? referenceDate
-        let debitDate = calendar.date(from: DateComponents(year: debitYear, month: debitMonth, day: debitDay)) ?? referenceDate
+        
+        // Pour la date de prélèvement, ajuster au dernier jour du mois si configuré >= 28
+        let debitDateComponents = DateComponents(year: debitYear, month: debitMonth, day: 1)
+        let debitMonthDate = calendar.date(from: debitDateComponents) ?? referenceDate
+        let lastDayOfDebitMonth = calendar.range(of: .day, in: .month, for: debitMonthDate)?.count ?? 30
+        let effectiveDebitDay: Int
+        if debitDay >= 28 {
+            effectiveDebitDay = lastDayOfDebitMonth
+        } else {
+            effectiveDebitDay = min(debitDay, lastDayOfDebitMonth)
+        }
+        let debitDate = calendar.date(from: DateComponents(year: debitYear, month: debitMonth, day: effectiveDebitDay)) ?? referenceDate
         
         return (cycleStart, cutoffDate, debitDate)
     }
@@ -78,6 +99,14 @@ struct DeferredCardService {
         let calendar = Calendar.current
         let currentDay = calendar.component(.day, from: referenceDate)
         return currentDay <= Int(card.cutoffDay)
+    }
+    
+    /// Calcule la date de référence pour le cycle précédent
+    /// Le cycle précédent est celui qui sera prélevé prochainement ou qui vient d'être prélevé
+    static func previousCycleReferenceDate(for card: DeferredCard, referenceDate: Date = Date()) -> Date {
+        let calendar = Calendar.current
+        // Reculer d'un mois pour obtenir le cycle précédent
+        return calendar.date(byAdding: .month, value: -1, to: referenceDate) ?? referenceDate
     }
     
     // MARK: - Budget Impact Calculation
