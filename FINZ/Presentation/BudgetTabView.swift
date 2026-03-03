@@ -410,6 +410,7 @@ struct AccountView: View {
     @State private var pendingImportURL: URL? = nil
     @State private var showingSignOutAlert = false
     @State private var showingCategoryManagement = false
+    @State private var forecastDay: Int = AppSettings.forecastDay
 
     var body: some View {
         NavigationStack {
@@ -474,6 +475,32 @@ struct AccountView: View {
                     .disabled(isResetting)
                 }
 
+                Section(header: Text("Prévisionnel")) {
+                    Picker("Date du prévisionnel", selection: $forecastDay) {
+                        Text("Dernier jour du mois").tag(0)
+                        ForEach(1...28, id: \.self) { day in
+                            Text("Le \(day) du mois").tag(day)
+                        }
+                    }
+                    .onChange(of: forecastDay) {
+                        AppSettings.forecastDay = forecastDay
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("C'est quoi le prévisionnel ?", systemImage: "info.circle")
+                            .font(.headline)
+                        Text("Le prévisionnel, c'est ta projection de thunes 💰 à une date précise du mois. En gros, on prend tout ce qui rentre (salaire, aides…) et tout ce qui sort (loyer, abos, courses…) et on te calcule combien il te restera sur ton compte à cette date-là.")
+                            .font(.caption)
+                        Text("La date que tu choisis ici, c'est super important ! 📅")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                        Text("💡 Notre conseil : mets la veille du jour où tu reçois ton salaire ou tes allocs. Comme ça tu vois vraiment combien il te reste juste avant que ça tombe. Si t'as pas de date précise, le dernier jour du mois c'est un bon choix pour avoir une vision complète de ton budget.")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 8)
+                }
+
                 Section(header: Text("Authentification")) {
                     if let user = authService.user {
                         VStack(alignment: .leading, spacing: 8) {
@@ -506,6 +533,7 @@ struct AccountView: View {
             .finzHeader()
             .onAppear {
                 firstName = AppSettings.firstName
+                forecastDay = AppSettings.forecastDay
             }
             .alert("Confirmer la déconnexion", isPresented: $showingSignOutAlert) {
                 Button("Annuler", role: .cancel) {}

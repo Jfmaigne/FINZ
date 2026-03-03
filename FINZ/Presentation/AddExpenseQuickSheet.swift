@@ -30,9 +30,7 @@ struct AddExpenseQuickSheet: View {
     // FINZ gradient colors
     private let finzPurple = Color(red: 0.52, green: 0.21, blue: 0.93)
     private let finzPink = Color(red: 1.00, green: 0.29, blue: 0.63)
-    private var finzGradient: LinearGradient {
-        LinearGradient(colors: [finzPurple, finzPink], startPoint: .leading, endPoint: .trailing)
-    }
+    private let finzGradient = LinearGradient(colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)], startPoint: .leading, endPoint: .trailing)
     private let grayFill = LinearGradient(colors: [Color(.systemGray6), Color(.systemGray6)], startPoint: .top, endPoint: .bottom)
     private let clearGradient = LinearGradient(colors: [Color.clear, Color.clear], startPoint: .leading, endPoint: .trailing)
 
@@ -44,59 +42,40 @@ struct AddExpenseQuickSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                LinearGradient(
-                    colors: [Color.blue.opacity(0.04), Color.purple.opacity(0.04), Color.pink.opacity(0.04)],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                )
+        ZStack {
+            Color(UIColor.systemGroupedBackground)
                 .ignoresSafeArea()
 
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 0) {
-                        headerView
-                        amountCardView
-                        if isReady {
-                            if !deferredCards.isEmpty {
-                                deferredCardSectionView
-                            }
-                            if !mainCategories.isEmpty {
-                                categorySectionView
-                                subCategorySectionView
-                            }
-                            dateSectionView
-                            errorView
-                            saveButtonView
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 0) {
+                    headerView
+                    amountCardView
+                    if isReady {
+                        if !deferredCards.isEmpty {
+                            deferredCardSectionView
                         }
-                        Color.clear.frame(height: 40)
+                        if !mainCategories.isEmpty {
+                            categorySectionView
+                            subCategorySectionView
+                        }
+                        dateSectionView
+                        errorView
+                        saveButtonView
                     }
-                    .padding(.vertical, 8)
+                    Color.clear.frame(height: 40)
                 }
-                .scrollDismissesKeyboard(.immediately)
-
-                if showSuccess {
-                    successOverlay
-                }
+                .padding(.vertical, 8)
             }
-            .navigationBarHidden(true)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("OK") {
-                        amountFocused = false
-                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    }
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(finzPurple)
-                }
+            .scrollDismissesKeyboard(.immediately)
+
+            if showSuccess {
+                successOverlay
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        .onAppear {
+        .task {
             loadCategories()
-            DispatchQueue.main.async {
-                isReady = true
-            }
+            isReady = true
         }
     }
 
@@ -132,6 +111,14 @@ struct AddExpenseQuickSheet: View {
                 .font(.system(size: 44, weight: .bold, design: .rounded))
                 .foregroundStyle(Color(white: 0.1))
                 .minimumScaleFactor(0.5)
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("OK") { amountFocused = false }
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(finzPurple)
+                    }
+                }
             Text("€")
                 .font(.system(size: 22, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)

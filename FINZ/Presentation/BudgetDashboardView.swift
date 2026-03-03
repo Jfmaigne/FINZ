@@ -131,7 +131,7 @@ struct BudgetDashboardView: View {
                             .frame(maxWidth: .infinity)
                             
                             HStack { Spacer()
-                                Text("Tu gères ce mois-ci 😎")
+                                Text(balanceMessage)
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                                 Spacer() }
@@ -256,13 +256,21 @@ struct BudgetDashboardView: View {
                                         .foregroundStyle(Color.secondary)
                                     Spacer() }
                                 
+                                if AppSettings.forecastDay > 0 && AppSettings.forecastDay < 28 {
+                                    HStack { Spacer()
+                                        Text("au \(AppSettings.forecastDay) du mois")
+                                            .font(.caption)
+                                            .foregroundStyle(Color(red: 0.52, green: 0.21, blue: 0.93).opacity(0.7))
+                                        Spacer() }
+                                }
+                                
                                 HStack { Spacer()
                                     Text(formatCurrency(forecast))
                                         .font(.system(size: 52, weight: .bold, design: .rounded))
                                     Spacer() }
                                 
                                 HStack { Spacer()
-                                    Text("Profite pour mettre de côté !")
+                                    Text(forecastMessage)
                                         .font(.subheadline)
                                         .foregroundStyle(Color(red: 0.52, green: 0.21, blue: 0.93))
                                     Spacer() }
@@ -496,8 +504,32 @@ struct BudgetDashboardView: View {
             // Add deferred cards budget impact
             let deferredCardsImpact = calculateDeferredCardsImpact(for: monthDate)
             expensesTotal += Decimal(deferredCardsImpact)
-            
-            let endBalance = runningStart + incomesTotal - expensesTotal
+
+            // Calcul du prévisionnel à la date configurée
+            let forecastDay = AppSettings.forecastDay
+            let forecastIncomes: Decimal
+            let forecastExpenses: Decimal
+
+            if forecastDay > 0 && forecastDay < 28 {
+                // Filtrer les opérations jusqu'au jour du prévisionnel
+                let lastDay = cal.range(of: .day, in: .month, for: monthDate)?.count ?? 30
+                let effectiveDay = min(forecastDay, lastDay)
+                
+                forecastIncomes = incomes
+                    .filter { cal.component(.day, from: $0.date) <= effectiveDay }
+                    .reduce(Decimal.zero) { $0 + Decimal($1.amount) }
+                let filteredExpenses = expenses
+                    .filter { cal.component(.day, from: $0.date) <= effectiveDay }
+                    .reduce(Decimal.zero) { $0 + Decimal(abs($1.amount)) }
+                // Les cartes sont prélevées en fin de mois, pas avant le jour du prévisionnel
+                forecastExpenses = filteredExpenses
+            } else {
+                // Fin de mois (0 ou >= 28) : tout est pris en compte
+                forecastIncomes = incomesTotal
+                forecastExpenses = expensesTotal
+            }
+
+            let endBalance = runningStart + forecastIncomes - forecastExpenses
             result.append(.init(monthIndex: offset, monthDate: monthDate, monthKey: monthKey, startBalance: runningStart, incomes: incomesTotal, expenses: expensesTotal, endBalance: endBalance))
             runningStart = endBalance
         }
@@ -597,6 +629,137 @@ struct BudgetDashboardView: View {
         let endOfMonth = calendar.date(from: endComponents) ?? now
         let diff = calendar.dateComponents([.day], from: now, to: endOfMonth)
         return max(0, (diff.day ?? 0))
+    }
+
+    // MARK: - Messages dynamiques GenZ
+
+    /// Message sous le solde actuel, adapté à la situation en cours
+    private var balanceMessage: String {
+        let balance = NSDecimalNumber(decimal: currentBalance).doubleValue
+        let forecastVal = NSDecimalNumber(decimal: forecast).doubleValue
+        let incomes = NSDecimalNumber(decimal: fixedIncomes).doubleValue
+        let expenses = NSDecimalNumber(decimal: fixedExpenses).doubleValue
+        let daysLeft = daysLeftInMonth
+        let totalDays = Calendar.current.range(of: .day, in: .month, for: Date())?.count ?? 30
+        let daysPassed = totalDays - daysLeft
+        let progressRatio = Double(daysPassed) / Double(totalDays)
+        let startBal = NSDecimalNumber(decimal: initialBalance).doubleValue
+
+        // Mois futur
+        if selectedMonthIndex > 0 {
+            if forecastVal > startBal {
+                return "Ce mois s'annonce bien 📈"
+            } else if forecastVal > 0 {
+                return "Ça devrait passer, mais reste vigilant 👀"
+            } else {
+                return "Attention, ça va être serré 😬"
+            }
+        }
+
+        // Solde négatif ou très bas
+        if balance < 0 {
+            return "Tu es dans le rouge, fais gaffe 🚨"
+        }
+        if balance < 50 {
+            if daysLeft > 15 {
+                return "C'est chaud là… 🥵 Serre les dépenses"
+            }
+            return "Dernier sprint, tiens bon 💪"
+        }
+
+        // Début de mois (< 33% du mois passé)
+        if progressRatio < 0.33 {
+            if balance > startBal * 0.9 {
+                return "Bon début de mois, continue comme ça 🚀"
+            }
+            if balance < startBal * 0.5 {
+                return "Déjà la moitié de cramé ? Doucement 😅"
+            }
+            return "Le mois commence, t'as le contrôle 😎"
+        }
+
+        // Milieu de mois (33-66%)
+        if progressRatio < 0.66 {
+            if forecastVal > 500 {
+                return "Tu gères tranquille ce mois-ci 😎"
+            }
+            if forecastVal > 0 {
+                return "Ça se tient, reste focus 🎯"
+            }
+            return "Ça va être juste… freine un peu 🛑"
+        }
+
+        // Fin de mois (> 66%)
+        if forecastVal > 500 {
+            return "Bien joué, t'assures en fin de mois 🏆"
+        }
+        if forecastVal > 100 {
+            return "Presque fini, tu gères 💪"
+        }
+        if forecastVal > 0 {
+            return "Fin de mois serrée mais tu tiens 🤞"
+        }
+        return "Accroche-toi, c'est bientôt fini 😬"
+    }
+
+    /// Message sous le prévisionnel, adapté au montant et à la position dans le mois
+    private var forecastMessage: String {
+        let forecastVal = NSDecimalNumber(decimal: forecast).doubleValue
+        let balance = NSDecimalNumber(decimal: currentBalance).doubleValue
+        let daysLeft = daysLeftInMonth
+        let totalDays = Calendar.current.range(of: .day, in: .month, for: Date())?.count ?? 30
+        let progressRatio = Double(totalDays - daysLeft) / Double(totalDays)
+
+        // Mois futur
+        if selectedMonthIndex > 0 {
+            if forecastVal > 1000 {
+                return "Ça s'annonce plutôt cool 💰"
+            } else if forecastVal > 200 {
+                return "Devrait le faire, mais on anticipe 📊"
+            } else if forecastVal > 0 {
+                return "Ce sera un mois serré, prévois le coup 🧐"
+            } else {
+                return "Danger en vue, revois tes dépenses ⚠️"
+            }
+        }
+
+        // Prévisionnel négatif
+        if forecastVal < 0 {
+            if progressRatio < 0.33 {
+                return "Red flag en début de mois 🚩 Réduis tes dépenses !"
+            }
+            return "Prévisionnel négatif, coupe le superflu 🚨"
+        }
+
+        // Prévisionnel très faible (< 50€)
+        if forecastVal < 50 {
+            if daysLeft > 20 {
+                return "Il reste du mois… faut vraiment ralentir 😰"
+            }
+            return "Ça passe ric-rac, évite les extras 🤏"
+        }
+
+        // Prévisionnel moyen (50-200€)
+        if forecastVal < 200 {
+            if progressRatio < 0.5 {
+                return "C'est jouable mais fais attention 🎯"
+            }
+            return "Pas mal, mais reste raisonnable 🧘"
+        }
+
+        // Prévisionnel confortable (200-500€)
+        if forecastVal < 500 {
+            if progressRatio < 0.5 {
+                return "Bien parti, continue comme ça 📈"
+            }
+            return "T'es large, profite pour épargner 🐷"
+        }
+
+        // Prévisionnel excellent (> 500€)
+        if forecastVal > 1000 {
+            return "On est large, place tes thunes 🏦✨"
+        }
+        return "Profite pour mettre de côté 💰"
     }
 
     private func fetchIncomeOccurrencesForCurrentMonth() throws -> [BudgetEntryOccurrence] {

@@ -37,7 +37,7 @@ struct FinzHeader: ViewModifier {
     func body(content: Content) -> some View {
         ZStack(alignment: .top) {
             content
-                .padding(.top, 110)
+                .padding(.top, title != nil ? 140 : 110)
             
             VStack(spacing: 0) {
                 HStack {
@@ -50,6 +50,18 @@ struct FinzHeader: ViewModifier {
                     Spacer()
                 }
                 .padding(.top, -35)
+                
+                if let title = title {
+                    HStack {
+                        Text(title)
+                            .font(.system(size: 40, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color(white: 0.1))
+                            .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 5)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, -10)
+                }
             }
             .frame(maxWidth: .infinity)
             .background(
