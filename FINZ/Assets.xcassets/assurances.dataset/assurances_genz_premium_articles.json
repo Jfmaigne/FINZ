@@ -1,0 +1,565 @@
+{
+  "category": "Les assurances",
+  "articles": [
+    {
+      "id": 1,
+      "title": "Le guide simple pour comprendre les assurances",
+      "hook": "Si tu comprends ça tôt, tu as déjà un avantage énorme.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels.",
+      "actions_a_tester": [
+        "Teste une app de gestion d'argent",
+        "Vérifie ton compte une fois par semaine",
+        "Supprime un abonnement inutile"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 2,
+      "title": "Comment devenir meilleur avec les assurances",
+      "hook": "On ne l’apprend presque jamais à l’école.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières.",
+      "actions_a_tester": [
+        "Vérifie ton compte une fois par semaine",
+        "Supprime un abonnement inutile",
+        "Teste une app de gestion d'argent"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 3,
+      "title": "Le guide simple pour comprendre les assurances",
+      "hook": "La plupart des gens découvrent ça beaucoup trop tard.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels.",
+      "actions_a_tester": [
+        "Automatise une petite épargne",
+        "Planifie tes grosses dépenses",
+        "Regarde tes dépenses pendant 30 jours"
+      ],
+      "quiz": {
+        "question": "Pourquoi fixer un objectif financier est utile ?",
+        "choices": [
+          "Pour rester motivé",
+          "Pour dépenser plus",
+          "Cela ne sert à rien"
+        ],
+        "answer": 0
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 4,
+      "title": "La vérité sur les assurances que peu de gens expliquent",
+      "hook": "Si tu comprends ça tôt, tu as déjà un avantage énorme.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels.",
+      "actions_a_tester": [
+        "Supprime un abonnement inutile",
+        "Regarde tes dépenses pendant 30 jours",
+        "Automatise une petite épargne"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 5,
+      "title": "Personne ne t’a appris ça sur les assurances (et c’est dommage)",
+      "hook": "On ne l’apprend presque jamais à l’école.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé. Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine.",
+      "actions_a_tester": [
+        "Vérifie ton compte une fois par semaine",
+        "Note tes dépenses principales",
+        "Planifie tes grosses dépenses"
+      ],
+      "quiz": {
+        "question": "Pourquoi fixer un objectif financier est utile ?",
+        "choices": [
+          "Pour rester motivé",
+          "Pour dépenser plus",
+          "Cela ne sert à rien"
+        ],
+        "answer": 0
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 6,
+      "title": "Comment devenir meilleur avec les assurances",
+      "hook": "Spoiler : ce n’est pas aussi compliqué que ça en a l’air.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs.",
+      "actions_a_tester": [
+        "Note tes dépenses principales",
+        "Fixe un petit objectif financier",
+        "Vérifie ton compte une fois par semaine"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 7,
+      "title": "La vérité sur les assurances que peu de gens expliquent",
+      "hook": "On ne l’apprend presque jamais à l’école.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé.",
+      "actions_a_tester": [
+        "Note tes dépenses principales",
+        "Vérifie ton compte une fois par semaine",
+        "Teste une app de gestion d'argent"
+      ],
+      "quiz": {
+        "question": "Pourquoi fixer un objectif financier est utile ?",
+        "choices": [
+          "Pour rester motivé",
+          "Pour dépenser plus",
+          "Cela ne sert à rien"
+        ],
+        "answer": 0
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 8,
+      "title": "Personne ne t’a appris ça sur les assurances (et c’est dommage)",
+      "hook": "La plupart des gens découvrent ça beaucoup trop tard.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières.",
+      "actions_a_tester": [
+        "Regarde tes dépenses pendant 30 jours",
+        "Vérifie ton compte une fois par semaine",
+        "Automatise une petite épargne"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 9,
+      "title": "Le guide simple pour comprendre les assurances",
+      "hook": "Si tu comprends ça tôt, tu as déjà un avantage énorme.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine.",
+      "actions_a_tester": [
+        "Vérifie ton compte une fois par semaine",
+        "Fixe un petit objectif financier",
+        "Supprime un abonnement inutile"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 10,
+      "title": "La vérité sur les assurances que peu de gens expliquent",
+      "hook": "Si tu comprends ça tôt, tu as déjà un avantage énorme.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières.",
+      "actions_a_tester": [
+        "Note tes dépenses principales",
+        "Automatise une petite épargne",
+        "Planifie tes grosses dépenses"
+      ],
+      "quiz": {
+        "question": "Pourquoi fixer un objectif financier est utile ?",
+        "choices": [
+          "Pour rester motivé",
+          "Pour dépenser plus",
+          "Cela ne sert à rien"
+        ],
+        "answer": 0
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 11,
+      "title": "Comment devenir meilleur avec les assurances",
+      "hook": "On ne l’apprend presque jamais à l’école.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé.",
+      "actions_a_tester": [
+        "Supprime un abonnement inutile",
+        "Note tes dépenses principales",
+        "Regarde tes dépenses pendant 30 jours"
+      ],
+      "quiz": {
+        "question": "Pourquoi fixer un objectif financier est utile ?",
+        "choices": [
+          "Pour rester motivé",
+          "Pour dépenser plus",
+          "Cela ne sert à rien"
+        ],
+        "answer": 0
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 12,
+      "title": "Débuter avec les assurances sans se prendre la tête",
+      "hook": "Spoiler : ce n’est pas aussi compliqué que ça en a l’air.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé.",
+      "actions_a_tester": [
+        "Note tes dépenses principales",
+        "Regarde tes dépenses pendant 30 jours",
+        "Supprime un abonnement inutile"
+      ],
+      "quiz": {
+        "question": "Pourquoi fixer un objectif financier est utile ?",
+        "choices": [
+          "Pour rester motivé",
+          "Pour dépenser plus",
+          "Cela ne sert à rien"
+        ],
+        "answer": 0
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 13,
+      "title": "Débuter avec les assurances sans se prendre la tête",
+      "hook": "Si tu comprends ça tôt, tu as déjà un avantage énorme.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs.",
+      "actions_a_tester": [
+        "Supprime un abonnement inutile",
+        "Teste une app de gestion d'argent",
+        "Vérifie ton compte une fois par semaine"
+      ],
+      "quiz": {
+        "question": "Pourquoi fixer un objectif financier est utile ?",
+        "choices": [
+          "Pour rester motivé",
+          "Pour dépenser plus",
+          "Cela ne sert à rien"
+        ],
+        "answer": 0
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 14,
+      "title": "Débuter avec les assurances sans se prendre la tête",
+      "hook": "On ne l’apprend presque jamais à l’école.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine.",
+      "actions_a_tester": [
+        "Note tes dépenses principales",
+        "Fixe un petit objectif financier",
+        "Vérifie ton compte une fois par semaine"
+      ],
+      "quiz": {
+        "question": "Pourquoi fixer un objectif financier est utile ?",
+        "choices": [
+          "Pour rester motivé",
+          "Pour dépenser plus",
+          "Cela ne sert à rien"
+        ],
+        "answer": 0
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 15,
+      "title": "Le guide simple pour comprendre les assurances",
+      "hook": "On ne l’apprend presque jamais à l’école.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé. Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières.",
+      "actions_a_tester": [
+        "Regarde tes dépenses pendant 30 jours",
+        "Note tes dépenses principales",
+        "Teste une app de gestion d'argent"
+      ],
+      "quiz": {
+        "question": "Pourquoi fixer un objectif financier est utile ?",
+        "choices": [
+          "Pour rester motivé",
+          "Pour dépenser plus",
+          "Cela ne sert à rien"
+        ],
+        "answer": 0
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 16,
+      "title": "Le guide simple pour comprendre les assurances",
+      "hook": "Spoiler : ce n’est pas aussi compliqué que ça en a l’air.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé. Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières.",
+      "actions_a_tester": [
+        "Planifie tes grosses dépenses",
+        "Fixe un petit objectif financier",
+        "Automatise une petite épargne"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 17,
+      "title": "La vérité sur les assurances que peu de gens expliquent",
+      "hook": "Si tu comprends ça tôt, tu as déjà un avantage énorme.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs.",
+      "actions_a_tester": [
+        "Vérifie ton compte une fois par semaine",
+        "Planifie tes grosses dépenses",
+        "Supprime un abonnement inutile"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 18,
+      "title": "Comment devenir meilleur avec les assurances",
+      "hook": "Si tu comprends ça tôt, tu as déjà un avantage énorme.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé. Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs.",
+      "actions_a_tester": [
+        "Fixe un petit objectif financier",
+        "Vérifie ton compte une fois par semaine",
+        "Planifie tes grosses dépenses"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 19,
+      "title": "La vérité sur les assurances que peu de gens expliquent",
+      "hook": "Si tu comprends ça tôt, tu as déjà un avantage énorme.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Par exemple, beaucoup de personnes découvrent que de petites dépenses répétées peuvent représenter une somme importante sur une année entière. Ce n’est pas forcément une mauvaise chose, mais c’est utile d’en être conscient pour faire des choix plus intentionnels. Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé.",
+      "actions_a_tester": [
+        "Automatise une petite épargne",
+        "Note tes dépenses principales",
+        "Vérifie ton compte une fois par semaine"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    },
+    {
+      "id": 20,
+      "title": "Comment devenir meilleur avec les assurances",
+      "hook": "On ne l’apprend presque jamais à l’école.",
+      "reading_time_minutes": 2,
+      "level": "débutant",
+      "tags": [
+        "les assurances",
+        "argent",
+        "finances personnelles"
+      ],
+      "content": "Quand on commence à s’intéresser à ses finances, beaucoup de notions peuvent sembler floues. Pourtant, comprendre les bases peut vraiment changer ta relation avec l’argent. Ce n’est pas une question d’être riche ou d’avoir un gros salaire : c’est surtout une question d’habitudes et de décisions régulières. Avec le temps, ces petits réflexes deviennent des habitudes. Et ces habitudes créent une situation financière beaucoup plus stable et sereine. Un bon réflexe est de commencer petit. Pas besoin de tout changer du jour au lendemain. Quelques ajustements simples peuvent déjà avoir un impact positif sur tes finances au fil du temps. Dans la réalité, beaucoup de personnes gèrent leur argent au feeling. Elles regardent leur compte rapidement, dépensent quand elles en ont envie et espèrent simplement que tout ira bien à la fin du mois. Le problème, c’est que cette approche peut créer du stress et empêcher d’avancer vers ses objectifs. Prendre le temps de comprendre comment fonctionne ton argent peut te donner beaucoup plus de contrôle. Tu peux décider où ton argent va, plutôt que de te demander où il est passé.",
+      "actions_a_tester": [
+        "Vérifie ton compte une fois par semaine",
+        "Teste une app de gestion d'argent",
+        "Note tes dépenses principales"
+      ],
+      "quiz": {
+        "question": "Quelle habitude aide le plus à mieux gérer son argent ?",
+        "choices": [
+          "Ignorer ses dépenses",
+          "Suivre régulièrement ses dépenses",
+          "Dépenser tout son argent"
+        ],
+        "answer": 1
+      },
+      "illustration_idea": "Illustration minimaliste représentant les assurances et la gestion d'argent."
+    }
+  ]
+}
