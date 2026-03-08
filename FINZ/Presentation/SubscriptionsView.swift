@@ -76,9 +76,8 @@ struct SubscriptionsView: View {
             )
             .ignoresSafeArea()
         )
-        .finzHeader()
+        .finzHeader(title: "Abonnements")
         .stickyNextButton(enabled: canProceed, action: startFlow)
-        .navigationTitle("Abonnements")
         .navigationBarTitleDisplayMode(.inline)
     }
 

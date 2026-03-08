@@ -71,9 +71,8 @@ struct SubscriptionsMusicView: View {
             )
             .ignoresSafeArea()
         )
-        .finzHeader()
+        .finzHeader(title: "Abonnements Musique")
         .stickyNextButton(enabled: canProceed, action: onNext)
-        .navigationTitle("Abonnements Musique")
         .navigationBarTitleDisplayMode(.inline)
     }
 

@@ -39,7 +39,7 @@ public struct ForecastLandscapeView: View {
                         .padding(12)
                         .background(Color.black.opacity(0.06))
                         .clipShape(Circle())
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.primary)
                         .padding(.top, 20)
                         .padding(.leading, 20)
                 }
@@ -118,7 +118,7 @@ public struct ForecastLandscapeView: View {
                     let x = xFor(index: i, count: series.count, rect: plotRect)
                     let y = yFor(value: (item.balance as NSDecimalNumber).doubleValue, lo: mm.lo, hi: mm.hi, rect: plotRect)
                     Circle()
-                        .fill(Color.white)
+                        .fill(Color(.systemBackground))
                         .frame(width: 4, height: 4)
                         .position(x: x, y: y)
                 }
@@ -151,13 +151,13 @@ public struct ForecastLandscapeView: View {
                             .foregroundStyle(.secondary)
                         Text(currency((series[idx].balance as NSDecimalNumber).doubleValue))
                             .font(.headline)
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.primary)
                     }
                     .padding(8)
                     .frame(width: bubbleWidth)
                     .background(
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color.white)
+                            .fill(Color(.systemBackground))
                             .shadow(color: Color.black.opacity(0.12), radius: 6, x: 0, y: 3)
                     )
                     .overlay(

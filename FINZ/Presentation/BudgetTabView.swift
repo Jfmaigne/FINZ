@@ -10,22 +10,16 @@ extension Notification.Name {
     static let switchToProfile = Notification.Name("switchToProfile")
 }
 
-private func justified(_ string: String) -> AttributedString {
-    let paragraphStyle = NSMutableParagraphStyle()
-    paragraphStyle.alignment = .justified
-    let nsAttr = NSAttributedString(
-        string: string,
-        attributes: [
-            .paragraphStyle: paragraphStyle
-        ]
-    )
-    return AttributedString(nsAttr)
-}
-
 struct BudgetTabView: View {
     @State private var selectedTab: Tab = .budget
     @EnvironmentObject var vm: QuestionnaireViewModel
     @Environment(\.modelContext) var modelContext
+    @ObservedObject private var readTracker = ArticleReadTracker.shared
+
+    private var totalNewArticles: Int {
+        let _ = readTracker.lastUpdate
+        return readTracker.totalNewCount
+    }
 
     enum Tab: Hashable {
         case budget, stats, learn, lexicon, account
@@ -76,6 +70,7 @@ struct BudgetTabView: View {
                 Label(Tab.learn.title, systemImage: Tab.learn.systemImage)
             }
             .tag(Tab.learn)
+            .badge(totalNewArticles)
 
             // LexiconView is defined in LexiconModule.swift
             NavigationStack {
@@ -111,7 +106,7 @@ struct BudgetProfileSetupView: View {
                 Spacer()
             }
             .padding()
-            .finzHeader()
+            .finzHeader(title: "Profil Budget")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -121,37 +116,50 @@ struct LearnView: View {
     @State private var carouselIndex: Int = 0
     @State private var timerSubscription: AnyCancellable?
     @Environment(\.scenePhase) private var scenePhase
+    @ObservedObject private var readTracker = ArticleReadTracker.shared
 
-    // Carousel items (banners)
-    private let banners: [CarouselItem] = [
-        .init(category: "Catégorie Investissement", title: "PAR OU COMMENCER", subtitle: "Pour investir", gradient: [Color(red: 0.08, green: 0.22, blue: 0.78), Color(red: 0.74, green: 0.24, blue: 0.96)]),
-        .init(category: "Catégorie Budget", title: "GÉRER SES DÉPENSES", subtitle: "1ère étape", gradient: [Color(red: 0.04, green: 0.50, blue: 0.73), Color(red: 0.35, green: 0.74, blue: 0.94)]),
-        .init(category: "Catégorie Logement", title: "COMPRENDRE SON LOYER", subtitle: "Locataire / Propriétaire", gradient: [Color(red: 0.94, green: 0.43, blue: 0.31), Color(red: 0.98, green: 0.68, blue: 0.36)])
+    // Articles aléatoires pour le carrousel (chargés au lancement)
+    @State private var carouselArticles: [(article: BasesArticleData, category: String, asset: String)] = []
+
+    // Gradients pour le carrousel (cyclés)
+    private let gradients: [[Color]] = [
+        [Color(red: 0.08, green: 0.22, blue: 0.78), Color(red: 0.74, green: 0.24, blue: 0.96)],
+        [Color(red: 0.04, green: 0.50, blue: 0.73), Color(red: 0.35, green: 0.74, blue: 0.94)],
+        [Color(red: 0.94, green: 0.43, blue: 0.31), Color(red: 0.98, green: 0.68, blue: 0.36)],
+        [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
+        [Color(red: 0.20, green: 0.70, blue: 0.40), Color(red: 0.10, green: 0.85, blue: 0.65)]
     ]
 
     // 9 themed buttons grouped by sections
     private let sections: [(title: String, items: [LearnItem])] = [
         ("Je débute", [
-            LearnItem(title: "Les bases", imageName: "Bases", asset: "articles_budget_gestion_genz"),
-            LearnItem(title: "Budget", imageName: "Budget", asset: "articles_budget_gestion_genz"),
-            LearnItem(title: "Epargne", imageName: "Epargne", asset: "articles_budget_gestion_genz")
+            LearnItem(title: "Les bases", imageName: "Bases", asset: "bases"),
+            LearnItem(title: "Budget", imageName: "Budget", asset: "budget"),
+            LearnItem(title: "Epargne", imageName: "Epargne", asset: "epargne")
         ]),
         ("Je sécurise", [
-            LearnItem(title: "Projets", imageName: "Projets", asset: "articles_logement_genz"),
-            LearnItem(title: "Assurances", imageName: "Assurances", asset: "articles_logement_genz"),
-            LearnItem(title: "Astuces", imageName: "Astuces", asset: "articles_budget_gestion_genz")
+            LearnItem(title: "Projets", imageName: "Projets", asset: "projets"),
+            LearnItem(title: "Assurances", imageName: "Assurances", asset: "assurances"),
+            LearnItem(title: "Astuces", imageName: "Astuces", asset: "astuces")
         ]),
         ("Je développe", [
-            LearnItem(title: "Crédit", imageName: "Crédit", asset: "articles_budget_gestion_genz"),
-            LearnItem(title: "Investissement", imageName: "Investissement", asset: "articles_investissement_genz"),
-            LearnItem(title: "Bourse", imageName: "Bourse", asset: "articles_investissement_genz")
+            LearnItem(title: "Crédit", imageName: "Crédit", asset: "credits"),
+            LearnItem(title: "Investissement", imageName: "Investissement", asset: "investissements"),
+            LearnItem(title: "Bourse", imageName: "Bourse", asset: "bourse")
         ])
     ]
+
+    /// Tous les assets des 9 catégories
+    private var allLearnAssets: [(title: String, asset: String)] {
+        sections.flatMap { section in
+            section.items.map { ($0.title, $0.asset) }
+        }
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 22) {
-                // En-tête "Les articles populaires" uniquement (le gros titre est désormais dans finzHeader)
+                // En-tête
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Les articles populaires")
                         .font(.headline)
@@ -161,27 +169,39 @@ struct LearnView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 12)
 
-                // Carrousel
-                TabView(selection: $carouselIndex) {
-                    ForEach(banners.indices, id: \.self) { idx in
-                        let item = banners[idx]
-                        NavigationLink {
-                            let asset = idx == 0 ? "articles_investissement_genz" : (idx == 1 ? "articles_budget_gestion_genz" : "articles_logement_genz")
-                            ArticlesListView(assetName: asset, title: item.title)
-                        } label: {
-                            CarouselBannerView(item: item)
+                // Carrousel d'articles aléatoires
+                if !carouselArticles.isEmpty {
+                    TabView(selection: $carouselIndex) {
+                        ForEach(carouselArticles.indices, id: \.self) { idx in
+                            let item = carouselArticles[idx]
+                            let gradient = gradients[idx % gradients.count]
+                            NavigationLink {
+                                BasesArticleDetailView(article: item.article)
+                            } label: {
+                                CarouselBannerView(item: CarouselItem(
+                                    category: item.category,
+                                    title: item.article.title,
+                                    subtitle: "\(item.article.reading_time_minutes) min • \(item.article.level)",
+                                    gradient: gradient
+                                ))
                                 .padding(.horizontal)
+                            }
+                            .tag(idx)
                         }
-                        .tag(idx)
                     }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+                    .frame(height: 120)
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
-                .frame(height: 120)
 
-                // Sections with 9 buttons (inchangées)
+                // Sections with 9 buttons
                 VStack(alignment: .leading, spacing: 10) {
+                    let _ = readTracker.lastUpdate // force refresh
                     ForEach(sections, id: \.title) { section in
-                        LearnSection(title: section.title, items: section.items)
+                        LearnSection(
+                            title: section.title,
+                            items: section.items,
+                            badgeCounts: Dictionary(uniqueKeysWithValues: section.items.map { ($0.asset, readTracker.newCount(forAsset: $0.asset)) })
+                        )
                     }
                 }
                 .padding(.horizontal)
@@ -201,6 +221,8 @@ struct LearnView: View {
             .ignoresSafeArea()
         )
         .onAppear {
+            ArticleReadTracker.shared.preloadAllAssets()
+            loadCarouselArticles()
             startCarouselTimer()
         }
         .onDisappear {
@@ -215,6 +237,25 @@ struct LearnView: View {
         }
     }
     
+    /// Charge 5 articles au hasard parmi les 9 catégories
+    private func loadCarouselArticles() {
+        guard carouselArticles.isEmpty else { return }
+        var allArticles: [(article: BasesArticleData, category: String, asset: String)] = []
+        
+        for item in allLearnAssets {
+            if let data = ArticleCacheService.shared.loadData(forAsset: item.asset) {
+                if let envelope = try? JSONDecoder().decode(BasesDataEnvelope.self, from: data) {
+                    for article in envelope.articles {
+                        allArticles.append((article: article, category: envelope.category, asset: item.asset))
+                    }
+                }
+            }
+        }
+        
+        // Mélanger et prendre 5 articles
+        carouselArticles = Array(allArticles.shuffled().prefix(5))
+    }
+    
     private func startCarouselTimer() {
         // Cancel any existing timer first
         timerSubscription?.cancel()
@@ -222,7 +263,7 @@ struct LearnView: View {
         timerSubscription = Timer.publish(every: 4.0, on: .main, in: .common)
             .autoconnect()
             .sink { _ in
-                withAnimation { carouselIndex = (carouselIndex + 1) % max(banners.count, 1) }
+                withAnimation { carouselIndex = (carouselIndex + 1) % max(carouselArticles.count, 1) }
             }
     }
     
@@ -293,6 +334,7 @@ private struct CarouselBannerView: View {
 private struct LearnSection: View {
     let title: String
     let items: [LearnItem]
+    var badgeCounts: [String: Int] = [:]
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
 
@@ -306,17 +348,45 @@ private struct LearnSection: View {
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(items) { item in
                     NavigationLink {
-                        // Use CategoryArticlesView for items with dedicated JSON files
-                        if item.title == "Les bases" {
-                            CategoryArticlesView(assetName: "lesbases")
-                        } else {
-                            ArticlesListView(assetName: item.asset, title: item.title)
-                        }
+                        BasesArticlesView(
+                            assetName: item.asset,
+                            imageName: item.imageName ?? "Bases",
+                            subtitle: subtitleFor(item.title),
+                            levelLabel: levelFor(item.title)
+                        )
                     } label: {
-                        LearnGridButton(title: item.title, imageName: item.imageName)
+                        LearnGridButton(
+                            title: item.title,
+                            imageName: item.imageName,
+                            badgeCount: badgeCounts[item.asset] ?? 0
+                        )
                     }
                 }
             }
+        }
+    }
+
+    private func subtitleFor(_ title: String) -> String {
+        switch title {
+        case "Les bases": return "Apprends les fondamentaux 💡"
+        case "Budget": return "Maîtrise ton budget au quotidien 📊"
+        case "Epargne": return "Mets de côté intelligemment 🐷"
+        case "Projets": return "Concrétise tes projets de vie 🎯"
+        case "Assurances": return "Protège-toi sans te ruiner 🛡️"
+        case "Astuces": return "Les bons plans pour économiser 🧠"
+        case "Crédit": return "Comprends le crédit avant de signer ✍️"
+        case "Investissement": return "Fais travailler ton argent 📈"
+        case "Bourse": return "Découvre la bourse pas à pas 🏦"
+        default: return "Découvre les articles 📚"
+        }
+    }
+
+    private func levelFor(_ title: String) -> String {
+        switch title {
+        case "Les bases", "Budget", "Epargne", "Astuces": return "Débutant"
+        case "Projets", "Assurances", "Crédit": return "Intermédiaire"
+        case "Investissement", "Bourse": return "Avancé"
+        default: return "Débutant"
         }
     }
 }
@@ -324,11 +394,12 @@ private struct LearnSection: View {
 private struct LearnGridButton: View {
     let title: String
     let imageName: String?
+    var badgeCount: Int = 0
 
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white)
+                .fill(Color(.secondarySystemBackground))
                 .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
 
             VStack(spacing: 0) {
@@ -349,6 +420,19 @@ private struct LearnGridButton: View {
         }
         .frame(height: 96)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(alignment: .topTrailing) {
+            if badgeCount > 0 {
+                Text("\(badgeCount)")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(minWidth: 20, minHeight: 20)
+                    .background(
+                        Circle()
+                            .fill(Color.red)
+                    )
+                    .offset(x: 6, y: -6)
+            }
+        }
     }
 }
 
@@ -383,7 +467,7 @@ private struct LearnRowView: View {
                 .padding(.leading, 2)
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white))
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground)))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.gray.opacity(0.12)))
         .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
     }
@@ -394,7 +478,8 @@ struct AccountView: View {
     @EnvironmentObject var vm: QuestionnaireViewModel
     @EnvironmentObject var authService: AuthenticationService
     @State private var showingResetAlert = false
-    @State private var showingSuccessAlert = false
+    @State private var showingResetFinalAlert = false
+    @State private var showResetSuccess = false
     @State private var isResetting = false
     @State private var resetError: String? = nil
     @State private var showingProfileConfirm = false
@@ -413,6 +498,7 @@ struct AccountView: View {
     @State private var forecastDay: Int = AppSettings.forecastDay
 
     var body: some View {
+        ZStack {
         NavigationStack {
             Form {
                 Section(header: Text("Paramètres")) {
@@ -528,9 +614,8 @@ struct AccountView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-//            .navigationTitle("Compte")
             .navigationBarTitleDisplayMode(.inline)
-            .finzHeader()
+            .finzHeader(title: "Compte")
             .onAppear {
                 firstName = AppSettings.firstName
                 forecastDay = AppSettings.forecastDay
@@ -544,16 +629,19 @@ struct AccountView: View {
             } message: {
                 Text("Vous serez redirigé vers l'écran de connexion.")
             }
-            .alert("Confirmer la réinitialisation", isPresented: $showingResetAlert) {
+            .alert("Réinitialiser les données ?", isPresented: $showingResetAlert) {
                 Button("Annuler", role: .cancel) {}
-                Button("Supprimer", role: .destructive) { resetAllData() }
+                Button("Continuer", role: .destructive) {
+                    showingResetFinalAlert = true
+                }
             } message: {
-                Text("Cette action va supprimer toutes les données des tables Income, Expense et BudgetEntryOccurrence. Cette action est irréversible.")
+                Text("Tu es sur le point de supprimer toutes tes données (recettes, dépenses, opérations, cartes à débit différé). Les catégories par défaut seront conservées.")
             }
-            .alert("Données réinitialisées", isPresented: $showingSuccessAlert) {
-                Button("OK") {}
+            .alert("⚠️ Dernière confirmation", isPresented: $showingResetFinalAlert) {
+                Button("Annuler", role: .cancel) {}
+                Button("Supprimer définitivement", role: .destructive) { resetAllData() }
             } message: {
-                Text("Vos données ont été supprimées. Vous pouvez relancer le questionnaire.")
+                Text("Cette action est irréversible. Toutes tes données seront définitivement supprimées.")
             }
             .alert("Modifier le profil", isPresented: $showingProfileConfirm) {
                 Button("Annuler", role: .cancel) {}
@@ -599,7 +687,27 @@ struct AccountView: View {
             } message: {
                 if let error = importError { Text(error) }
             }
-        }
+        } // NavigationStack
+        
+            // Overlay de confirmation suppression (style recette mais en rouge)
+            if showResetSuccess {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                VStack(spacing: 16) {
+                    Image(systemName: "trash.circle.fill")
+                        .font(.system(size: 56))
+                        .foregroundStyle(.red)
+                    Text("Données supprimées")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundStyle(.red)
+                }
+                .padding(32)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
+                .transition(.opacity.combined(with: .scale))
+                .zIndex(100)
+            }
+        } // ZStack
+        .animation(.spring(response: 0.3), value: showResetSuccess)
         .sheet(isPresented: $showingExportSheet, onDismiss: {
             cleanupExportFile()
         }) {
@@ -628,32 +736,40 @@ struct AccountView: View {
         resetError = nil
         
         do {
+            // Fetch and delete all DeferredCardExpense entities
+            let cardExpFetch = FetchDescriptor<DeferredCardExpense>()
+            for item in try modelContext.fetch(cardExpFetch) { modelContext.delete(item) }
+            
+            // Fetch and delete all DeferredCard entities
+            let cardFetch = FetchDescriptor<DeferredCard>()
+            for item in try modelContext.fetch(cardFetch) { modelContext.delete(item) }
+            
             // Fetch and delete all Income entities
             let incomeFetch = FetchDescriptor<Income>()
-            let incomes = try modelContext.fetch(incomeFetch)
-            for income in incomes {
-                modelContext.delete(income)
-            }
+            for item in try modelContext.fetch(incomeFetch) { modelContext.delete(item) }
             
             // Fetch and delete all Expense entities
             let expenseFetch = FetchDescriptor<Expense>()
-            let expenses = try modelContext.fetch(expenseFetch)
-            for expense in expenses {
-                modelContext.delete(expense)
-            }
+            for item in try modelContext.fetch(expenseFetch) { modelContext.delete(item) }
             
             // Fetch and delete all BudgetEntryOccurrence entities
             let occurrenceFetch = FetchDescriptor<BudgetEntryOccurrence>()
-            let occurrences = try modelContext.fetch(occurrenceFetch)
-            for occurrence in occurrences {
-                modelContext.delete(occurrence)
-            }
+            for item in try modelContext.fetch(occurrenceFetch) { modelContext.delete(item) }
+            
+            // Les catégories et sous-catégories par défaut sont conservées
             
             try modelContext.save()
             
             // Notify UI and switch to questionnaire tab
             NotificationCenter.default.post(name: .didResetAllData, object: nil)
-            showingSuccessAlert = true
+            
+            // Haptic + overlay rouge
+            let gen = UINotificationFeedbackGenerator()
+            gen.notificationOccurred(.success)
+            withAnimation(.spring(response: 0.3)) { showResetSuccess = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation { showResetSuccess = false }
+            }
         } catch {
             resetError = "Échec de la réinitialisation: \(error.localizedDescription)"
         }
@@ -662,21 +778,13 @@ struct AccountView: View {
     
     private func exportBackup() async {
         let iso = ISO8601DateFormatter()
-        var payload: [String: Any] = [
-            "version": 1,
-            "exportedAt": iso.string(from: Date()),
-            "profile": ["firstName": AppSettings.firstName],
-            "entities": [:]
-        ]
 
         do {
-            var entitiesData: [String: [[String: Any]]] = [:]
-            
-            // Export Income
+            // SwiftData fetches doivent rester sur le main thread
             let incomeFetch = FetchDescriptor<Income>()
             let incomes = try modelContext.fetch(incomeFetch)
-            entitiesData["Income"] = incomes.map { income in
-                [
+            let incomeData: [[String: Any]] = incomes.map { income in
+                var dict: [String: Any] = [
                     "id": income.id.uuidString,
                     "amount": income.amount,
                     "complement": income.complement ?? "",
@@ -685,12 +793,14 @@ struct AccountView: View {
                     "months": income.months ?? "",
                     "periodicity": income.periodicity
                 ]
+                if let mainCategoryID = income.mainCategoryID { dict["mainCategoryID"] = mainCategoryID.uuidString }
+                if let subCategoryID = income.subCategoryID { dict["subCategoryID"] = subCategoryID.uuidString }
+                return dict
             }
-            
-            // Export Expense
+
             let expenseFetch = FetchDescriptor<Expense>()
             let expenses = try modelContext.fetch(expenseFetch)
-            entitiesData["Expense"] = expenses.map { expense in
+            let expenseData: [[String: Any]] = expenses.map { expense in
                 var dict: [String: Any] = [
                     "id": expense.id.uuidString,
                     "amount": expense.amount,
@@ -703,13 +813,14 @@ struct AccountView: View {
                 if let months = expense.months { dict["months"] = months }
                 if let note = expense.note { dict["note"] = note }
                 if let provider = expense.provider { dict["provider"] = provider }
+                if let mainCategoryID = expense.mainCategoryID { dict["mainCategoryID"] = mainCategoryID.uuidString }
+                if let subCategoryID = expense.subCategoryID { dict["subCategoryID"] = subCategoryID.uuidString }
                 return dict
             }
-            
-            // Export BudgetEntryOccurrence
+
             let occurrenceFetch = FetchDescriptor<BudgetEntryOccurrence>()
             let occurrences = try modelContext.fetch(occurrenceFetch)
-            entitiesData["BudgetEntryOccurrence"] = occurrences.map { occ in
+            let occurrenceData: [[String: Any]] = occurrences.map { occ in
                 var dict: [String: Any] = [
                     "id": occ.id.uuidString,
                     "date": iso.string(from: occ.date),
@@ -722,14 +833,100 @@ struct AccountView: View {
                 ]
                 if let title = occ.title { dict["title"] = title }
                 if let sourceid = occ.sourceid { dict["sourceid"] = sourceid.uuidString }
+                if let mainCategoryID = occ.mainCategoryID { dict["mainCategoryID"] = mainCategoryID.uuidString }
+                if let subCategoryID = occ.subCategoryID { dict["subCategoryID"] = subCategoryID.uuidString }
                 return dict
             }
-            
-            payload["entities"] = entitiesData
 
-            let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted])
-            let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("finz_backup.json")
-            try data.write(to: tmp, options: .atomic)
+            let cardFetch = FetchDescriptor<DeferredCard>()
+            let cards = try modelContext.fetch(cardFetch)
+            let cardData: [[String: Any]] = cards.map { card in
+                var dict: [String: Any] = [
+                    "id": card.id.uuidString,
+                    "name": card.name,
+                    "cutoffDay": card.cutoffDay,
+                    "debitDay": card.debitDay,
+                    "monthlyBudget": card.monthlyBudget,
+                    "isActive": card.isActive,
+                    "createdAt": iso.string(from: card.createdAt),
+                    "updatedAt": iso.string(from: card.updatedAt)
+                ]
+                if let lastFour = card.lastFourDigits { dict["lastFourDigits"] = lastFour }
+                return dict
+            }
+
+            let cardExpFetch = FetchDescriptor<DeferredCardExpense>()
+            let cardExpenses = try modelContext.fetch(cardExpFetch)
+            let cardExpData: [[String: Any]] = cardExpenses.map { ce in
+                var dict: [String: Any] = [
+                    "id": ce.id.uuidString,
+                    "cardID": ce.cardID.uuidString,
+                    "amount": ce.amount,
+                    "expenseDate": iso.string(from: ce.expenseDate),
+                    "cycleStartDate": iso.string(from: ce.cycleStartDate),
+                    "cycleEndDate": iso.string(from: ce.cycleEndDate),
+                    "isSettled": ce.isSettled,
+                    "createdAt": iso.string(from: ce.createdAt)
+                ]
+                if let desc = ce.expenseDescription { dict["expenseDescription"] = desc }
+                return dict
+            }
+
+            let mainCatFetch = FetchDescriptor<MainCategory>()
+            let mainCategories = try modelContext.fetch(mainCatFetch)
+            let mainCatData: [[String: Any]] = mainCategories.map { cat in
+                [
+                    "id": cat.id.uuidString,
+                    "name": cat.name,
+                    "displayName": cat.displayName,
+                    "icon": cat.icon,
+                    "color": cat.color,
+                    "categoryType": cat.categoryType,
+                    "order": cat.order
+                ] as [String: Any]
+            }
+
+            let subCatFetch = FetchDescriptor<SubCategory>()
+            let subCategories = try modelContext.fetch(subCatFetch)
+            let subCatData: [[String: Any]] = subCategories.map { sub in
+                var dict: [String: Any] = [
+                    "id": sub.id.uuidString,
+                    "name": sub.name,
+                    "displayName": sub.displayName,
+                    "icon": sub.icon,
+                    "order": sub.order
+                ]
+                if let mainCat = sub.mainCategory { dict["mainCategoryID"] = mainCat.id.uuidString }
+                return dict
+            }
+
+            // Sérialisation JSON + écriture fichier en background
+            let profileName = AppSettings.firstName
+            let profileForecast = AppSettings.forecastDay
+            
+            let tmp: URL = try await Task.detached(priority: .userInitiated) {
+                let payload: [String: Any] = [
+                    "version": 2,
+                    "exportedAt": iso.string(from: Date()),
+                    "profile": [
+                        "firstName": profileName,
+                        "forecastDay": profileForecast
+                    ],
+                    "entities": [
+                        "Income": incomeData,
+                        "Expense": expenseData,
+                        "BudgetEntryOccurrence": occurrenceData,
+                        "DeferredCard": cardData,
+                        "DeferredCardExpense": cardExpData,
+                        "MainCategory": mainCatData,
+                        "SubCategory": subCatData
+                    ]
+                ]
+                let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted])
+                let tmpURL = FileManager.default.temporaryDirectory.appendingPathComponent("finz_backup.json")
+                try data.write(to: tmpURL, options: .atomic)
+                return tmpURL
+            }.value
 
             await MainActor.run {
                 exportURL = tmp
@@ -743,39 +940,136 @@ struct AccountView: View {
     }
     
     private func importBackup(from url: URL) async {
+        let accessing = url.startAccessingSecurityScopedResource()
+        defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+        
+        // Lecture fichier + parsing JSON en background
+        let parseResult: (json: [String: Any], entities: [String: Any])?
         do {
-            let data = try Data(contentsOf: url)
-            guard
-                let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                let entities = json["entities"] as? [String: Any]
-            else {
-                await MainActor.run { importError = "Fichier invalide" }
-                return
-            }
-            if let profile = json["profile"] as? [String: Any], let first = profile["firstName"] as? String {
-                AppSettings.firstName = first
-                await MainActor.run { firstName = first }
+            parseResult = try await Task.detached(priority: .userInitiated) {
+                let data = try Data(contentsOf: url)
+                guard
+                    let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                    let entities = json["entities"] as? [String: Any]
+                else { return nil }
+                return (json, entities)
+            }.value
+        } catch {
+            await MainActor.run { importError = "Impossible de lire le fichier : \(error.localizedDescription)" }
+            return
+        }
+        
+        guard let parseResult else {
+            await MainActor.run { importError = "Fichier invalide" }
+            return
+        }
+        
+        let json = parseResult.json
+        let entities = parseResult.entities
+        
+        do {
+            
+            // Restore profile
+            if let profile = json["profile"] as? [String: Any] {
+                if let first = profile["firstName"] as? String {
+                    AppSettings.firstName = first
+                    await MainActor.run { firstName = first }
+                }
+                if let fd = profile["forecastDay"] as? Int {
+                    AppSettings.forecastDay = fd
+                    await MainActor.run { forecastDay = fd }
+                }
             }
 
             let iso = ISO8601DateFormatter()
 
-            // Purge existing data
+            // Purge existing data (sauf catégories/sous-catégories par défaut)
+            let cardExpFetch = FetchDescriptor<DeferredCardExpense>()
+            for item in try modelContext.fetch(cardExpFetch) { modelContext.delete(item) }
+            
+            let cardFetch = FetchDescriptor<DeferredCard>()
+            for item in try modelContext.fetch(cardFetch) { modelContext.delete(item) }
+
             let incomeFetch = FetchDescriptor<Income>()
-            let incomes = try modelContext.fetch(incomeFetch)
-            for income in incomes {
-                modelContext.delete(income)
-            }
+            for item in try modelContext.fetch(incomeFetch) { modelContext.delete(item) }
             
             let expenseFetch = FetchDescriptor<Expense>()
-            let expenses = try modelContext.fetch(expenseFetch)
-            for expense in expenses {
-                modelContext.delete(expense)
-            }
+            for item in try modelContext.fetch(expenseFetch) { modelContext.delete(item) }
             
             let occurrenceFetch = FetchDescriptor<BudgetEntryOccurrence>()
-            let occurrences = try modelContext.fetch(occurrenceFetch)
-            for occurrence in occurrences {
-                modelContext.delete(occurrence)
+            for item in try modelContext.fetch(occurrenceFetch) { modelContext.delete(item) }
+
+            // Merge MainCategory — mise à jour des existantes, insertion des nouvelles
+            let existingMainCats = try modelContext.fetch(FetchDescriptor<MainCategory>())
+            var mainCatByID: [UUID: MainCategory] = [:]
+            for cat in existingMainCats { mainCatByID[cat.id] = cat }
+            
+            var mainCategoryMap: [String: MainCategory] = [:]
+            if let array = entities["MainCategory"] as? [[String: Any]] {
+                for dict in array {
+                    guard let idStr = dict["id"] as? String,
+                          let id = UUID(uuidString: idStr),
+                          let name = dict["name"] as? String,
+                          let displayName = dict["displayName"] as? String,
+                          let icon = dict["icon"] as? String,
+                          let color = dict["color"] as? String,
+                          let categoryType = dict["categoryType"] as? String,
+                          let order = dict["order"] as? Int else { continue }
+                    
+                    if let existing = mainCatByID[id] {
+                        // Mettre à jour la catégorie existante
+                        existing.name = name
+                        existing.displayName = displayName
+                        existing.icon = icon
+                        existing.color = color
+                        existing.categoryType = categoryType
+                        existing.order = order
+                        mainCategoryMap[idStr] = existing
+                    } else {
+                        // Nouvelle catégorie
+                        let cat = MainCategory(id: id, name: name, displayName: displayName, icon: icon, color: color, categoryType: categoryType, order: order)
+                        modelContext.insert(cat)
+                        mainCategoryMap[idStr] = cat
+                    }
+                }
+            }
+            // Garder aussi les catégories existantes non présentes dans le backup dans le map
+            for (_, cat) in mainCatByID {
+                if mainCategoryMap[cat.id.uuidString] == nil {
+                    mainCategoryMap[cat.id.uuidString] = cat
+                }
+            }
+            
+            // Merge SubCategory — mise à jour des existantes, insertion des nouvelles
+            let existingSubCats = try modelContext.fetch(FetchDescriptor<SubCategory>())
+            var subCatByID: [UUID: SubCategory] = [:]
+            for sub in existingSubCats { subCatByID[sub.id] = sub }
+            
+            if let array = entities["SubCategory"] as? [[String: Any]] {
+                for dict in array {
+                    guard let idStr = dict["id"] as? String,
+                          let id = UUID(uuidString: idStr),
+                          let name = dict["name"] as? String,
+                          let displayName = dict["displayName"] as? String,
+                          let icon = dict["icon"] as? String,
+                          let order = dict["order"] as? Int else { continue }
+                    
+                    let parentCat: MainCategory? = (dict["mainCategoryID"] as? String).flatMap { mainCategoryMap[$0] }
+                    
+                    if let existing = subCatByID[id] {
+                        // Mettre à jour la sous-catégorie existante
+                        existing.name = name
+                        existing.displayName = displayName
+                        existing.icon = icon
+                        existing.order = order
+                        if let parent = parentCat { existing.mainCategory = parent }
+                    } else {
+                        // Nouvelle sous-catégorie
+                        let sub = SubCategory(id: id, name: name, displayName: displayName, icon: icon, order: order)
+                        if let parent = parentCat { sub.mainCategory = parent }
+                        modelContext.insert(sub)
+                    }
+                }
             }
 
             // Import Income
@@ -786,6 +1080,9 @@ struct AccountView: View {
                           let kind = dict["kind"] as? String,
                           let periodicity = dict["periodicity"] as? String else { continue }
                     
+                    let mainCatID = (dict["mainCategoryID"] as? String).flatMap { UUID(uuidString: $0) }
+                    let subCatID = (dict["subCategoryID"] as? String).flatMap { UUID(uuidString: $0) }
+                    
                     let income = Income(
                         id: id,
                         amount: dict["amount"] as? Double ?? 0,
@@ -793,7 +1090,9 @@ struct AccountView: View {
                         day: Int16(dict["day"] as? Int ?? 0),
                         kind: kind,
                         months: dict["months"] as? String,
-                        periodicity: periodicity
+                        periodicity: periodicity,
+                        mainCategoryID: mainCatID,
+                        subCategoryID: subCatID
                     )
                     modelContext.insert(income)
                 }
@@ -812,6 +1111,9 @@ struct AccountView: View {
                         endDate = iso.date(from: endDateStr)
                     }
                     
+                    let mainCatID = (dict["mainCategoryID"] as? String).flatMap { UUID(uuidString: $0) }
+                    let subCatID = (dict["subCategoryID"] as? String).flatMap { UUID(uuidString: $0) }
+                    
                     let expense = Expense(
                         id: id,
                         amount: dict["amount"] as? Double ?? 0,
@@ -822,7 +1124,9 @@ struct AccountView: View {
                         months: dict["months"] as? String,
                         note: dict["note"] as? String,
                         periodicity: periodicity,
-                        provider: dict["provider"] as? String
+                        provider: dict["provider"] as? String,
+                        mainCategoryID: mainCatID,
+                        subCategoryID: subCatID
                     )
                     modelContext.insert(expense)
                 }
@@ -845,6 +1149,8 @@ struct AccountView: View {
                     
                     let createdAt = (dict["createdAt"] as? String).flatMap { iso.date(from: $0) } ?? Date()
                     let updatedAt = (dict["updatedAt"] as? String).flatMap { iso.date(from: $0) } ?? Date()
+                    let mainCatID = (dict["mainCategoryID"] as? String).flatMap { UUID(uuidString: $0) }
+                    let subCatID = (dict["subCategoryID"] as? String).flatMap { UUID(uuidString: $0) }
                     
                     let occurrence = BudgetEntryOccurrence(
                         id: id,
@@ -856,9 +1162,62 @@ struct AccountView: View {
                         isManual: dict["isManual"] as? Bool ?? false,
                         sourceid: sourceid,
                         createdAt: createdAt,
-                        updatedAt: updatedAt
+                        updatedAt: updatedAt,
+                        mainCategoryID: mainCatID,
+                        subCategoryID: subCatID
                     )
                     modelContext.insert(occurrence)
+                }
+            }
+            
+            // Import DeferredCard
+            if let cardArray = entities["DeferredCard"] as? [[String: Any]] {
+                for dict in cardArray {
+                    guard let idStr = dict["id"] as? String,
+                          let id = UUID(uuidString: idStr),
+                          let name = dict["name"] as? String else { continue }
+                    
+                    let card = DeferredCard(
+                        id: id,
+                        name: name,
+                        lastFourDigits: dict["lastFourDigits"] as? String,
+                        cutoffDay: Int16(dict["cutoffDay"] as? Int ?? 25),
+                        debitDay: Int16(dict["debitDay"] as? Int ?? 4),
+                        monthlyBudget: dict["monthlyBudget"] as? Double ?? 0,
+                        isActive: dict["isActive"] as? Bool ?? true,
+                        createdAt: (dict["createdAt"] as? String).flatMap { iso.date(from: $0) } ?? Date(),
+                        updatedAt: (dict["updatedAt"] as? String).flatMap { iso.date(from: $0) } ?? Date()
+                    )
+                    modelContext.insert(card)
+                }
+            }
+            
+            // Import DeferredCardExpense
+            if let ceArray = entities["DeferredCardExpense"] as? [[String: Any]] {
+                for dict in ceArray {
+                    guard let idStr = dict["id"] as? String,
+                          let id = UUID(uuidString: idStr),
+                          let cardIDStr = dict["cardID"] as? String,
+                          let cardID = UUID(uuidString: cardIDStr),
+                          let expenseDateStr = dict["expenseDate"] as? String,
+                          let expenseDate = iso.date(from: expenseDateStr),
+                          let cycleStartStr = dict["cycleStartDate"] as? String,
+                          let cycleStartDate = iso.date(from: cycleStartStr),
+                          let cycleEndStr = dict["cycleEndDate"] as? String,
+                          let cycleEndDate = iso.date(from: cycleEndStr) else { continue }
+                    
+                    let ce = DeferredCardExpense(
+                        id: id,
+                        cardID: cardID,
+                        amount: dict["amount"] as? Double ?? 0,
+                        expenseDate: expenseDate,
+                        expenseDescription: dict["expenseDescription"] as? String,
+                        cycleStartDate: cycleStartDate,
+                        cycleEndDate: cycleEndDate,
+                        isSettled: dict["isSettled"] as? Bool ?? false,
+                        createdAt: (dict["createdAt"] as? String).flatMap { iso.date(from: $0) } ?? Date()
+                    )
+                    modelContext.insert(ce)
                 }
             }
 
@@ -881,64 +1240,6 @@ struct AccountView: View {
             try? FileManager.default.removeItem(at: url)
             exportURL = nil
         }
-    }
-}
-
-struct LogementView: View {
-    var body: some View {
-        NavigationStack {
-            LogementArticlesView()
-                .navigationTitle("Logement")
-                .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-}
-
-struct ImpotsTVAView: View {
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Impôts & TVA")
-                    .font(.largeTitle.bold())
-                Text(justified("Contenu pédagogique sur les impôts et la TVA…"))
-                    .foregroundStyle(.secondary)
-            }
-            .padding()
-        }
-        .navigationTitle("Impôts & TVA")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct InvestissementView: View {
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Investissement")
-                    .font(.largeTitle.bold())
-                Text(justified("Bases de l’investissement, risques, horizons…"))
-                    .foregroundStyle(.secondary)
-            }
-            .padding()
-        }
-        .navigationTitle("Investissement")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct BudgetGestionView: View {
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Budget & gestion")
-                    .font(.largeTitle.bold())
-                Text(justified("Suivi, catégories, objectifs, bonnes pratiques…"))
-                    .foregroundStyle(.secondary)
-            }
-            .padding()
-        }
-        .navigationTitle("Budget & gestion")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

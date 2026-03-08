@@ -37,44 +37,30 @@ struct FinzHeader: ViewModifier {
     func body(content: Content) -> some View {
         ZStack(alignment: .top) {
             content
-                .padding(.top, title != nil ? 140 : 110)
+                .padding(.top, title != nil ? 130 : 100)
             
             VStack(spacing: 0) {
-                HStack {
-                    Spacer()
-                    Image("finz_logo_couleur")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 144)
-                        .accessibilityLabel("Finz")
-                    Spacer()
-                }
-                .padding(.top, -35)
+                Image("finz_logo_couleur")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 130)
+                    .accessibilityLabel("Finz")
+                    .padding(.top, -30)
                 
                 if let title = title {
-                    HStack {
-                        Text(title)
-                            .font(.system(size: 40, weight: .heavy, design: .rounded))
-                            .foregroundStyle(Color(white: 0.1))
-                            .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 5)
-                        Spacer()
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.top, -10)
+                    Text(title)
+                        .font(.system(size: 32, weight: .heavy, design: .rounded))
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                        .foregroundStyle(.primary)
+                        .shadow(color: Color.black.opacity(0.08), radius: 6, x: 0, y: 3)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .padding(.top, -10)
                 }
             }
             .frame(maxWidth: .infinity)
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color.blue.opacity(0.04),
-                        Color.purple.opacity(0.04),
-                        Color.pink.opacity(0.04)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
+            .background(Color.clear)
         }
     }
 }

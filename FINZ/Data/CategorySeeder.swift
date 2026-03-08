@@ -6,69 +6,71 @@ struct CategorySeeder {
     
     /// Initialise ou met à jour les catégories dans la base de données
     static func seedCategories(in modelContext: ModelContext) async throws {
-        // Vérifier si les catégories existent déjà
-        let existingExpense = try modelContext.fetch(FetchDescriptor<MainCategory>(
-            predicate: #Predicate { $0.categoryType == "expense" }
-        ))
+        // Fetch all existing categories
+        let allExisting = try modelContext.fetch(FetchDescriptor<MainCategory>())
         
-        if !existingExpense.isEmpty {
-            // Les catégories existent déjà
-            return
+        // Index by (categoryType, name)
+        var existingMap: [String: MainCategory] = [:]
+        for cat in allExisting {
+            existingMap["\(cat.categoryType)_\(cat.name)"] = cat
         }
         
-        // Insérer les catégories de dépenses par défaut
+        // Process expense categories
         for (mainCatData, subCatsData) in DefaultCategoryConfiguration.defaultExpenseCategories {
-            let mainCategory = MainCategory(
-                name: mainCatData.name,
-                displayName: mainCatData.displayName,
-                icon: mainCatData.icon,
-                color: mainCatData.color,
-                categoryType: "expense",
-                order: mainCatData.order
-            )
-            
-            for (index, subCatData) in subCatsData.enumerated() {
-                let subCategory = SubCategory(
-                    name: subCatData.name,
-                    displayName: subCatData.displayName,
-                    icon: subCatData.icon,
-                    order: index + 1
-                )
-                subCategory.mainCategory = mainCategory
-                mainCategory.subCategories.append(subCategory)
-                modelContext.insert(subCategory)
-            }
-            
-            modelContext.insert(mainCategory)
+            seedOrUpdate(mainCatData: mainCatData, subCatsData: subCatsData,
+                         categoryType: "expense", existingMap: &existingMap,
+                         modelContext: modelContext)
         }
         
-        // Insérer les catégories de revenus par défaut
+        // Process income categories
         for (mainCatData, subCatsData) in DefaultCategoryConfiguration.defaultIncomeCategories {
-            let mainCategory = MainCategory(
-                name: mainCatData.name,
-                displayName: mainCatData.displayName,
-                icon: mainCatData.icon,
-                color: mainCatData.color,
-                categoryType: "income",
-                order: mainCatData.order
-            )
-            
-            for (index, subCatData) in subCatsData.enumerated() {
-                let subCategory = SubCategory(
-                    name: subCatData.name,
-                    displayName: subCatData.displayName,
-                    icon: subCatData.icon,
-                    order: index + 1
-                )
-                subCategory.mainCategory = mainCategory
-                mainCategory.subCategories.append(subCategory)
-                modelContext.insert(subCategory)
-            }
-            
-            modelContext.insert(mainCategory)
+            seedOrUpdate(mainCatData: mainCatData, subCatsData: subCatsData,
+                         categoryType: "income", existingMap: &existingMap,
+                         modelContext: modelContext)
         }
         
         try modelContext.save()
+    }
+    
+    private static func seedOrUpdate(
+        mainCatData: (name: String, displayName: String, icon: String, color: String, order: Int),
+        subCatsData: [(name: String, displayName: String, icon: String, order: Int)],
+        categoryType: String,
+        existingMap: inout [String: MainCategory],
+        modelContext: ModelContext
+    ) {
+        let key = "\(categoryType)_\(mainCatData.name)"
+        
+        let mainCategory: MainCategory
+        if let existing = existingMap[key] {
+            mainCategory = existing
+        } else {
+            mainCategory = MainCategory(
+                name: mainCatData.name,
+                displayName: mainCatData.displayName,
+                icon: mainCatData.icon,
+                color: mainCatData.color,
+                categoryType: categoryType,
+                order: mainCatData.order
+            )
+            modelContext.insert(mainCategory)
+            existingMap[key] = mainCategory
+        }
+        
+        // Add missing subcategories
+        let existingSubNames = Set(mainCategory.subCategories.map { $0.name })
+        for subCatData in subCatsData {
+            guard !existingSubNames.contains(subCatData.name) else { continue }
+            let subCategory = SubCategory(
+                name: subCatData.name,
+                displayName: subCatData.displayName,
+                icon: subCatData.icon,
+                order: subCatData.order
+            )
+            subCategory.mainCategory = mainCategory
+            mainCategory.subCategories.append(subCategory)
+            modelContext.insert(subCategory)
+        }
     }
     
     /// Récupère les catégories principales pour un type donné

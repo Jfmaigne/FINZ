@@ -68,9 +68,8 @@ struct TransportModeView: View {
             )
             .ignoresSafeArea()
         )
-        .finzHeader()
+        .finzHeader(title: "Transports")
         .stickyNextButton(enabled: canProceed, action: onNext)
-        .navigationTitle("Transports")
         .navigationBarTitleDisplayMode(.inline)
     }
 

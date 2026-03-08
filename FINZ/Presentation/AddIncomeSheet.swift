@@ -46,13 +46,13 @@ struct AddIncomeSheet: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 0) {
                     headerView
-                    amountCardView
                     if isReady {
                         if !mainCategories.isEmpty {
                             categorySectionView
                             subCategorySectionView
                         }
                         dateSectionView
+                        amountCardView
                         errorView
                         saveButtonView
                     }
@@ -104,7 +104,7 @@ struct AddIncomeSheet: View {
                 .focused($amountFocused)
                 .multilineTextAlignment(.center)
                 .font(.system(size: 44, weight: .bold, design: .rounded))
-                .foregroundStyle(Color(white: 0.1))
+                .foregroundStyle(.primary)
                 .minimumScaleFactor(0.5)
                 .toolbar {
                     ToolbarItemGroup(placement: .keyboard) {
@@ -448,7 +448,7 @@ private struct IncomeCategoryCellView: View {
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(isSelected ? Self.finzPurple.opacity(0.08) : Color.white)
+                    .fill(isSelected ? Self.finzPurple.opacity(0.08) : Color(.secondarySystemBackground))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)

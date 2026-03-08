@@ -34,11 +34,12 @@ struct DefaultCategoryConfiguration {
         (
             mainCat: ("housing", "Logement", "🏠", "#FF6B6B", 1),
             subCats: [
-                ("rent", "Loyer + charges", "🚪", 1),
-                ("electricity", "Électricité", "💡", 2),
-                ("gas", "Gaz", "🔥", 3),
-                ("water", "Eau", "💧", 4),
-                ("home_insurance", "Assurance habitation", "🛡️", 5),
+                ("mortgage", "Crédit immobilier", "🏦", 1),
+                ("rent", "Loyer + charges", "🚪", 2),
+                ("electricity", "Électricité", "💡", 3),
+                ("gas", "Gaz", "🔥", 4),
+                ("water", "Eau", "💧", 5),
+                ("home_insurance", "Assurance habitation", "🛡️", 6),
             ]
         ),
         
@@ -46,10 +47,11 @@ struct DefaultCategoryConfiguration {
         (
             mainCat: ("transport", "Transport", "🚗", "#4ECDC4", 2),
             subCats: [
-                ("fuel", "Carburant", "⛽", 1),
-                ("car_insurance", "Assurance auto", "🛡️", 2),
-                ("maintenance", "Entretien/réparation", "🔧", 3),
-                ("public_transport", "Transports en commun", "🚌", 4),
+                ("car_loan", "Crédit Auto/LOA/LLD", "🚗", 1),
+                ("fuel", "Carburant", "⛽", 2),
+                ("car_insurance", "Assurance auto", "🛡️", 3),
+                ("maintenance", "Entretien/réparation", "🔧", 4),
+                ("public_transport", "Transports en commun", "🚌", 5),
             ]
         ),
         
@@ -91,6 +93,7 @@ struct DefaultCategoryConfiguration {
                 ("doctor", "Médecin/Consultation", "👨‍⚕️", 1),
                 ("pharmacy", "Pharmacie", "💊", 2),
                 ("dentist", "Dentiste", "🦷", 3),
+                ("mutual_health", "Mutuelle", "🏥", 4),
             ]
         ),
         
@@ -113,6 +116,17 @@ struct DefaultCategoryConfiguration {
                 ("school", "Frais scolaires", "🏫", 3),
             ]
         ),
+        
+        // INVESTISSEMENTS
+        (
+            mainCat: ("investments", "Investissements", "📈", "#A8E6CF", 9),
+            subCats: [
+                ("invest_credit", "Crédit", "🏗️", 1),
+                ("invest_credit_insurance", "Assurance Crédit", "🛡️", 2),
+                ("invest_home_insurance", "Assurance Logement", "🏠", 3),
+                ("invest_misc", "Frais divers", "📦", 4),
+            ]
+        ),
     ]
     
     /// Configuration des catégories de revenus par défaut
@@ -132,13 +146,21 @@ struct DefaultCategoryConfiguration {
             subCats: [
                 ("freelance", "Freelance", "💻", 1),
                 ("bonus", "Bonus/Primes", "🎁", 2),
-                ("rental", "Location", "🏠", 3),
+            ]
+        ),
+        
+        // INVESTISSEMENTS
+        (
+            mainCat: ("investment_income", "Investissements", "📈", "#6BCB77", 3),
+            subCats: [
+                ("interest", "Intérêts", "💹", 1),
+                ("rental_income", "Loyers", "🏠", 2),
             ]
         ),
         
         // AIDES & ALLOCATIONS
         (
-            mainCat: ("social_benefits", "Aides & Allocations", "🤝", "#FFB3BA", 3),
+            mainCat: ("social_benefits", "Aides & Allocations", "🤝", "#FFB3BA", 4),
             subCats: [
                 ("unemployment", "Allocation chômage", "📋", 1),
                 ("family_allowance", "Allocations familiales", "👨‍👩‍👧‍👦", 2),
@@ -146,9 +168,18 @@ struct DefaultCategoryConfiguration {
             ]
         ),
         
+        // SANTÉ
+        (
+            mainCat: ("health_income", "Santé", "⚕️", "#81D4FA", 5),
+            subCats: [
+                ("social_security", "Sécurité Sociale", "🏛️", 1),
+                ("mutual_refund", "Mutuelle", "🏥", 2),
+            ]
+        ),
+        
         // REVENUS EXCEPTIONNELS
         (
-            mainCat: ("exceptional_income", "Revenus Exceptionnels", "🎊", "#A8E6CF", 4),
+            mainCat: ("exceptional_income", "Revenus Exceptionnels", "🎊", "#A8E6CF", 6),
             subCats: [
                 ("gifts", "Cadeaux/Dons", "🎁", 1),
                 ("inheritance", "Héritage", "💎", 2),

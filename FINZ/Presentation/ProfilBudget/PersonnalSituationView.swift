@@ -79,9 +79,8 @@ struct PersonnalSituationView: View {
             )
             .ignoresSafeArea()
         )
-        .finzHeader()
+        .finzHeader(title: "Situation Personnelle")
         .stickyNextButton(enabled: canProceed, action: onNext)
-        .navigationTitle("Situation Personnelle")
         .navigationBarTitleDisplayMode(.inline)
     }
 

@@ -52,6 +52,12 @@ struct AuthApp: App {
             RootView()
                 .environmentObject(sessionManager)
                 .modelContainer(modelContainer)
+                .task {
+                    // Rafraîchir les articles en tâche de fond au lancement
+                    ArticleCacheService.shared.refreshAllArticles()
+                    // Pré-charger le tracker d'articles pour le badge icône
+                    ArticleReadTracker.shared.preloadAllAssets()
+                }
         }
     }
 }

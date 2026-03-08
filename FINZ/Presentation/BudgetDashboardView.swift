@@ -46,22 +46,12 @@ struct BudgetDashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    VStack(spacing: 8) {
-                        HStack {
-                            Text(firstName.isEmpty ? "Hello !" : "Hello \(firstName) !")
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                        }
-                        HStack {
-                            Text("Mon budget")
-                                .font(.system(size: 40, weight: .heavy, design: .rounded))
-                                .foregroundStyle(Color(white: 0.1))
-                                .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 5)
-                            Spacer()
-                        }
+                    if !firstName.isEmpty {
+                        Text("Hello \(firstName) !")
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 10)
                     }
-                    .padding(.top, 10)
                     
                     // Solde actuel
                     DashboardCard {
@@ -320,11 +310,13 @@ struct BudgetDashboardView: View {
                 )
                 .ignoresSafeArea()
             )
-            .finzHeader()
+            .finzHeader(title: "Mon Budget")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 firstName = AppSettings.firstName
-                refreshDashboard()
+                Task { @MainActor in
+                    await refreshDashboard()
+                }
                 appDataResetObserver = NotificationCenter.default.addObserver(forName: Notification.Name("AppDataDidReset"), object: nil, queue: .main) { _ in
                     startProfileCreationFlow()
                 }
@@ -336,7 +328,9 @@ struct BudgetDashboardView: View {
                 }
             }
             .onChange(of: firstName) { _, _ in
-                refreshDashboard()
+                Task { @MainActor in
+                    await refreshDashboard()
+                }
             }
             .sheet(isPresented: $showingFixedIncomesSheet) {
                 RecettesFixesSheet(monthDate: selectedMonthDate)
@@ -364,7 +358,7 @@ struct BudgetDashboardView: View {
                 ProfileCreationView()
                     .onDisappear {
                         firstName = AppSettings.firstName
-                        refreshDashboard()
+                        Task { @MainActor in await refreshDashboard() }
                     }
             }
             .fullScreenCover(isPresented: $showingAddOperationFullScreen) {
@@ -373,7 +367,7 @@ struct BudgetDashboardView: View {
                     onSaved: {
                         let success = UINotificationFeedbackGenerator()
                         success.notificationOccurred(.success)
-                        refreshDashboard()
+                        Task { @MainActor in await refreshDashboard() }
                         showingAddOperationFullScreen = false
                     },
                     onCancel: {
@@ -384,7 +378,7 @@ struct BudgetDashboardView: View {
             .fullScreenCover(isPresented: $showingAddIncomeFullScreen) {
                 AddIncomeSheet(
                     defaultDate: Date(),
-                    onSaved: { let s = UINotificationFeedbackGenerator(); s.notificationOccurred(.success); refreshDashboard(); showingAddIncomeFullScreen = false },
+                    onSaved: { let s = UINotificationFeedbackGenerator(); s.notificationOccurred(.success); Task { @MainActor in await refreshDashboard() }; showingAddIncomeFullScreen = false },
                     onCancel: { showingAddIncomeFullScreen = false }
                 )
             }
@@ -394,7 +388,7 @@ struct BudgetDashboardView: View {
                     onSaved: {
                         let success = UINotificationFeedbackGenerator()
                         success.notificationOccurred(.success)
-                        refreshDashboard()
+                        Task { @MainActor in await refreshDashboard() }
                         showingAddExpenseFullScreen = false
                     },
                     onCancel: {
@@ -447,16 +441,17 @@ struct BudgetDashboardView: View {
 
     private func fetchOccurrences(monthKey: String, kind: String) throws -> [BudgetEntryOccurrence] {
         let fetchDescriptor = FetchDescriptor<BudgetEntryOccurrence>(
+            predicate: #Predicate { $0.monthKey == monthKey && $0.kind == kind },
             sortBy: [SortDescriptor(\.date, order: .forward)]
         )
-        let all = try modelContext.fetch(fetchDescriptor)
-        return all.filter { $0.monthKey == monthKey && $0.kind == kind }
+        return try modelContext.fetch(fetchDescriptor)
     }
 
-    private func upsertAutoBalance(monthKey: String, date: Date, amount: Decimal) throws {
-        let fetchDescriptor = FetchDescriptor<BudgetEntryOccurrence>()
-        let all = try modelContext.fetch(fetchDescriptor)
-        let existing = all.first { $0.monthKey == monthKey && $0.kind == "balance" && $0.isManual == false }
+    private func upsertAutoBalance(monthKey: String, date: Date, amount: Decimal, save: Bool = true) throws {
+        let fetchDescriptor = FetchDescriptor<BudgetEntryOccurrence>(
+            predicate: #Predicate { $0.monthKey == monthKey && $0.kind == "balance" && $0.isManual == false }
+        )
+        let existing = try modelContext.fetch(fetchDescriptor).first
         
         if let existing = existing {
             existing.amount = (amount as NSDecimalNumber).doubleValue
@@ -472,23 +467,28 @@ struct BudgetDashboardView: View {
             )
             modelContext.insert(newBalance)
         }
-        try modelContext.save()
+        if save { try modelContext.save() }
     }
 
-    private func buildProjections(horizon: Int = 12, baseInitialBalance: Decimal) {
+    private func buildProjections(horizon: Int = 12, baseInitialBalance: Decimal) async {
         let cal = Calendar.current
         let startMonth = startOfMonth(for: Date())
         var runningStart = baseInitialBalance
         var result: [MonthProjection] = []
 
         for offset in 0..<horizon {
+            // Céder le contrôle au run loop entre chaque mois pour ne pas freeze l'UI
+            if offset > 0 {
+                await Task.yield()
+            }
+            
             guard let monthDate = cal.date(byAdding: .month, value: offset, to: startMonth) else { break }
             let monthKey = BudgetProjectionManager.monthKey(for: monthDate)
 
             if offset > 0 {
-                try? BudgetProjectionManager.projectIncomes(for: monthDate, modelContext: modelContext)
-                try? BudgetProjectionManager.projectExpenses(for: monthDate, modelContext: modelContext)
-                try? upsertAutoBalance(monthKey: monthKey, date: monthDate, amount: runningStart)
+                try? BudgetProjectionManager.projectIncomes(for: monthDate, modelContext: modelContext, save: false)
+                try? BudgetProjectionManager.projectExpenses(for: monthDate, modelContext: modelContext, save: false)
+                try? upsertAutoBalance(monthKey: monthKey, date: monthDate, amount: runningStart, save: false)
             }
 
             let incomes = (try? fetchOccurrences(monthKey: monthKey, kind: "income")) ?? []
@@ -501,17 +501,14 @@ struct BudgetDashboardView: View {
                 return partial + Decimal(abs(obj.amount))
             }
             
-            // Add deferred cards budget impact
             let deferredCardsImpact = calculateDeferredCardsImpact(for: monthDate)
             expensesTotal += Decimal(deferredCardsImpact)
 
-            // Calcul du prévisionnel à la date configurée
             let forecastDay = AppSettings.forecastDay
             let forecastIncomes: Decimal
             let forecastExpenses: Decimal
 
             if forecastDay > 0 && forecastDay < 28 {
-                // Filtrer les opérations jusqu'au jour du prévisionnel
                 let lastDay = cal.range(of: .day, in: .month, for: monthDate)?.count ?? 30
                 let effectiveDay = min(forecastDay, lastDay)
                 
@@ -521,10 +518,8 @@ struct BudgetDashboardView: View {
                 let filteredExpenses = expenses
                     .filter { cal.component(.day, from: $0.date) <= effectiveDay }
                     .reduce(Decimal.zero) { $0 + Decimal(abs($1.amount)) }
-                // Les cartes sont prélevées en fin de mois, pas avant le jour du prévisionnel
                 forecastExpenses = filteredExpenses
             } else {
-                // Fin de mois (0 ou >= 28) : tout est pris en compte
                 forecastIncomes = incomesTotal
                 forecastExpenses = expensesTotal
             }
@@ -533,6 +528,9 @@ struct BudgetDashboardView: View {
             result.append(.init(monthIndex: offset, monthDate: monthDate, monthKey: monthKey, startBalance: runningStart, incomes: incomesTotal, expenses: expensesTotal, endBalance: endBalance))
             runningStart = endBalance
         }
+        
+        try? modelContext.save()
+        
         projections = result
         if selectedMonthIndex >= projections.count { selectedMonthIndex = max(0, projections.count - 1) }
         if let current = projections.first(where: { $0.monthIndex == selectedMonthIndex }) {
@@ -620,15 +618,39 @@ struct BudgetDashboardView: View {
     }
 
     private func computeDaysLeftInMonth(now: Date = Date(), calendar: Calendar = .current) -> Int {
+        let forecastDay = AppSettings.forecastDay
         let comps = calendar.dateComponents([.year, .month, .day], from: now)
-        guard let year = comps.year, let month = comps.month, let day = comps.day else { return 0 }
-        var endComponents = DateComponents()
-        endComponents.year = year
-        endComponents.month = month + 1
-        endComponents.day = 0
-        let endOfMonth = calendar.date(from: endComponents) ?? now
-        let diff = calendar.dateComponents([.day], from: now, to: endOfMonth)
-        return max(0, (diff.day ?? 0))
+        guard let year = comps.year, let month = comps.month, let today = comps.day else { return 0 }
+        
+        if forecastDay == 0 {
+            // Dernier jour du mois
+            var endComponents = DateComponents()
+            endComponents.year = year
+            endComponents.month = month + 1
+            endComponents.day = 0
+            let endOfMonth = calendar.date(from: endComponents) ?? now
+            let diff = calendar.dateComponents([.day], from: now, to: endOfMonth)
+            return max(0, diff.day ?? 0)
+        } else {
+            // Jour précis du mois — trouver la prochaine occurrence
+            let lastDayOfMonth = calendar.range(of: .day, in: .month, for: now)?.count ?? 30
+            let effectiveDay = min(forecastDay, lastDayOfMonth)
+            
+            if today <= effectiveDay {
+                // La date est encore à venir ce mois-ci
+                return effectiveDay - today
+            } else {
+                // La date est passée ce mois-ci → prochaine occurrence le mois prochain
+                guard let nextMonth = calendar.date(byAdding: .month, value: 1, to: now) else { return 0 }
+                let lastDayNextMonth = calendar.range(of: .day, in: .month, for: nextMonth)?.count ?? 30
+                let effectiveDayNext = min(forecastDay, lastDayNextMonth)
+                var targetComponents = calendar.dateComponents([.year, .month], from: nextMonth)
+                targetComponents.day = effectiveDayNext
+                guard let targetDate = calendar.date(from: targetComponents) else { return 0 }
+                let diff = calendar.dateComponents([.day], from: now, to: targetDate)
+                return max(0, diff.day ?? 0)
+            }
+        }
     }
 
     // MARK: - Messages dynamiques GenZ
@@ -809,7 +831,7 @@ struct BudgetDashboardView: View {
         }
     }
 
-    private func refreshDashboard() {
+    private func refreshDashboard() async {
         do {
             let incomes = try fetchIncomeOccurrencesForCurrentMonth()
             let expenses = try fetchExpenseOccurrencesForCurrentMonth()
@@ -826,7 +848,7 @@ struct BudgetDashboardView: View {
             actualCurrentBalance = currentBalance
             self.initialBalance = initialBalance
 
-            buildProjections(horizon: 12, baseInitialBalance: initialBalance)
+            await buildProjections(horizon: 12, baseInitialBalance: initialBalance)
             applyProjection(at: selectedMonthIndex)
         } catch {
             print("Fetch occurrences error: \(error)")
@@ -1143,11 +1165,11 @@ private struct DeferredCardForecastRow: View {
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.5))
+                .fill(Color(.secondarySystemBackground))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                .stroke(Color(.separator).opacity(0.3), lineWidth: 1)
         )
     }
     

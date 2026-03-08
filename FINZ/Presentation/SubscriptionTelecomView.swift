@@ -70,9 +70,8 @@ struct SubscriptionTelecomView: View {
             )
             .ignoresSafeArea()
         )
-        .finzHeader()
+        .finzHeader(title: "Abonnements Télécom")
         .stickyNextButton(enabled: canProceed, action: onNext)
-        .navigationTitle("Abonnements Télécom")
         .navigationBarTitleDisplayMode(.inline)
     }
 

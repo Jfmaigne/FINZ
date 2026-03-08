@@ -6,19 +6,6 @@ struct QuestionnaireView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                HStack {
-                    Spacer()
-                    Image("finz_logo_couleur")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: 160)
-                        .accessibilityLabel("Finz")
-                    Spacer()
-                }
-
-                Text("Tu vis...?")
-                    .font(.system(size: 40, weight: .bold, design: .rounded))
-
                 VStack(spacing: 14) {
                     NavigationLink(destination: LivesWithParentsView()) {
                         AnswerRow(emoji: "🏠", title: "Chez tes parents")
@@ -52,6 +39,7 @@ struct QuestionnaireView: View {
             .padding()
         }
         .background(Color(.systemBackground))
+        .finzHeader(title: "Tu vis...?")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -87,12 +75,6 @@ struct DestinationTemplate: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Image("finz_logo_couleur")
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: 140)
-                .accessibilityLabel("Finz")
-
             Text(title)
                 .font(.system(size: 28, weight: .bold, design: .rounded))
 
@@ -128,12 +110,11 @@ struct LivesWithParentsView: View {
                     .keyboardType(.decimalPad)
             }
         }
-        .finzHeader()
+        .finzHeader(title: "Chez tes parents")
         .stickyNextButton(enabled: true) { goToTransport = true }
         .background(
             NavigationLink(destination: TransportModeView().environmentObject(vm), isActive: $goToTransport) { EmptyView() }
         )
-        .navigationTitle("Chez tes parents")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -141,9 +122,8 @@ struct LivesWithParentsView: View {
 struct LivesAloneView: View {
     var body: some View {
         DestinationTemplate(title: "Seul(e)")
-            .finzHeader()
+            .finzHeader(title: "Habitation")
             .stickyNextButton(enabled: true) { }
-            .navigationTitle("Habitation")
             .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -151,9 +131,8 @@ struct LivesAloneView: View {
 struct LivesColocationView: View {
     var body: some View {
         DestinationTemplate(title: "En colocation")
-            .finzHeader()
+            .finzHeader(title: "Habitation")
             .stickyNextButton(enabled: true) { }
-            .navigationTitle("Habitation")
             .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -161,9 +140,8 @@ struct LivesColocationView: View {
 struct LivesCoupleView: View {
     var body: some View {
         DestinationTemplate(title: "En couple")
-            .finzHeader()
+            .finzHeader(title: "Habitation")
             .stickyNextButton(enabled: true) { }
-            .navigationTitle("Habitation")
             .navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -235,6 +235,14 @@ struct AddFixedIncomeSheet: View {
             }
         }
         periodicity = hasSpecificMonths ? "Mois spécifiques" : "Mensuel"
+        
+        // Restore selected categories from saved IDs
+        if let mainCatID = e.mainCategoryID {
+            selectedMainCategory = mainCategories.first(where: { $0.id == mainCatID })
+        }
+        if let subCatID = e.subCategoryID, let mainCat = selectedMainCategory {
+            selectedSubCategory = mainCat.subCategories.first(where: { $0.id == subCatID })
+        }
     }
 
     private func save() {

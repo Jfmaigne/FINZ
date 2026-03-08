@@ -74,8 +74,8 @@ struct CategoryReference {
         (
             mainCat: ("housing", "Logement", "🏠", "#FF6B6B", 1),
             subCats: [
-                ("rent", "Loyer + charges", "🚪", 1),
-                ("mortgage", "Crédit habitation", "🏦", 2),
+                ("mortgage", "Crédit habitation", "🏦", 1),
+                ("rent", "Loyer + charges", "🚪", 2),
                 ("mortgage_insurance", "Assurance crédit", "🛡️", 3),
                 ("property_tax", "Taxe foncière", "📋", 4),
                 ("home_insurance", "Assurance habitation", "🏠", 5),
@@ -134,9 +134,11 @@ struct CategoryReference {
             mainCat: ("investments", "Investissements", "📈", "#A8E6CF", 6),
             subCats: [
                 ("home_investment", "Crédit immobilier investissement", "🏗️", 1),
-                ("works", "Crédit travaux/divers", "🔨", 2),
-                ("property_taxes", "Impôts fonciers", "📋", 3),
-                ("renovations", "Rénovations", "🏠", 4),
+                ("invest_credit_insurance", "Assurance crédit invest.", "🛡️", 2),
+                ("invest_home_insurance", "Assurance logement invest.", "🏠", 3),
+                ("works", "Crédit travaux/divers", "🔨", 4),
+                ("property_taxes", "Impôts fonciers", "📋", 5),
+                ("invest_misc", "Frais divers invest.", "📦", 6),
             ]
         ),
     ]
@@ -159,14 +161,20 @@ struct CategoryReference {
             subCats: [
                 ("freelance", "Freelance/contrats", "💻", 1),
                 ("tutoring", "Tutorat/cours", "📚", 2),
-                ("rental", "Revenu locatif", "🏠", 3),
-                ("investment_income", "Revenus d'investissement", "📈", 4),
-                ("bonus", "Bonus/primes", "🎁", 5),
+                ("bonus", "Bonus/primes", "🎁", 3),
+            ]
+        ),
+        // INVESTISSEMENTS
+        (
+            mainCat: ("investment_income", "Investissements", "📈", "#6BCB77", 3),
+            subCats: [
+                ("interest", "Intérêts", "💹", 1),
+                ("rental_income", "Loyers", "🏠", 2),
             ]
         ),
         // AIDES SOCIALES
         (
-            mainCat: ("social_benefits", "Aides sociales", "🤝", "#FFB3BA", 3),
+            mainCat: ("social_benefits", "Aides sociales", "🤝", "#FFB3BA", 4),
             subCats: [
                 ("unemployment", "Allocation chômage", "📋", 1),
                 ("disability", "Allocation handicap", "♿", 2),
@@ -178,16 +186,24 @@ struct CategoryReference {
         ),
         // BOURSES
         (
-            mainCat: ("scholarships", "Bourses", "🎓", "#A8E6CF", 4),
+            mainCat: ("scholarships", "Bourses", "🎓", "#A8E6CF", 5),
             subCats: [
                 ("university_scholarship", "Bourse universitaire", "🎓", 1),
                 ("government_grant", "Bourse gouvernementale", "📜", 2),
                 ("school_grant", "Bourse scolaire", "🏫", 3),
             ]
         ),
+        // SANTÉ
+        (
+            mainCat: ("health_income", "Santé", "⚕️", "#81D4FA", 6),
+            subCats: [
+                ("social_security", "Sécurité Sociale", "🏛️", 1),
+                ("mutual_refund", "Mutuelle", "🏥", 2),
+            ]
+        ),
         // REVENUS EXCEPTIONNELS
         (
-            mainCat: ("exceptional_income", "Revenus exceptionnels", "🎊", "#95E1D3", 5),
+            mainCat: ("exceptional_income", "Revenus exceptionnels", "🎊", "#95E1D3", 7),
             subCats: [
                 ("gifts", "Cadeaux/dons", "🎁", 1),
                 ("inheritance", "Héritage", "💎", 2),

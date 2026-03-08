@@ -8,24 +8,26 @@ public struct FinzHeaderView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 8) {
-            HStack { Spacer() }
+        VStack(spacing: 0) {
             Image("finz_logo_couleur")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 144)
+                .frame(height: 130)
                 .accessibilityLabel("FINZ")
                 .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, -15)
             HStack {
                 Text(title)
-                    .font(.system(size: 40, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(white: 0.1))
-                    .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 5)
+                    .font(.system(size: 32, weight: .heavy, design: .rounded))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                    .foregroundStyle(.primary)
+                    .shadow(color: Color.black.opacity(0.08), radius: 6, x: 0, y: 3)
                 Spacer(minLength: 0)
             }
+            .padding(.horizontal, 16)
+            .padding(.top, -10)
         }
-        .padding(.horizontal)
-        .padding(.top, -15)
     }
 }
 

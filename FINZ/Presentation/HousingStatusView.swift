@@ -67,9 +67,8 @@ struct HousingStatusView: View {
             )
             .ignoresSafeArea()
         )
-        .finzHeader()
+        .finzHeader(title: "Habitation")
         .stickyNextButton(enabled: canProceed, action: onNext)
-        .navigationTitle("Habitation")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             selectedStatus = vm.housingStatus

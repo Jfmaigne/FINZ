@@ -108,22 +108,8 @@ struct RecettesView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    HStack {
-                        Spacer()
-                        Image("finz_logo_couleur")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 100)
-                            .accessibilityLabel("FINZ")
-                        Spacer()
-                    }
-                    .listRowBackground(Color.clear)
-                }
-                
-                if entries.isEmpty {
+        List {
+            if entries.isEmpty {
                     Section {
                         Text("Aucune recette à saisir selon les informations précédentes.")
                             .font(.footnote)
@@ -139,6 +125,8 @@ struct RecettesView: View {
                             IncomeEntryRow(
                                 entry: entry,
                                 detailText: detailText(for: entry),
+                                subCategoryName: subCategoryName(for: entry),
+                                comment: extractComment(from: entry.complement),
                                 onEdit: {
                                     editingEntry = entry
                                     showingAddSheet = true
@@ -165,9 +153,8 @@ struct RecettesView: View {
                 )
                 .ignoresSafeArea()
             )
-            .finzHeader()
-            .stickyNextButton(enabled: !entries.isEmpty, action: saveAll)
-            .navigationTitle("Recettes")
+            .finzHeader(title: "Recettes")
+            .stickyNextButton(enabled: !entries.isEmpty, action: { Task { await saveAll() } })
             .navigationBarTitleDisplayMode(.inline)
             // Le bouton "+" est maintenant dans la barre d'outils pour rester fixe
             .toolbar {
@@ -200,11 +187,12 @@ struct RecettesView: View {
                 }
             }
             .fullScreenCover(isPresented: $showExpenses) {
-                ExpensesView()
-                    .environmentObject(vm)
+                NavigationStack {
+                    ExpensesView()
+                        .environmentObject(vm)
+                }
             }
             .onAppear(perform: setupEntries)
-        }
     }
 
     private func setupEntries() {
@@ -238,7 +226,7 @@ struct RecettesView: View {
                     return buildComplement(monthsCSV: monthsCSV, day: dayVal)
                 }()
                 guard let kind = IncomeKind(rawValue: obj.kind) else { return nil }
-                return IncomeEntry(id: obj.id, kind: kind, amount: amount, periodicity: periodicity, complement: complement)
+                return IncomeEntry(id: obj.id, kind: kind, amount: amount, periodicity: periodicity, complement: complement, mainCategoryID: obj.mainCategoryID, subCategoryID: obj.subCategoryID)
             }
             if !existing.isEmpty {
                 entries = existing
@@ -273,34 +261,34 @@ struct RecettesView: View {
         }
     }
 
-    private func saveAll() {
+    private func saveAll() async {
         guard !isSaving else { return }
         isSaving = true
         saveError = nil
         do {
             try persistEntries()
             
+            // Laisser le run loop respirer
+            try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+            
             // Project incomes into monthly occurrences for the dashboard
             do {
                 try BudgetProjectionManager.projectIncomes(for: Date(), modelContext: modelContext)
             } catch {
-                // Non-fatal: record an error message but continue navigation
                 saveError = "Projection des recettes échouée: \(error.localizedDescription)"
             }
             
         } catch {
-            saveError = "Erreur d’enregistrement: \(error.localizedDescription)"
+            saveError = "Erreur d'enregistrement: \(error.localizedDescription)"
             isSaving = false
             return
         }
-        // Temporary no-op: simulate a save and finish
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            isSaving = false
-            if let action = continueAction {
-                action()
-            } else {
-                showExpenses = true
-            }
+        
+        isSaving = false
+        if let action = continueAction {
+            action()
+        } else {
+            showExpenses = true
         }
     }
 
@@ -356,6 +344,19 @@ struct RecettesView: View {
         return names.joined(separator: ", ")
     }
 
+    private func subCategoryName(for entry: IncomeEntry) -> String? {
+        guard let subCatID = entry.subCategoryID else { return nil }
+        let fetchDescriptor = FetchDescriptor<SubCategory>(
+            predicate: #Predicate { $0.id == subCatID }
+        )
+        return (try? modelContext.fetch(fetchDescriptor).first)?.displayName
+    }
+    
+    private func extractComment(from complement: String) -> String? {
+        let parsed = parseComplement(complement)
+        return parsed.comment
+    }
+
     private func detailText(for entry: IncomeEntry) -> String {
         let parsed = parseComplement(entry.complement)
         let dayText: String = {
@@ -370,22 +371,19 @@ struct RecettesView: View {
         } else {
             base = entry.periodicity
         }
-        if let comment = parsed.comment, !comment.isEmpty {
-            return base + " • " + comment
-        } else {
-            return base
-        }
+        return base
     }
 
     private func persistEntries() throws {
+        // Un seul fetch, indexé par ID
+        let fetchDescriptor = FetchDescriptor<Income>()
+        let allExisting = try modelContext.fetch(fetchDescriptor)
+        var existingByID: [UUID: Income] = [:]
+        for inc in allExisting { existingByID[inc.id] = inc }
+        
         for e in entries {
-            let entryID = e.id
-            let fetchDescriptor = FetchDescriptor<Income>(
-                predicate: #Predicate { $0.id == entryID }
-            )
-            let existing = try modelContext.fetch(fetchDescriptor).first
             let obj: Income
-            if let existing = existing {
+            if let existing = existingByID[e.id] {
                 obj = existing
             } else {
                 let amount = Double(e.amount.replacingOccurrences(of: ",", with: ".")) ?? 0
@@ -416,6 +414,8 @@ struct RecettesView: View {
             } else {
                 obj.day = 0
             }
+            obj.mainCategoryID = e.mainCategoryID
+            obj.subCategoryID = e.subCategoryID
         }
         try modelContext.save()
     }
@@ -441,11 +441,13 @@ struct RecettesView: View {
 private struct IncomeEntryRow: View {
     let entry: RecettesView.IncomeEntry
     let detailText: String
+    let subCategoryName: String?
+    let comment: String?
     let onEdit: () -> Void
     let onDelete: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(entry.label)
                     .font(.headline)
@@ -454,9 +456,20 @@ private struct IncomeEntryRow: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
             }
+            if let subCatName = subCategoryName, !subCatName.isEmpty {
+                Text(subCatName)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
             Text(detailText)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+            if let comment = comment, !comment.isEmpty {
+                Text(comment)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .italic()
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture {
@@ -497,4 +510,3 @@ private struct IncomeEntryRow: View {
             .environmentObject(QuestionnaireViewModel())
     }
 }
-

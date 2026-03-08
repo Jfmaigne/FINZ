@@ -35,17 +35,29 @@ struct ExpensesView: View {
         
         var category: ExpenseCategory {
             switch self {
-            case .loyerCharges, .creditHabitation, .assuranceHabitation, .electricite, .gaz, .eau:
+            case .loyerCharges, .creditHabitation, .assuranceHabitation:
                 return .logement
-            case .creditAuto, .assuranceAuto, .entretienReparation, .abonnementTrain, .assuranceVeloTrottinette, .abonnementTransport:
+            case .electricite, .gaz, .eau:
+                return .logement
+            case .creditAuto, .assuranceAuto, .entretienReparation:
+                return .transport
+            case .abonnementTrain, .assuranceVeloTrottinette, .abonnementTransport:
                 return .transport
             case .courses, .essences, .cantine, .peage, .carburant:
                 return .vieCourante
-            case .abonnementTVStreaming, .abonnementMusique, .abonnementInternetFixeMobile, .abonnementSport, .abonnement:
+            case .abonnementTVStreaming, .abonnementMusique, .abonnementInternetFixeMobile:
                 return .abonnements
-            case .creditImmobilierInvest, .assuranceCredit, .taxeFonciere, .impotsFonciers, .creditTravauxDivers:
+            case .abonnementSport, .abonnement:
+                return .abonnements
+            case .creditImmobilierInvest, .assuranceCreditInvest, .assuranceCredit:
                 return .investissements
-            case .habillement, .restaurant, .sortiesConcertCinema, .vacances, .activitesAutres, .parcsAttraction:
+            case .assuranceLogementInvest, .taxeFonciere, .impotsFonciers:
+                return .investissements
+            case .creditTravauxDivers, .fraisDiversInvest:
+                return .investissements
+            case .habillement, .restaurant, .sortiesConcertCinema:
+                return .plaisir
+            case .vacances, .activitesAutres, .parcsAttraction:
                 return .plaisir
             }
         }
@@ -61,7 +73,7 @@ struct ExpensesView: View {
                 // Abonnements
                 .abonnementTVStreaming, .abonnementMusique, .abonnementInternetFixeMobile, .abonnementSport, .abonnement,
                 // Investissements (include both labels)
-                .creditImmobilierInvest, .assuranceCredit, .taxeFonciere, .impotsFonciers, .creditTravauxDivers,
+                .creditImmobilierInvest, .assuranceCreditInvest, .assuranceLogementInvest, .assuranceCredit, .taxeFonciere, .impotsFonciers, .creditTravauxDivers, .fraisDiversInvest,
                 // Plaisir
                 .habillement, .restaurant, .sortiesConcertCinema, .vacances, .activitesAutres, .parcsAttraction
             ]
@@ -79,8 +91,11 @@ struct ExpensesView: View {
         case abonnementInternetFixeMobile = "Abonnement internet fixe/mobile"
         case abonnementSport = "Abonnement sport"
         case creditImmobilierInvest = "Crédit immobilier investissement"
+        case assuranceCreditInvest = "Assurance crédit invest."
+        case assuranceLogementInvest = "Assurance logement invest."
         case impotsFonciers = "Impôts fonciers"
         case creditTravauxDivers = "Crédit travaux/divers"
+        case fraisDiversInvest = "Frais divers invest."
         case habillement = "Habillement"
         case restaurant = "Restaurant"
         case sortiesConcertCinema = "Sorties/concerts/cinéma"
@@ -117,131 +132,35 @@ struct ExpensesView: View {
         
         for cat in categoryOrder {
             guard var items = groups[cat], !items.isEmpty else { continue }
-            
-            // Create a simple order map
-            let order = ExpenseKind.availableKinds.filter { $0.category == cat }
-            var orderMap: [ExpenseKind: Int] = [:]
-            for (index, kind) in order.enumerated() {
-                orderMap[kind] = index
-            }
-            
-            // Sort items by the order map
-            items.sort { a, b in
-                let aIndex = orderMap[a.kind] ?? Int.max
-                let bIndex = orderMap[b.kind] ?? Int.max
-                return aIndex < bIndex
-            }
-            
-            result.append((cat, items))
+            let sorted = sortedItems(items, forCategory: cat)
+            result.append((cat, sorted))
         }
         
         return result
     }
+    
+    private func sortedItems(_ items: [ExpenseEntry], forCategory cat: ExpenseCategory) -> [ExpenseEntry] {
+        let order = ExpenseKind.availableKinds.filter { $0.category == cat }
+        var orderMap: [ExpenseKind: Int] = [:]
+        for (index, kind) in order.enumerated() {
+            orderMap[kind] = index
+        }
+        return items.sorted { (a: ExpenseEntry, b: ExpenseEntry) -> Bool in
+            let aIdx: Int = orderMap[a.kind] ?? Int.max
+            let bIdx: Int = orderMap[b.kind] ?? Int.max
+            return aIdx < bIdx
+        }
+    }
 
     var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Dépenses")
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
-                        if entries.isEmpty {
-                            Text("Aucune dépense enregistrée")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .listRowBackground(Color.clear)
-
-                ForEach(groupedEntries, id: \.category) { group in
-                    Section(group.category.rawValue) {
-                        ForEach(group.items) { entry in
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack {
-                                    Text(label(for: entry))
-                                        .font(.headline)
-                                    Spacer()
-                                    Text(entry.amount.isEmpty ? "—" : entry.amount + " €")
-                                        .font(.headline)
-                                        .foregroundStyle(.primary)
-                                }
-                                if let detail = detailText(for: entry), !detail.isEmpty {
-                                    Text(detail)
-                                        .font(.footnote)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                DispatchQueue.main.async {
-                                    editingEntry = entry
-                                }
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    let generator = UINotificationFeedbackGenerator()
-                                    generator.notificationOccurred(.success)
-                                    deleteEntry(entry)
-                                } label: {
-                                    Label("Supprimer", systemImage: "trash")
-                                }
-                            }
-                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                                Button {
-                                    let generator = UIImpactFeedbackGenerator(style: .light)
-                                    generator.impactOccurred()
-                                    DispatchQueue.main.async {
-                                        editingEntry = entry
-                                    }
-                                } label: {
-                                    Label("Modifier", systemImage: "pencil")
-                                }
-                                .tint(.blue)
-                            }
-                        }
-                    }
-                }
-            }
+        expenseList
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color.blue.opacity(0.08),
-                        Color.purple.opacity(0.08),
-                        Color.pink.opacity(0.08)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-            )
-            .finzHeader()
-            .stickyNextButton(enabled: !entries.isEmpty, action: saveAll)
-            .navigationTitle("Dépenses")
+            .background(gradientBackground)
+            .finzHeader(title: "Dépenses")
+            .stickyNextButton(enabled: !entries.isEmpty, action: { Task { await saveAll() } })
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        let newEntry = ExpenseEntry(id: UUID(), kind: .creditHabitation, amount: "")
-                        DispatchQueue.main.async {
-                            editingEntry = newEntry
-                        }
-                    } label: {
-                        ZStack {
-                            Circle()
-                                .fill(LinearGradient(colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .frame(width: 34, height: 34)
-                            Image(systemName: "plus")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundStyle(.white)
-                        }
-                    }
-                    .accessibilityLabel("Ajouter une dépense")
-                }
-            }
+            .toolbar { addButton }
             .onAppear(perform: setupEntries)
             .sheet(item: $editingEntry) { item in
                 AddExpenseSheet(entry: item) { updatedEntry in
@@ -266,12 +185,140 @@ struct ExpensesView: View {
             .fullScreenCover(isPresented: $showTabs) {
                 BudgetTabView()
                     .environmentObject(vm)
+                    .environmentObject(AuthenticationService())
             }
+    }
+    
+    // MARK: - Sub-views
+    
+    private var expenseList: some View {
+        List {
+            if entries.isEmpty {
+                Section {
+                    Text("Aucune dépense enregistrée")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .listRowBackground(Color.clear)
+            }
+
+            ForEach(groupedEntries, id: \.category) { group in
+                Section(group.category.rawValue) {
+                    ForEach(group.items) { entry in
+                        entryRow(entry)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func entryRow(_ entry: ExpenseEntry) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(label(for: entry))
+                    .font(.headline)
+                Spacer()
+                Text(entry.amount.isEmpty ? "—" : entry.amount + " €")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+            }
+            if let subCatName = subCategoryName(for: entry), !subCatName.isEmpty {
+                Text(subCatName)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            if let detail = detailText(for: entry), !detail.isEmpty {
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            if let comment = extractComment(from: entry.complement), !comment.isEmpty {
+                Text(comment)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .italic()
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            DispatchQueue.main.async { editingEntry = entry }
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                deleteEntry(entry)
+            } label: {
+                Label("Supprimer", systemImage: "trash")
+            }
+        }
+        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+            Button {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                DispatchQueue.main.async { editingEntry = entry }
+            } label: {
+                Label("Modifier", systemImage: "pencil")
+            }
+            .tint(.blue)
+        }
+    }
+    
+    private var gradientBackground: some View {
+        LinearGradient(
+            colors: [
+                Color.blue.opacity(0.08),
+                Color.purple.opacity(0.08),
+                Color.pink.opacity(0.08)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .ignoresSafeArea()
+    }
+    
+    private var addButton: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button {
+                let newEntry = ExpenseEntry(id: UUID(), kind: .creditHabitation, amount: "")
+                DispatchQueue.main.async { editingEntry = newEntry }
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(LinearGradient(colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: 34, height: 34)
+                    Image(systemName: "plus")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+            }
+            .accessibilityLabel("Ajouter une dépense")
         }
     }
 
     private func label(for entry: ExpenseEntry) -> String {
         return entry.kind.rawValue
+    }
+
+    private func subCategoryName(for entry: ExpenseEntry) -> String? {
+        guard let subCatID = entry.subCategoryID else { return nil }
+        let fetchDescriptor = FetchDescriptor<SubCategory>(
+            predicate: #Predicate { $0.id == subCatID }
+        )
+        return (try? modelContext.fetch(fetchDescriptor).first)?.displayName
+    }
+    
+    private func extractComment(from complement: String) -> String? {
+        let parts = complement.split(separator: ";")
+        for part in parts {
+            let keyVal = part.split(separator: "=", maxSplits: 1)
+            if keyVal.count == 2 {
+                let key = keyVal[0].trimmingCharacters(in: .whitespaces)
+                let val = String(keyVal[1]).trimmingCharacters(in: .whitespaces)
+                if key == "comment" {
+                    return val.removingPercentEncoding ?? val
+                }
+            }
+        }
+        return nil
     }
 
     private func detailText(for entry: ExpenseEntry) -> String? {
@@ -294,11 +341,7 @@ struct ExpensesView: View {
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "fr")
             formatter.dateStyle = .medium
-            details.append("Jusqu’au \(formatter.string(from: endDate))")
-        }
-
-        if let comment = parseComment(entry.complement), !comment.isEmpty {
-            details.append(comment)
+            details.append("Jusqu'au \(formatter.string(from: endDate))")
         }
 
         return details.isEmpty ? nil : details.joined(separator: " • ")
@@ -320,7 +363,9 @@ struct ExpensesView: View {
                         periodicity: $0.periodicity,
                         complement: $0.complement ?? "",
                         provider: $0.provider,
-                        endDate: $0.endDate
+                        endDate: $0.endDate,
+                        mainCategoryID: $0.mainCategoryID,
+                        subCategoryID: $0.subCategoryID
                     )
                 }
                 return
@@ -361,7 +406,8 @@ struct ExpensesView: View {
         entries = defaults
     }
 
-    private func saveAll() {
+    private func saveAll() async {
+        guard !isSaving else { return }
         isSaving = true
         saveError = nil
 
@@ -373,12 +419,17 @@ struct ExpensesView: View {
             return
         }
 
+        // Laisser le run loop respirer avant la projection
+        try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+
         do {
             try BudgetProjectionManager.projectExpenses(for: Date(), modelContext: modelContext)
         } catch {
             // non fatal error, just log or ignore
         }
+        
         isSaving = false
+        
         if let action = continueAction {
             action()
         } else {
@@ -388,23 +439,25 @@ struct ExpensesView: View {
 
     private func persistEntries() throws {
         let fetchDescriptor = FetchDescriptor<Expense>()
-        let allIds = entries.map { $0.id }
-        // Delete expenses not in entries
         let existing = try modelContext.fetch(fetchDescriptor)
+        
+        // Index des dépenses existantes par ID
+        var existingByID: [UUID: Expense] = [:]
+        for expense in existing { existingByID[expense.id] = expense }
+        
+        let entryIDs = Set(entries.map { $0.id })
+        
+        // Supprimer les dépenses qui ne sont plus dans la liste
         for expense in existing {
-            if !allIds.contains(expense.id) {
+            if !entryIDs.contains(expense.id) {
                 modelContext.delete(expense)
             }
         }
 
+        // Mettre à jour ou créer
         for entry in entries {
-            let entryID = entry.id
-            let fetchSingle = FetchDescriptor<Expense>(
-                predicate: #Predicate { $0.id == entryID }
-            )
-            let expensesFound = try modelContext.fetch(fetchSingle)
             let expense: Expense
-            if let found = expensesFound.first {
+            if let found = existingByID[entry.id] {
                 expense = found
             } else {
                 expense = Expense(
@@ -434,9 +487,21 @@ struct ExpensesView: View {
             }
             expense.provider = nil
             expense.endDate = entry.endDate
+            expense.mainCategoryID = entry.mainCategoryID
+            expense.subCategoryID = entry.subCategoryID
         }
 
         try modelContext.save()
+    }
+
+    private func deleteEntry(_ entry: ExpenseEntry) {
+        entries.removeAll { $0.id == entry.id }
+    }
+
+    private func monthShortNames(from csv: String) -> String {
+        let names = ["jan", "fév", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "déc"]
+        let indices = csv.split(separator: ",").compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }
+        return indices.compactMap { ($0 >= 1 && $0 <= 12) ? names[$0 - 1] : nil }.joined(separator: ", ")
     }
 
     private func parseComplement(_ complement: String) -> (months: String?, day: Int16?)? {
@@ -469,54 +534,13 @@ struct ExpensesView: View {
         for part in parts {
             let keyVal = part.split(separator: "=", maxSplits: 1)
             if keyVal.count == 2 {
-                let key = keyVal[0].trimmingCharacters(in: .whitespaces).lowercased()
+                let key = keyVal[0].trimmingCharacters(in: .whitespaces)
                 let val = keyVal[1].trimmingCharacters(in: .whitespaces)
-                if key == "comment" || key == "note" || key == "desc" {
-                    return val.isEmpty ? nil : val
+                if key.lowercased() == "comment" || key.lowercased() == "note" {
+                    return val
                 }
             }
         }
         return nil
-    }
-
-    private func monthShortNames(from csv: String) -> String {
-        // Parse CSV into concrete [Int]
-        let components: [Substring] = csv.split(separator: ",")
-        let months: [Int] = components.compactMap { comp in
-            let trimmed = comp.trimmingCharacters(in: .whitespaces)
-            return Int(trimmed)
-        }
-
-        let symbols: [String] = Calendar.current.shortMonthSymbols
-        let names: [String] = months.compactMap { idx -> String? in
-            guard idx >= 1, idx <= symbols.count else { return nil }
-            return symbols[idx - 1].lowercased()
-        }
-        return names.joined(separator: ", ")
-    }
-    
-    private func deleteEntry(_ entry: ExpenseEntry) {
-        // Remove from in-memory list
-        if let idx = entries.firstIndex(where: { $0.id == entry.id }) {
-            entries.remove(at: idx)
-        }
-        
-        // Remove from persistent store if present
-        do {
-            let entryID = entry.id
-            let fetch = FetchDescriptor<Expense>(
-                predicate: #Predicate { $0.id == entryID }
-            )
-            let matches = try modelContext.fetch(fetch)
-            for exp in matches {
-                modelContext.delete(exp)
-            }
-            if modelContext.hasChanges {
-                try modelContext.save()
-            }
-        } catch {
-            // Not fatal for UI; persistence will reconcile on next saveAll
-            print("Failed to delete expense: \(error)")
-        }
     }
 }

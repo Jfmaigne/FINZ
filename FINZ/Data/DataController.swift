@@ -34,7 +34,7 @@ final class DataController {
             do {
                 try seedCategoriesSync()
             } catch {
-                print("Erreur lors du seed des catégories: \(error.localizedDescription)")
+        print("Erreur lors du seed des catégories: \(error.localizedDescription)")
             }
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
@@ -54,79 +54,87 @@ final class DataController {
     
     @MainActor
     private static func seedCategoriesSyncStatic(in modelContext: ModelContext) throws {
-        // Vérifier si les catégories existent déjà
-        let fetchDescriptor = FetchDescriptor<MainCategory>(
-            predicate: #Predicate { $0.categoryType == "expense" }
-        )
+        // Fetch all existing categories
+        let allExisting = try modelContext.fetch(FetchDescriptor<MainCategory>())
         
-        let existing = try modelContext.fetch(fetchDescriptor)
-        
-        if !existing.isEmpty {
-            // Les catégories existent déjà
-            print("✅ Les catégories existent déjà (\(existing.count) catégories de dépenses)")
-            return
+        // Index by (categoryType, name) for quick lookup
+        var existingMap: [String: MainCategory] = [:]
+        for cat in allExisting {
+            existingMap["\(cat.categoryType)_\(cat.name)"] = cat
         }
         
-        print("🌱 Création des catégories par défaut...")
+        var addedCount = 0
         
-        // Insérer les catégories de dépenses par défaut
+        // Process expense categories
         for (mainCatData, subCatsData) in DefaultCategoryConfiguration.defaultExpenseCategories {
-            let mainCategory = MainCategory(
-                name: mainCatData.name,
-                displayName: mainCatData.displayName,
-                icon: mainCatData.icon,
-                color: mainCatData.color,
-                categoryType: "expense",
-                order: mainCatData.order
+            addedCount += seedOrUpdateCategory(
+                mainCatData: mainCatData, subCatsData: subCatsData,
+                categoryType: "expense", existingMap: &existingMap,
+                modelContext: modelContext
             )
-            
-            // Insérer la catégorie principale
-            modelContext.insert(mainCategory)
-            
-            // Créer et ajouter les sous-catégories
-            for (index, subCatData) in subCatsData.enumerated() {
-                let subCategory = SubCategory(
-                    name: subCatData.name,
-                    displayName: subCatData.displayName,
-                    icon: subCatData.icon,
-                    order: index + 1
-                )
-                subCategory.mainCategory = mainCategory
-                mainCategory.subCategories.append(subCategory)
-                modelContext.insert(subCategory)
-            }
         }
         
-        // Insérer les catégories de revenus par défaut
+        // Process income categories
         for (mainCatData, subCatsData) in DefaultCategoryConfiguration.defaultIncomeCategories {
-            let mainCategory = MainCategory(
+            addedCount += seedOrUpdateCategory(
+                mainCatData: mainCatData, subCatsData: subCatsData,
+                categoryType: "income", existingMap: &existingMap,
+                modelContext: modelContext
+            )
+        }
+        
+        if addedCount > 0 {
+            try modelContext.save()
+        }
+    }
+    
+    @MainActor
+    private static func seedOrUpdateCategory(
+        mainCatData: (name: String, displayName: String, icon: String, color: String, order: Int),
+        subCatsData: [(name: String, displayName: String, icon: String, order: Int)],
+        categoryType: String,
+        existingMap: inout [String: MainCategory],
+        modelContext: ModelContext
+    ) -> Int {
+        var added = 0
+        let key = "\(categoryType)_\(mainCatData.name)"
+        
+        let mainCategory: MainCategory
+        if let existing = existingMap[key] {
+            // Category exists — check for missing subcategories
+            mainCategory = existing
+        } else {
+            // New category — create it
+            mainCategory = MainCategory(
                 name: mainCatData.name,
                 displayName: mainCatData.displayName,
                 icon: mainCatData.icon,
                 color: mainCatData.color,
-                categoryType: "income",
+                categoryType: categoryType,
                 order: mainCatData.order
             )
-            
-            // Insérer la catégorie principale
             modelContext.insert(mainCategory)
-            
-            // Créer et ajouter les sous-catégories
-            for (index, subCatData) in subCatsData.enumerated() {
-                let subCategory = SubCategory(
-                    name: subCatData.name,
-                    displayName: subCatData.displayName,
-                    icon: subCatData.icon,
-                    order: index + 1
-                )
-                subCategory.mainCategory = mainCategory
-                mainCategory.subCategories.append(subCategory)
-                modelContext.insert(subCategory)
-            }
+            existingMap[key] = mainCategory
+            added += 1
         }
         
-        try modelContext.save()
-        print("✅ Catégories créées avec succès !")
+        // Check and add missing subcategories
+        let existingSubNames = Set(mainCategory.subCategories.map { $0.name })
+        for subCatData in subCatsData {
+            guard !existingSubNames.contains(subCatData.name) else { continue }
+            let subCategory = SubCategory(
+                name: subCatData.name,
+                displayName: subCatData.displayName,
+                icon: subCatData.icon,
+                order: subCatData.order
+            )
+            subCategory.mainCategory = mainCategory
+            mainCategory.subCategories.append(subCategory)
+            modelContext.insert(subCategory)
+            added += 1
+        }
+        
+        return added
     }
     
     // MARK: - Preview Support

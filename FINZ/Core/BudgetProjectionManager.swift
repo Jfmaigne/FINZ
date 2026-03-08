@@ -11,7 +11,7 @@ struct BudgetProjectionManager {
         return String(format: "%04d-%02d", year, month)
     }
     
-    static func projectIncomes(for date: Date, modelContext: ModelContext) throws {
+    static func projectIncomes(for date: Date, modelContext: ModelContext, save: Bool = true) throws {
         let calendar = Calendar.current
         let comps = calendar.dateComponents([.year, .month], from: date)
         guard let year = comps.year, let month = comps.month else {
@@ -134,10 +134,10 @@ struct BudgetProjectionManager {
             modelContext.insert(occurrence)
         }
         
-        try modelContext.save()
+        if save { try modelContext.save() }
     }
     
-    static func projectExpenses(for date: Date, modelContext: ModelContext) throws {
+    static func projectExpenses(for date: Date, modelContext: ModelContext, save: Bool = true) throws {
         let calendar = Calendar.current
         let comps = calendar.dateComponents([.year, .month], from: date)
         guard let year = comps.year, let month = comps.month else {
@@ -231,7 +231,7 @@ struct BudgetProjectionManager {
             modelContext.insert(occurrence)
         }
         
-        try modelContext.save()
+        if save { try modelContext.save() }
     }
     
     static func getInitialBalance(for monthKey: String, modelContext: ModelContext) throws -> Double {

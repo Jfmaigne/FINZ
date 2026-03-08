@@ -84,7 +84,17 @@ struct StatisticsView: View {
         }
     }
     
-    private enum Period: String, CaseIterable, Identifiable { case week = "Semaine", month = "Mois", year = "Année"; var id: String { rawValue } }
+    private enum Period: String, CaseIterable, Identifiable {
+        case week = "Semaine", month = "Mois", year = "Année"
+        var id: String { rawValue }
+        var shortLabel: String {
+            switch self {
+            case .week: return "Sem."
+            case .month: return "Mois"
+            case .year: return "Année"
+            }
+        }
+    }
     @State private var selectedPeriod: Period = .month
 
     @State private var incomeSlices: [Slice] = []
@@ -104,25 +114,16 @@ struct StatisticsView: View {
             }
             loadData()
         }
-        .onChange(of: selectedDate) { _ in // Déplacé ici
+        .onChange(of: selectedDate) {
             loadData()
         }
-        .finzHeader() // Déplacé ici
+        .finzHeader(title: "Statistiques")
     }
 
     // MARK: - Extracted Main Content
     private var mainContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                HStack {
-                    Text("Statistiques")
-                        .font(.system(size: 40, weight: .heavy, design: .rounded))
-                        .foregroundStyle(Color(white: 0.1))
-                        .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 5)
-                    Spacer(minLength: 0)
-                }
-                .padding(.top, 8)
-                
                 // Period selection card
                 periodSelectionCard
                 
@@ -147,50 +148,83 @@ struct StatisticsView: View {
     // MARK: - Extracted Subviews/Properties for Dashboard Cards
     private var periodSelectionCard: some View {
         DashboardCard {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Période")
-                    .font(.headline)
-                // Period wheel picker (liste roulante)
-                Picker("Période", selection: $selectedPeriod) {
+            HStack(alignment: .top, spacing: 14) {
+                // Toggle vertical Semaine / Mois / Année
+                VStack(spacing: 0) {
                     ForEach(Period.allCases) { p in
-                        Text(p.rawValue).tag(p)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(height: 110)
-                .clipped()
-                .onChange(of: selectedPeriod) { _ in
-                    preparePeriodOptions()
-                    loadData()
-                }
-
-                if !periodOptions.isEmpty {
-                    Picker("Période", selection: $selectedDate) {
-                        ForEach(periodOptions, id: \.self) { date in
-                            switch selectedPeriod {
-                            case .week:
-                                let r = range(for: .week, anchoredAt: date)
-                                Text("Semaine du \(weekFormatter.string(from: r.start))")
-                                    .tag(date)
-                            case .month:
-                                Text(monthFormatter.string(from: date).capitalized)
-                                    .tag(date)
-                            case .year:
-                                Text(yearFormatter.string(from: date))
-                                    .tag(date)
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                selectedPeriod = p
+                                preparePeriodOptions()
+                                loadData()
                             }
+                        } label: {
+                            Text(p.shortLabel)
+                                .font(.system(size: 13, weight: selectedPeriod == p ? .bold : .medium, design: .rounded))
+                                .foregroundStyle(selectedPeriod == p ? .white : .secondary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(
+                                    selectedPeriod == p
+                                    ? AnyShapeStyle(LinearGradient(colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)], startPoint: .top, endPoint: .bottom))
+                                    : AnyShapeStyle(Color.clear)
+                                )
                         }
+                        .buttonStyle(.plain)
                     }
-                    .pickerStyle(.wheel)
-                    .frame(height: 110)
-                    .clipped()
-                } else {
-                    ProgressView()
-                        .frame(height: 110)
+                }
+                .frame(width: 72)
+                .background(Color(.tertiarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                
+                // Liste de détail à droite
+                VStack(spacing: 6) {
+                    ForEach(periodOptions, id: \.self) { date in
+                        let isSelected = Calendar.current.isDate(date, equalTo: selectedDate, toGranularity: granularity(for: selectedPeriod))
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                selectedDate = date
+                            }
+                        } label: {
+                            Text(periodLabel(for: date))
+                                .font(.system(size: 14, weight: isSelected ? .bold : .regular, design: .rounded))
+                                .foregroundStyle(isSelected ? .white : .primary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 10)
+                                .background(
+                                    isSelected
+                                    ? AnyShapeStyle(LinearGradient(colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)], startPoint: .leading, endPoint: .trailing))
+                                    : AnyShapeStyle(Color(.tertiarySystemBackground))
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }
         .padding(.horizontal)
+    }
+    
+    private func periodLabel(for date: Date) -> String {
+        switch selectedPeriod {
+        case .week:
+            let r = range(for: .week, anchoredAt: date)
+            return "Sem. du \(weekFormatter.string(from: r.start))"
+        case .month:
+            return monthFormatter.string(from: date).capitalized
+        case .year:
+            return yearFormatter.string(from: date)
+        }
+    }
+    
+    private func granularity(for period: Period) -> Calendar.Component {
+        switch period {
+        case .week: return .weekOfYear
+        case .month: return .month
+        case .year: return .year
+        }
     }
 
     private var accountSummaryCard: some View {
@@ -420,35 +454,29 @@ struct StatisticsView: View {
         let now = Date()
         switch selectedPeriod {
         case .week:
-            if let start = cal.date(byAdding: .weekOfYear, value: -11, to: now) {
-                for offset in 0...11 {
-                    if let d = cal.date(byAdding: .weekOfYear, value: offset, to: start) {
-                        let normalized = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: d)) ?? d
-                        dates.append(normalized)
-                    }
+            for offset in -2...0 {
+                if let d = cal.date(byAdding: .weekOfYear, value: offset, to: now) {
+                    let normalized = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: d)) ?? d
+                    dates.append(normalized)
                 }
             }
         case .month:
-            if let start = cal.date(byAdding: .month, value: -11, to: now) {
-                for offset in 0...11 {
-                    if let d = cal.date(byAdding: .month, value: offset, to: start) {
-                        let comps = cal.dateComponents([.year, .month], from: d)
-                        if let first = cal.date(from: comps) { dates.append(first) }
-                    }
+            for offset in -2...0 {
+                if let d = cal.date(byAdding: .month, value: offset, to: now) {
+                    let comps = cal.dateComponents([.year, .month], from: d)
+                    if let first = cal.date(from: comps) { dates.append(first) }
                 }
             }
         case .year:
-            if let start = cal.date(byAdding: .year, value: -3, to: now) {
-                for offset in 0...3 {
-                    if let d = cal.date(byAdding: .year, value: offset, to: start) {
-                        let comps = cal.dateComponents([.year], from: d)
-                        if let first = cal.date(from: comps) { dates.append(first) }
-                    }
+            for offset in -2...0 {
+                if let d = cal.date(byAdding: .year, value: offset, to: now) {
+                    let comps = cal.dateComponents([.year], from: d)
+                    if let first = cal.date(from: comps) { dates.append(first) }
                 }
             }
         }
         periodOptions = dates
-        // Snap selectedDate to start of its period
+        // Snap selectedDate to start of its current period
         let snapped = range(for: selectedPeriod, anchoredAt: now).start
         selectedDate = snapped
     }

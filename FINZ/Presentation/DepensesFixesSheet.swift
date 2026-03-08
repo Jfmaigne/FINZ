@@ -360,11 +360,11 @@ private struct EditExpenseOccurrenceSheet: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white)
+                            .fill(Color(.secondarySystemBackground))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                            .stroke(Color(.separator).opacity(0.3), lineWidth: 1)
                     )
                     .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
 
@@ -377,7 +377,7 @@ private struct EditExpenseOccurrenceSheet: View {
                                 .focused($amountFocused)
                                 .multilineTextAlignment(.center)
                                 .font(.system(size: 34, weight: .bold, design: .rounded))
-                                .foregroundStyle(Color(white: 0.1))
+                                .foregroundStyle(.primary)
                                 .minimumScaleFactor(0.8)
                             Text("€")
                                 .font(.title3)
@@ -389,11 +389,11 @@ private struct EditExpenseOccurrenceSheet: View {
                     .padding(.horizontal, 12)
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white)
+                            .fill(Color(.secondarySystemBackground))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                            .stroke(Color(.separator).opacity(0.3), lineWidth: 1)
                     )
                     .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
 
@@ -409,11 +409,11 @@ private struct EditExpenseOccurrenceSheet: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white)
+                            .fill(Color(.secondarySystemBackground))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                            .stroke(Color(.separator).opacity(0.3), lineWidth: 1)
                     )
                     .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
 
@@ -732,11 +732,11 @@ private struct EditDeferredExpenseSheet: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white)
+                            .fill(Color(.secondarySystemBackground))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                            .stroke(Color(.separator).opacity(0.3), lineWidth: 1)
                     )
                     .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
                     
@@ -749,7 +749,7 @@ private struct EditDeferredExpenseSheet: View {
                                 .focused($amountFocused)
                                 .multilineTextAlignment(.center)
                                 .font(.system(size: 34, weight: .bold, design: .rounded))
-                                .foregroundStyle(Color(white: 0.1))
+                                .foregroundStyle(.primary)
                                 .minimumScaleFactor(0.8)
                             Text("€")
                                 .font(.title3)
@@ -761,11 +761,11 @@ private struct EditDeferredExpenseSheet: View {
                     .padding(.horizontal, 12)
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white)
+                            .fill(Color(.secondarySystemBackground))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                            .stroke(Color(.separator).opacity(0.3), lineWidth: 1)
                     )
                     .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
                     
@@ -779,11 +779,11 @@ private struct EditDeferredExpenseSheet: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white)
+                            .fill(Color(.secondarySystemBackground))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                            .stroke(Color(.separator).opacity(0.3), lineWidth: 1)
                     )
                     .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
                 }

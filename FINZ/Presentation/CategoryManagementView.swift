@@ -102,7 +102,7 @@ struct CategoryManagementView: View {
                     }
                 }
                 .padding(16)
-                .background(Color.white)
+                .background(Color(.secondarySystemBackground))
                 
                 // Liste des catégories
                 List {

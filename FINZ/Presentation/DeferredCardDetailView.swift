@@ -194,7 +194,7 @@ struct DeferredCardDetailView: View {
                             .background(Capsule().fill(cycleStatusColor.opacity(0.1)))
                         }
                         .padding()
-                        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white)
+                        .background(RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground))
                             .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4))
 
                         // Résumé financier
@@ -205,7 +205,7 @@ struct DeferredCardDetailView: View {
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
-                            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground))
                                 .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 3))
 
                             VStack(alignment: .leading, spacing: 4) {
@@ -215,7 +215,7 @@ struct DeferredCardDetailView: View {
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
-                            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground))
                                 .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 3))
                         }
 
@@ -244,7 +244,7 @@ struct DeferredCardDetailView: View {
                                 .frame(height: 8)
                             }
                             .padding(12)
-                            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground))
                                 .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 3))
                         }
 
@@ -301,7 +301,7 @@ struct DeferredCardDetailView: View {
                             }
                         }
                         .padding(16)
-                        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white)
+                        .background(RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground))
                             .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4))
 
                         Spacer(minLength: 24)

@@ -14,17 +14,11 @@ struct DashboardCard<Content: View>: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [Color.white, Color.white],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(Color(.secondarySystemBackground))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                .stroke(Color(.separator).opacity(0.3), lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
     }

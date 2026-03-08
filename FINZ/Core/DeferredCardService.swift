@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import Combine
 
 /// Service de gestion des cartes à débit différé
 /// Gère le calcul de l'impact sur le budget selon le cycle de la carte

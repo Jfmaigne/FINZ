@@ -70,9 +70,8 @@ struct SubscriptionSportView: View {
             )
             .ignoresSafeArea()
         )
-        .finzHeader()
+        .finzHeader(title: "Abonnements Sport")
         .stickyNextButton(enabled: canProceed, action: onNext)
-        .navigationTitle("Abonnements Sport")
         .navigationBarTitleDisplayMode(.inline)
     }
 

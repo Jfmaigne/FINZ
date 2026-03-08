@@ -83,9 +83,8 @@ struct LifeView: View {
             )
             .ignoresSafeArea()
         )
-        .finzHeader()
+        .finzHeader(title: "Mode de vie")
         .stickyNextButton(enabled: canProceed, action: onNext)
-        .navigationTitle("Mode de vie")
         .navigationBarTitleDisplayMode(.inline)
     }
 

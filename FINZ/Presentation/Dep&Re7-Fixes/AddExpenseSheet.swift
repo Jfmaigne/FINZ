@@ -239,6 +239,14 @@ struct AddExpenseSheet: View {
             }
         }
         periodicity = hasSpecificMonths ? "Mois spécifiques" : "Mensuel"
+        
+        // Restore selected categories from saved IDs
+        if let mainCatID = entry.mainCategoryID {
+            selectedMainCategory = mainCategories.first(where: { $0.id == mainCatID })
+        }
+        if let subCatID = entry.subCategoryID, let mainCat = selectedMainCategory {
+            selectedSubCategory = mainCat.subCategories.first(where: { $0.id == subCatID })
+        }
     }
 
     private func save() {

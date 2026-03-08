@@ -72,9 +72,8 @@ struct SubscriptionTVView: View {
             )
             .ignoresSafeArea()
         )
-        .finzHeader()
+        .finzHeader(title: "Abonnements TV")
         .stickyNextButton(enabled: canProceed, action: onNext)
-        .navigationTitle("Abonnements TV")
         .navigationBarTitleDisplayMode(.inline)
     }
 

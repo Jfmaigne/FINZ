@@ -151,7 +151,7 @@ struct AddOperationQuickSheet: View {
         }
         .padding(.horizontal, 16)
         .padding(.top, 6)
-        .background(Color.white)
+        .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
         .presentationDetents([.fraction(0.5)])
         .presentationDragIndicator(.visible)
