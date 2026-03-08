@@ -5,7 +5,7 @@ import SwiftData
 
 @Model
 final class MainCategory {
-    @Attribute(.unique) var id: UUID
+    var id: UUID
     var name: String
     var displayName: String
     var icon: String
@@ -18,12 +18,12 @@ final class MainCategory {
     
     init(
         id: UUID = UUID(),
-        name: String,
-        displayName: String,
-        icon: String,
-        color: String,
-        categoryType: String,
-        order: Int
+        name: String = "",
+        displayName: String = "",
+        icon: String = "",
+        color: String = "",
+        categoryType: String = "",
+        order: Int = 0
     ) {
         self.id = id
         self.name = name
@@ -40,7 +40,7 @@ final class MainCategory {
 
 @Model
 final class SubCategory {
-    @Attribute(.unique) var id: UUID
+    var id: UUID
     var name: String
     var displayName: String
     var icon: String
@@ -50,10 +50,10 @@ final class SubCategory {
     
     init(
         id: UUID = UUID(),
-        name: String,
-        displayName: String,
-        icon: String,
-        order: Int
+        name: String = "",
+        displayName: String = "",
+        icon: String = "",
+        order: Int = 0
     ) {
         self.id = id
         self.name = name

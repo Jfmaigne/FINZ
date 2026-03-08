@@ -177,7 +177,7 @@ private struct CardRowView: View {
         formatter.numberStyle = .currency
         formatter.currencyCode = "EUR"
         formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: value)) ?? "\(Int(value)) €"
+        return formatter.string(from: NSNumber(value: value)) ?? "\(value.safeInt) €"
     }
 }
 
@@ -329,7 +329,7 @@ struct AddEditDeferredCardView: View {
                     lastFourDigits = card.lastFourDigits ?? ""
                     cutoffDay = Int(card.cutoffDay)
                     debitDay = Int(card.debitDay)
-                    monthlyBudgetText = card.monthlyBudget > 0 ? String(Int(card.monthlyBudget)) : ""
+                    monthlyBudgetText = card.monthlyBudget > 0 ? String(card.monthlyBudget.safeInt) : ""
                     isActive = card.isActive
                 }
             }

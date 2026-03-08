@@ -105,7 +105,7 @@ struct AddSubCategorySheet: View {
 }
 
 #Preview {
-    let container = DataController.preview.modelContainer
+    let container = DataController.previewContainer
     let context = ModelContext(container)
     
     let mainCat = MainCategory(

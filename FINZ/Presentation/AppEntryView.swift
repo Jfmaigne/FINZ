@@ -49,6 +49,6 @@ struct AppEntryView: View {
 
 #Preview {
     AppEntryView()
-        .modelContainer(DataController.preview.modelContainer)
+        .modelContainer(DataController.previewContainer)
         .environmentObject(QuestionnaireViewModel())
 }

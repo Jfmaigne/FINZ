@@ -158,5 +158,5 @@ extension Color {
         categoryType: "expense",
         onSave: { _ in }
     )
-        .modelContainer(DataController.preview.modelContainer)
+        .modelContainer(DataController.previewContainer)
 }

@@ -14,7 +14,7 @@ struct AuthApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var sessionManager = SessionManager()
     
-    // SwiftData ModelContainer
+    // SwiftData ModelContainer avec CloudKit
     let modelContainer: ModelContainer = {
         let schema = Schema([
             BudgetEntryOccurrence.self,
@@ -26,21 +26,34 @@ struct AuthApp: App {
             DeferredCardExpense.self
         ])
         
-        let modelConfiguration = ModelConfiguration(
+        let config = ModelConfiguration(
             schema: schema,
-            isStoredInMemoryOnly: false
+            isStoredInMemoryOnly: false,
+            cloudKitDatabase: .automatic
         )
         
         do {
-            let container = try ModelContainer(
-                for: schema,
-                configurations: [modelConfiguration]
-            )
-            
-            // Seed categories on app launch
+            let container = try ModelContainer(for: schema, configurations: [config])
             let context = ModelContext(container)
             try? DataController.seedCategories(in: context)
-            
+            print("☁️ ModelContainer CloudKit créé avec succès")
+            return container
+        } catch {
+            print("⚠️ CloudKit échoué: \(error). Fallback local...")
+        }
+        
+        // Fallback local si CloudKit échoue
+        let localConfig = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            cloudKitDatabase: .none
+        )
+        
+        do {
+            let container = try ModelContainer(for: schema, configurations: [localConfig])
+            let context = ModelContext(container)
+            try? DataController.seedCategories(in: context)
+            print("📱 ModelContainer local créé")
             return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")

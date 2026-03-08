@@ -467,7 +467,7 @@ private struct LearnRowView: View {
                 .padding(.leading, 2)
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground)))
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.gray.opacity(0.12)))
         .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
     }
@@ -485,7 +485,6 @@ struct AccountView: View {
     @State private var showingProfileConfirm = false
     @State private var firstName: String = AppSettings.firstName
     
-    @State private var showingExportSheet = false
     @State private var exportURL: URL? = nil
     @State private var exportError: String? = nil
     @State private var showingImportPicker = false
@@ -496,124 +495,38 @@ struct AccountView: View {
     @State private var showingSignOutAlert = false
     @State private var showingCategoryManagement = false
     @State private var forecastDay: Int = AppSettings.forecastDay
+    @State private var showForecastInfo = false
+
+    // MARK: - Couleurs FINZ
+    private let finzPurple = Color(red: 0.52, green: 0.21, blue: 0.93)
+    private let finzPink = Color(red: 1.00, green: 0.29, blue: 0.63)
+    private let accentGradient = LinearGradient(
+        colors: [Color(red: 0.52, green: 0.21, blue: 0.93), Color(red: 1.00, green: 0.29, blue: 0.63)],
+        startPoint: .leading, endPoint: .trailing
+    )
 
     var body: some View {
         ZStack {
         NavigationStack {
-            Form {
-                Section(header: Text("Paramètres")) {
-                    TextField("Prénom", text: $firstName)
-                        .textInputAutocapitalization(.words)
-                        .onChange(of: firstName) { newValue in
-                            AppSettings.firstName = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                        }
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 20) {
+                    profileSection
+                    settingsSection
+                    dataSection
+                    forecastSection
+                    backupSection
+                    dangerZoneSection
+                    versionFooter
                 }
-                Section(header: Text("Données")) {
-                    if let resetError {
-                        Text(resetError)
-                            .foregroundStyle(.red)
-                    }
-                    NavigationLink {
-                        RecettesView()
-                            .environmentObject(vm)
-                    } label: {
-                        Label("Modifier les recettes fixes", systemImage: "arrow.up.circle")
-                    }
-                    NavigationLink {
-                        ExpensesView()
-                            .environmentObject(vm)
-                    } label: {
-                        Label("Modifier les dépenses fixes", systemImage: "arrow.down.circle")
-                    }
-                    NavigationLink {
-                        CategoryManagementView()
-                    } label: {
-                        Label("Gérer les catégories", systemImage: "tag.circle")
-                    }
-                    NavigationLink {
-                        DeferredCardManagementView()
-                    } label: {
-                        Label("Cartes à débit différé", systemImage: "creditcard.circle")
-                    }
-                    Button {
-                        showingProfileConfirm = true
-                    } label: {
-                        Label("Modifier le profil", systemImage: "person.crop.circle")
-                    }
-                    Button {
-                        Task { await exportBackup() }
-                    } label: {
-                        Label("Exporter les données", systemImage: "square.and.arrow.up")
-                    }
-                    Button {
-                        showingImportPicker = true
-                    } label: {
-                        Label("Importer des données", systemImage: "square.and.arrow.down")
-                    }
-                    Button(role: .destructive) {
-                        showingResetAlert = true
-                    } label: {
-                        HStack {
-                            if isResetting { ProgressView().padding(.trailing, 6) }
-                            Text("Réinitialiser les données")
-                        }
-                    }
-                    .disabled(isResetting)
-                }
-
-                Section(header: Text("Prévisionnel")) {
-                    Picker("Date du prévisionnel", selection: $forecastDay) {
-                        Text("Dernier jour du mois").tag(0)
-                        ForEach(1...28, id: \.self) { day in
-                            Text("Le \(day) du mois").tag(day)
-                        }
-                    }
-                    .onChange(of: forecastDay) {
-                        AppSettings.forecastDay = forecastDay
-                    }
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("C'est quoi le prévisionnel ?", systemImage: "info.circle")
-                            .font(.headline)
-                        Text("Le prévisionnel, c'est ta projection de thunes 💰 à une date précise du mois. En gros, on prend tout ce qui rentre (salaire, aides…) et tout ce qui sort (loyer, abos, courses…) et on te calcule combien il te restera sur ton compte à cette date-là.")
-                            .font(.caption)
-                        Text("La date que tu choisis ici, c'est super important ! 📅")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                        Text("💡 Notre conseil : mets la veille du jour où tu reçois ton salaire ou tes allocs. Comme ça tu vois vraiment combien il te reste juste avant que ça tombe. Si t'as pas de date précise, le dernier jour du mois c'est un bon choix pour avoir une vision complète de ton budget.")
-                            .font(.caption)
-                    }
-                    .foregroundStyle(.secondary)
-                    .padding(.vertical, 8)
-                }
-
-                Section(header: Text("Authentification")) {
-                    if let user = authService.user {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Connecté en tant que:")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text(user.fullName)
-                                .font(.headline)
-                            Text(user.email)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.vertical, 8)
-                    }
-                    
-                    Button(role: .destructive) {
-                        showingSignOutAlert = true
-                    } label: {
-                        Label("Se déconnecter", systemImage: "arrow.right.circle")
-                    }
-                }
-
-                Section(header: Text("À propos")) {
-                    Text("Compte")
-                        .foregroundStyle(.secondary)
-                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 32)
             }
+            .background(
+                LinearGradient(
+                    colors: [Color.blue.opacity(0.04), Color.purple.opacity(0.04), Color.pink.opacity(0.04)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                ).ignoresSafeArea()
+            )
             .navigationBarTitleDisplayMode(.inline)
             .finzHeader(title: "Compte")
             .onAppear {
@@ -708,14 +621,15 @@ struct AccountView: View {
             }
         } // ZStack
         .animation(.spring(response: 0.3), value: showResetSuccess)
-        .sheet(isPresented: $showingExportSheet, onDismiss: {
-            cleanupExportFile()
-        }) {
+        .sheet(isPresented: Binding<Bool>(
+            get: { exportURL != nil },
+            set: { if !$0 { cleanupExportFile() } }
+        )) {
             if let url = exportURL, FileManager.default.fileExists(atPath: url.path) {
                 ActivityView(activityItems: [url])
             } else {
                 Text("Erreur d'accès au fichier exporté.").onAppear {
-                    showingExportSheet = false
+                    exportURL = nil
                     exportError = "Le fichier export n'est plus disponible."
                 }
             }
@@ -724,11 +638,258 @@ struct AccountView: View {
             switch result {
             case .success(let url):
                 pendingImportURL = url
-                showingImportConfirm = true
+                // Retarder pour laisser le fileImporter se fermer
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    showingImportConfirm = true
+                }
             case .failure(let error):
                 importError = "Impossible d'ouvrir le fichier : \(error.localizedDescription)"
             }
         })
+    }
+
+    // MARK: - Profil
+    private var profileSection: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(accentGradient)
+                    .frame(width: 72, height: 72)
+                Text(String(firstName.prefix(1)).uppercased())
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+            }
+            if let user = authService.user {
+                Text(user.fullName)
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                Text(user.email)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text(firstName.isEmpty ? "Mon compte" : firstName)
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color(.secondarySystemGroupedBackground))
+                .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
+        )
+    }
+
+    // MARK: - Paramètres
+    private var settingsSection: some View {
+        AccountSectionCard(title: "Paramètres", icon: "gearshape.fill", iconColor: .gray) {
+            VStack(spacing: 0) {
+                HStack(spacing: 14) {
+                    accountIcon("person.fill", color: finzPurple)
+                    TextField("Prénom", text: $firstName)
+                        .textInputAutocapitalization(.words)
+                        .onChange(of: firstName) { newValue in
+                            AppSettings.firstName = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                        }
+                }
+                .padding(.vertical, 12)
+                
+                Divider().padding(.leading, 44)
+                
+                accountRow(icon: "person.crop.circle", color: .blue, label: "Modifier le profil") {
+                    showingProfileConfirm = true
+                }
+            }
+        }
+    }
+
+    // MARK: - Données
+    private var dataSection: some View {
+        AccountSectionCard(title: "Données", icon: "square.stack.3d.up.fill", iconColor: finzPurple) {
+            VStack(spacing: 0) {
+                if let resetError {
+                    Text(resetError)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .padding(.vertical, 8)
+                }
+                
+                accountNavRow(icon: "arrow.up.circle.fill", color: .green, label: "Recettes fixes") {
+                    RecettesView().environmentObject(vm)
+                }
+                Divider().padding(.leading, 44)
+                accountNavRow(icon: "arrow.down.circle.fill", color: finzPink, label: "Dépenses fixes") {
+                    ExpensesView().environmentObject(vm)
+                }
+                Divider().padding(.leading, 44)
+                accountNavRow(icon: "tag.circle.fill", color: .orange, label: "Catégories") {
+                    CategoryManagementView()
+                }
+                Divider().padding(.leading, 44)
+                accountNavRow(icon: "creditcard.circle.fill", color: .indigo, label: "Cartes à débit différé") {
+                    DeferredCardManagementView()
+                }
+            }
+        }
+    }
+
+    // MARK: - Prévisionnel
+    private var forecastSection: some View {
+        AccountSectionCard(title: "Prévisionnel", icon: "calendar.badge.clock", iconColor: .teal) {
+            VStack(spacing: 12) {
+                Picker("Date du prévisionnel", selection: $forecastDay) {
+                    Text("Dernier jour du mois").tag(0)
+                    ForEach(1...28, id: \.self) { day in
+                        Text("Le \(day) du mois").tag(day)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(finzPurple)
+                .onChange(of: forecastDay) {
+                    AppSettings.forecastDay = forecastDay
+                }
+                
+                Button {
+                    withAnimation { showForecastInfo.toggle() }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "info.circle")
+                        Text("C'est quoi le prévisionnel ?")
+                            .font(.caption)
+                        Spacer()
+                        Image(systemName: showForecastInfo ? "chevron.up" : "chevron.down")
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                
+                if showForecastInfo {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Le prévisionnel, c'est ta projection de thunes 💰 à une date précise du mois.")
+                            .font(.caption)
+                        Text("💡 Notre conseil : mets la veille du jour où tu reçois ton salaire ou tes allocs.")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundStyle(.secondary)
+                    .padding(12)
+                    .background(Color(.tertiarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+        }
+    }
+
+    // MARK: - Sauvegarde
+    private var backupSection: some View {
+        AccountSectionCard(title: "Sauvegarde", icon: "icloud.fill", iconColor: .cyan) {
+            VStack(spacing: 0) {
+                accountRow(icon: "square.and.arrow.up.fill", color: .blue, label: "Exporter les données") {
+                    Task { await exportBackup() }
+                }
+                Divider().padding(.leading, 44)
+                accountRow(icon: "square.and.arrow.down.fill", color: .green, label: "Importer des données") {
+                    showingImportPicker = true
+                }
+            }
+        }
+    }
+
+    // MARK: - Zone dangereuse
+    private var dangerZoneSection: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                Text("Zone dangereuse")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.red)
+                Spacer()
+            }
+            .padding(.horizontal, 4)
+            .padding(.bottom, 8)
+            
+            VStack(spacing: 0) {
+                accountRow(icon: "trash.fill", color: .red, label: "Réinitialiser les données", isDestructive: true) {
+                    showingResetAlert = true
+                }
+                Divider().padding(.leading, 44)
+                accountRow(icon: "rectangle.portrait.and.arrow.right.fill", color: .red, label: "Se déconnecter", isDestructive: true) {
+                    showingSignOutAlert = true
+                }
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(.secondarySystemGroupedBackground))
+                    .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.red.opacity(0.15), lineWidth: 1)
+            )
+        }
+    }
+
+    // MARK: - Version
+    private var versionFooter: some View {
+        VStack(spacing: 4) {
+            Text("FINZ")
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundStyle(accentGradient)
+            Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 8)
+    }
+
+    // MARK: - Row Helpers
+    private func accountIcon(_ systemName: String, color: Color) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 16, weight: .medium))
+            .foregroundStyle(.white)
+            .frame(width: 30, height: 30)
+            .background(color, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+    }
+    
+    private func accountRow(icon: String, color: Color, label: String, isDestructive: Bool = false, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                accountIcon(icon, color: color)
+                Text(label)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundStyle(isDestructive ? .red : .primary)
+                Spacer()
+                if isResetting && label.contains("Réinitialiser") {
+                    ProgressView()
+                }
+            }
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isResetting && label.contains("Réinitialiser"))
+    }
+    
+    @ViewBuilder
+    private func accountNavRow<Destination: View>(icon: String, color: Color, label: String, @ViewBuilder destination: () -> Destination) -> some View {
+        NavigationLink(destination: destination) {
+            HStack(spacing: 14) {
+                accountIcon(icon, color: color)
+                Text(label)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundStyle(.primary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.vertical, 10)
+        }
     }
 
     private func resetAllData() {
@@ -930,7 +1091,6 @@ struct AccountView: View {
 
             await MainActor.run {
                 exportURL = tmp
-                showingExportSheet = true
             }
         } catch {
             await MainActor.run {
@@ -1239,6 +1399,40 @@ struct AccountView: View {
         if let url = exportURL {
             try? FileManager.default.removeItem(at: url)
             exportURL = nil
+        }
+    }
+}
+
+// MARK: - AccountSectionCard
+private struct AccountSectionCard<Content: View>: View {
+    let title: String
+    let icon: String
+    let iconColor: Color
+    @ViewBuilder let content: Content
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.caption)
+                    .foregroundStyle(iconColor)
+                Text(title)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+            .padding(.horizontal, 4)
+            .padding(.bottom, 8)
+            
+            VStack(spacing: 0) {
+                content
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(.secondarySystemGroupedBackground))
+                    .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
+            )
         }
     }
 }

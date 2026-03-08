@@ -3,53 +3,11 @@ import SwiftData
 
 @MainActor
 final class DataController {
-    static let shared = DataController()
     
-    let modelContainer: ModelContainer
-    let modelContext: ModelContext
+    // MARK: - Category Seeding (appelé par AuthApp au lancement)
     
-    private init() {
-        let schema = Schema([
-            BudgetEntryOccurrence.self,
-            Income.self,
-            Expense.self,
-            MainCategory.self,
-            SubCategory.self
-        ])
-        
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false,
-            cloudKitDatabase: .none
-        )
-        
-        do {
-            modelContainer = try ModelContainer(
-                for: schema,
-                configurations: [modelConfiguration]
-            )
-            modelContext = ModelContext(modelContainer)
-            
-            // Initialiser les catégories de manière synchrone
-            do {
-                try seedCategoriesSync()
-            } catch {
-        print("Erreur lors du seed des catégories: \(error.localizedDescription)")
-            }
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }
-    
-    // Static method for seeding categories
-    @MainActor
     static func seedCategories(in context: ModelContext) throws {
         try seedCategoriesSyncStatic(in: context)
-    }
-    
-    // Instance method called from init
-    private func seedCategoriesSync() throws {
-        try Self.seedCategoriesSyncStatic(in: modelContext)
     }
     
     @MainActor
@@ -140,34 +98,39 @@ final class DataController {
     // MARK: - Preview Support
     
     @MainActor
-    static var preview: DataController = {
+    static var previewContainer: ModelContainer = {
         let schema = Schema([
             BudgetEntryOccurrence.self,
             Income.self,
             Expense.self,
             MainCategory.self,
-            SubCategory.self
+            SubCategory.self,
+            DeferredCard.self,
+            DeferredCardExpense.self
         ])
         
-        let modelConfiguration = ModelConfiguration(
+        let config = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: true
         )
         
-        let controller = DataController()
-        
-        // Ajouter des données de preview si besoin
-        let sampleOccurrence = BudgetEntryOccurrence(
-            date: Date(),
-            amount: 100.0,
-            kind: "income",
-            title: "Salaire",
-            monthKey: "2026-02",
-            isManual: false
-        )
-        
-        controller.modelContext.insert(sampleOccurrence)
-        
-        return controller
+        do {
+            let container = try ModelContainer(for: schema, configurations: [config])
+            let context = ModelContext(container)
+            
+            let sample = BudgetEntryOccurrence(
+                date: Date(),
+                amount: 100.0,
+                kind: "income",
+                title: "Salaire",
+                monthKey: "2026-02",
+                isManual: false
+            )
+            context.insert(sample)
+            
+            return container
+        } catch {
+            fatalError("Preview container failed: \(error)")
+        }
     }()
 }

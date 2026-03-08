@@ -179,7 +179,8 @@ private struct IncomeRow: View {
     }
 
     private var amountFormatted: String {
-        let val = Int(abs(occurrence.amount))
+        let raw = abs(occurrence.amount)
+        let val = raw.isFinite ? Int(raw) : 0
         return "+\(val) €"
     }
 
@@ -332,7 +333,7 @@ private struct EditIncomeOccurrenceSheet: View {
             }
             .onAppear {
                 title = occurrence.title ?? ""
-                amountText = String(Int(abs(occurrence.amount)))
+                amountText = String(abs(occurrence.amount).isFinite ? Int(abs(occurrence.amount)) : 0)
                 date = occurrence.date
             }
         }
@@ -353,5 +354,5 @@ private struct EditIncomeOccurrenceSheet: View {
 
 #Preview {
     RecettesFixesSheet()
-        .modelContainer(DataController.preview.modelContainer)
+        .modelContainer(DataController.previewContainer)
 }

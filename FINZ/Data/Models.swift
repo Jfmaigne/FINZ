@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class BudgetEntryOccurrence {
-    @Attribute(.unique) var id: UUID
+    var id: UUID
     var date: Date
     var amount: Double
     var kind: String // "income", "expense", "balance"
@@ -18,11 +18,11 @@ final class BudgetEntryOccurrence {
     
     init(
         id: UUID = UUID(),
-        date: Date,
-        amount: Double,
-        kind: String,
+        date: Date = Date(),
+        amount: Double = 0,
+        kind: String = "",
         title: String? = nil,
-        monthKey: String,
+        monthKey: String = "",
         isManual: Bool = false,
         sourceid: UUID? = nil,
         createdAt: Date = Date(),
@@ -47,7 +47,7 @@ final class BudgetEntryOccurrence {
 
 @Model
 final class Income {
-    @Attribute(.unique) var id: UUID
+    var id: UUID
     var amount: Double
     var complement: String?
     var day: Int16
@@ -61,12 +61,12 @@ final class Income {
     
     init(
         id: UUID = UUID(),
-        amount: Double,
+        amount: Double = 0,
         complement: String? = nil,
-        day: Int16,
-        kind: String,
+        day: Int16 = 1,
+        kind: String = "",
         months: String? = nil,
-        periodicity: String,
+        periodicity: String = "Mensuel",
         mainCategoryID: UUID? = nil,
         subCategoryID: UUID? = nil
     ) {
@@ -84,7 +84,7 @@ final class Income {
 
 @Model
 final class Expense {
-    @Attribute(.unique) var id: UUID
+    var id: UUID
     var amount: Double
     var complement: String?
     var day: Int16
@@ -101,14 +101,14 @@ final class Expense {
     
     init(
         id: UUID = UUID(),
-        amount: Double,
+        amount: Double = 0,
         complement: String? = nil,
-        day: Int16,
+        day: Int16 = 1,
         endDate: Date? = nil,
-        kind: String,
+        kind: String = "",
         months: String? = nil,
         note: String? = nil,
-        periodicity: String,
+        periodicity: String = "Mensuel",
         provider: String? = nil,
         mainCategoryID: UUID? = nil,
         subCategoryID: UUID? = nil
@@ -130,7 +130,7 @@ final class Expense {
 
 @Model
 final class DeferredCard {
-    @Attribute(.unique) var id: UUID
+    var id: UUID
     var name: String                    // Nom de la carte (ex: "Visa Gold")
     var lastFourDigits: String?         // 4 derniers chiffres (optionnel)
     var cutoffDay: Int16                // Jour de bascule du différé (ex: 25)
@@ -142,7 +142,7 @@ final class DeferredCard {
     
     init(
         id: UUID = UUID(),
-        name: String,
+        name: String = "",
         lastFourDigits: String? = nil,
         cutoffDay: Int16 = 25,
         debitDay: Int16 = 4,
@@ -165,7 +165,7 @@ final class DeferredCard {
 
 @Model
 final class DeferredCardExpense {
-    @Attribute(.unique) var id: UUID
+    var id: UUID
     var cardID: UUID                    // Référence à la carte
     var amount: Double                  // Montant de la dépense
     var expenseDate: Date               // Date de la dépense
@@ -177,12 +177,12 @@ final class DeferredCardExpense {
     
     init(
         id: UUID = UUID(),
-        cardID: UUID,
-        amount: Double,
-        expenseDate: Date,
+        cardID: UUID = UUID(),
+        amount: Double = 0,
+        expenseDate: Date = Date(),
         expenseDescription: String? = nil,
-        cycleStartDate: Date,
-        cycleEndDate: Date,
+        cycleStartDate: Date = Date(),
+        cycleEndDate: Date = Date(),
         isSettled: Bool = false,
         createdAt: Date = Date()
     ) {

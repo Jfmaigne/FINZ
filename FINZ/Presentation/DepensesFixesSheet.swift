@@ -297,7 +297,8 @@ private struct ExpenseRow: View {
     }
 
     private var amountFormatted: String {
-        let val = Int(abs(occurrence.amount))
+        let raw = abs(occurrence.amount)
+        let val = raw.isFinite ? Int(raw) : 0
         return "-\(val) €"
     }
 
@@ -450,7 +451,7 @@ private struct EditExpenseOccurrenceSheet: View {
             }
             .onAppear {
                 title = occurrence.title ?? ""
-                amountText = String(Int(abs(occurrence.amount)))
+                amountText = String(abs(occurrence.amount).isFinite ? Int(abs(occurrence.amount)) : 0)
                 date = occurrence.date
             }
         }
@@ -534,7 +535,7 @@ private struct DeferredCardDebitRow: View {
             
             // Montant
             VStack(alignment: .trailing, spacing: 2) {
-                Text("-\(Int(amount)) €")
+                Text("-\(amount.isFinite ? Int(amount) : 0) €")
                     .foregroundColor(.red)
                     .font(.body.monospacedDigit())
                 if isEstimate {
@@ -616,7 +617,7 @@ private struct DeferredCardSectionHeader: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text("-\(Int(displayAmount)) €")
+                    Text("-\(displayAmount.isFinite ? Int(displayAmount) : 0) €")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.red)
                     
@@ -636,7 +637,7 @@ private struct DeferredCardSectionHeader: View {
                     Text("Bascule le \(cutoffInfo)")
                         .font(.caption2)
                     if cycleSummary.totalExpenses > 0 {
-                        Text("• Dépenses: \(Int(cycleSummary.totalExpenses)) €")
+                        Text("• Dépenses: \(cycleSummary.totalExpenses.isFinite ? Int(cycleSummary.totalExpenses) : 0) €")
                             .font(.caption2)
                     }
                 } else {
@@ -666,7 +667,7 @@ private struct DeferredExpenseRow: View {
     }
     
     private var amountFormatted: String {
-        let val = Int(expense.amount)
+        let val = expense.amount.safeInt
         return "-\(val) €"
     }
     
@@ -818,7 +819,7 @@ private struct EditDeferredExpenseSheet: View {
             }
             .onAppear {
                 description = expense.expenseDescription ?? ""
-                amountText = String(Int(expense.amount))
+                amountText = String(expense.amount.isFinite ? Int(expense.amount) : 0)
                 date = expense.expenseDate
             }
         }

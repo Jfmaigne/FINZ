@@ -211,7 +211,7 @@ struct DeferredCardDetailView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Enveloppe").font(.caption).foregroundStyle(.secondary)
                                 Text(formatAmount(card.monthlyBudget)).font(.headline.bold()).foregroundStyle(usageColor)
-                                Text("\(Int(usagePercent * 100))% utilisé").font(.caption2).foregroundStyle(usageColor)
+                                Text("\((usagePercent * 100).safeInt)% utilisé").font(.caption2).foregroundStyle(usageColor)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)

@@ -449,17 +449,13 @@ private struct IncomeEntryRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text(entry.label)
+                // Afficher le nom de la sous-catégorie comme libellé principal si disponible
+                Text(subCategoryName ?? entry.label)
                     .font(.headline)
                 Spacer()
                 Text(entry.amount.isEmpty ? "—" : entry.amount)
                     .font(.headline)
                     .foregroundStyle(.primary)
-            }
-            if let subCatName = subCategoryName, !subCatName.isEmpty {
-                Text(subCatName)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
             }
             Text(detailText)
                 .font(.caption)

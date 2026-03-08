@@ -240,7 +240,7 @@ public struct ForecastLandscapeView: View {
         f.numberStyle = .currency
         f.currencyCode = Locale.current.currency?.identifier ?? "EUR"
         f.maximumFractionDigits = 0
-        let s = f.string(from: n) ?? "\(Int(abs(value))) €"
+        let s = f.string(from: n) ?? "\(abs(value).safeInt) €"
         return value < 0 ? "-\(s)" : s
     }
 

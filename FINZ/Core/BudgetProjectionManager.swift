@@ -42,6 +42,16 @@ struct BudgetProjectionManager {
         let incomeFetch = FetchDescriptor<Income>()
         let incomes = try modelContext.fetch(incomeFetch)
         
+        // Charger les sous-catégories pour résoudre les noms
+        let subCatFetch = FetchDescriptor<SubCategory>()
+        let allSubCategories = try modelContext.fetch(subCatFetch)
+        let subCatByID: [UUID: SubCategory] = Dictionary(
+            allSubCategories.compactMap { sub in
+                (sub.id, sub)
+            }.map { ($0.0, $0.1) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        
         func parseMonths(from complement: String?) -> [Int] {
             guard let complement = complement else { return [] }
             
@@ -121,14 +131,24 @@ struct BudgetProjectionManager {
             
             guard let occurrenceDate = calendar.date(from: occurrenceComps) else { continue }
             
+            // Utiliser le nom de la sous-catégorie comme titre si disponible
+            let title: String = {
+                if let subID = income.subCategoryID, let sub = subCatByID[subID] {
+                    return sub.displayName
+                }
+                return income.kind
+            }()
+            
             let occurrence = BudgetEntryOccurrence(
                 date: occurrenceDate,
                 amount: income.amount,
                 kind: "income",
-                title: income.kind,
+                title: title,
                 monthKey: monthKey,
                 isManual: false,
-                sourceid: income.id
+                sourceid: income.id,
+                mainCategoryID: income.mainCategoryID,
+                subCategoryID: income.subCategoryID
             )
             
             modelContext.insert(occurrence)
@@ -161,6 +181,16 @@ struct BudgetProjectionManager {
         // Fetch all Expense objects
         let expenseFetch = FetchDescriptor<Expense>()
         let expenses = try modelContext.fetch(expenseFetch)
+        
+        // Charger les sous-catégories pour résoudre les noms
+        let subCatFetch = FetchDescriptor<SubCategory>()
+        let allSubCategories = try modelContext.fetch(subCatFetch)
+        let subCatByID: [UUID: SubCategory] = Dictionary(
+            allSubCategories.compactMap { sub in
+                (sub.id, sub)
+            }.map { ($0.0, $0.1) },
+            uniquingKeysWith: { first, _ in first }
+        )
         
         func parseMonths(from months: String?) -> [Int] {
             guard let months = months else { return [] }
@@ -216,16 +246,29 @@ struct BudgetProjectionManager {
             
             guard let occurrenceDate = calendar.date(from: occurrenceComps) else { continue }
             
-            let title = [expense.kind, expense.provider].compactMap { $0 }.joined(separator: " - ")
+            // Utiliser le nom de la sous-catégorie si disponible, sinon kind + provider
+            let title: String = {
+                if let subID = expense.subCategoryID, let sub = subCatByID[subID] {
+                    if let provider = expense.provider, !provider.isEmpty {
+                        return "\(sub.displayName) - \(provider)"
+                    }
+                    return sub.displayName
+                }
+                let parts = [expense.kind, expense.provider].compactMap { $0 }.filter { !$0.isEmpty }
+                let joined = parts.joined(separator: " - ")
+                return joined.isEmpty ? "Dépense" : joined
+            }()
             
             let occurrence = BudgetEntryOccurrence(
                 date: occurrenceDate,
                 amount: -abs(expense.amount),
                 kind: "expense",
-                title: title.isEmpty ? "Dépense" : title,
+                title: title,
                 monthKey: monthKey,
                 isManual: false,
-                sourceid: expense.id
+                sourceid: expense.id,
+                mainCategoryID: expense.mainCategoryID,
+                subCategoryID: expense.subCategoryID
             )
             
             modelContext.insert(occurrence)

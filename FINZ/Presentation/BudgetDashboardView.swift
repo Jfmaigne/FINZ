@@ -495,9 +495,11 @@ struct BudgetDashboardView: View {
             let expenses = (try? fetchOccurrences(monthKey: monthKey, kind: "expense")) ?? []
 
             let incomesTotal = incomes.reduce(Decimal.zero) { partial, obj in
+                guard obj.amount.isFinite else { return partial }
                 return partial + Decimal(obj.amount)
             }
             var expensesTotal = expenses.reduce(Decimal.zero) { partial, obj in
+                guard obj.amount.isFinite else { return partial }
                 return partial + Decimal(abs(obj.amount))
             }
             
@@ -842,6 +844,7 @@ struct BudgetDashboardView: View {
             let recettesPassees = computeRecettesPassees(from: incomes)
             let depensesPassees = computeDepensesPassees(from: expenses)
             let initialBalance = balances.reduce(Decimal.zero) { partial, obj in
+                guard obj.amount.isFinite else { return partial }
                 return partial + Decimal(obj.amount)
             }
             currentBalance = initialBalance + recettesPassees - depensesPassees
@@ -1205,7 +1208,7 @@ private struct DeferredCardForecastRow: View {
             
             if card.monthlyBudget > 0 {
                 let usagePercent = min(totalExpensesForCycle / card.monthlyBudget, 1.0)
-                Text("\(Int(usagePercent * 100))%")
+                Text("\((usagePercent * 100).safeInt)%")
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(usagePercent > 0.9 ? .red : (usagePercent > 0.7 ? .orange : .green))
             }
@@ -1324,6 +1327,6 @@ private struct DeferredCardForecastRow: View {
         formatter.numberStyle = .currency
         formatter.currencyCode = "EUR"
         formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: value)) ?? "\(Int(value)) €"
+        return formatter.string(from: NSNumber(value: value)) ?? "\(value.safeInt) €"
     }
 }
